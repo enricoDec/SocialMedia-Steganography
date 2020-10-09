@@ -25,30 +25,7 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94cb77b4-78ec-4b46-a90d-b95d33e85fbf" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/ProjektSteganography.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copyright/GNU_3_Copyright_Notice.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copyright/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apiguardian_apiguardian_api_1_0_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_api_5_4_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_jupiter_junit_jupiter_engine_5_4_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_platform_junit_platform_commons_1_4_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_junit_platform_junit_platform_engine_1_4_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_opentest4j_opentest4j_1_1_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/scopes/scope.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/apis/junit/integration/IntegrationTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/apis/junit/unit/UnitTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/steganography/junit/integration/IntegrationTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/steganography/junit/unit/UnitTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="94cb77b4-78ec-4b46-a90d-b95d33e85fbf" name="Default Changelist" comment="initial project structure" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -110,8 +87,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1602250487863</updated>
-      <workItem from="1602250489378" duration="1021000" />
+      <workItem from="1602250489378" duration="1413000" />
     </task>
+    <task id="LOCAL-00001" summary="initial project structure">
+      <created>1602251662133</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1602251662133</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,11 +125,19 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="initial project structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="initial project structure" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="336" y="136" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1602250539616">
       <screen x="0" y="23" width="1440" height="835" />
     </state>
     <state x="336" y="136" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.23.1440.835@0.23.1440.835" timestamp="1602250539616" />
+    <state x="144" y="95" key="DiffContextDialog" timestamp="1602251703052">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="144" y="95" key="DiffContextDialog/0.23.1440.835@0.23.1440.835" timestamp="1602251703052" />
     <state width="1398" height="217" key="GridCell.Tab.0.bottom" timestamp="1602251358755">
       <screen x="0" y="23" width="1440" height="836" />
     </state>
@@ -165,5 +158,9 @@
       <screen x="0" y="23" width="1440" height="835" />
     </state>
     <state x="221" y="79" key="SettingsEditor/0.23.1440.835@0.23.1440.835" timestamp="1602250903173" />
+    <state x="320" y="180" key="Vcs.Push.Dialog.v2" timestamp="1602251990421">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="320" y="180" key="Vcs.Push.Dialog.v2/0.23.1440.835@0.23.1440.835" timestamp="1602251990421" />
   </component>
 </project>
