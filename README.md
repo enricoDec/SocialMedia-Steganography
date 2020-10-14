@@ -11,6 +11,6 @@ Goal of this project is to develop a library able to hide information in a given
  - Robert Dreyer (TikTok)
  ### Steganography 
  - Enrico de Chadarevian (Video mp4)
- - Selina Wernike (Bild JPG/GIF)
+ - Selina Wernike (Bild JPG)
  - Henk-Joas Lubig (Bild)
  - Richard Rudek (Audio/Bild)
