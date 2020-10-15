@@ -16,5 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public interface Steganography {
+import apis.SocialMedia;
+
+public interface SocialMediaSteganography {
+
+    /**
+     * Send address to all users
+     * @param socialMedia Social Media
+     * @param carrier data used to hide address
+     * @param payload address
+     * @return
+     */
+    boolean sendAddress(SocialMedia socialMedia, byte[] carrier, byte[] payload);
+
+    /**
+     * Search all Social Medias for addresses
+     * @return addresses
+     */
+    byte[] receiveAllAddress();
+
+    /**
+     * Search a specific Social Media for addresses
+     * @return addresses
+     */
+    byte[] receiveAddress(SocialMedia socialMedia);
+
 }
