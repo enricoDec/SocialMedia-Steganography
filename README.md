@@ -5,7 +5,7 @@ Goal of this project is to develop a library able to hide information in a given
 ## Features
 
 ### Social Media APIs
- - Mario Teklic (Facebook)
+ - Mario Teklic (Reddit)
  - Mario Fenzl (Instagram)
  - Omar El-Issa (Twitter)
  - Robert Dreyer (TikTok)
