@@ -18,35 +18,33 @@
 
 package apis;
 
+import java.util.List;
+
 public interface SocialMedia {
 
-    /**
-     * Sign in Social Network
-     * @param Username username
-     * @param password password
-     * @return true if successful
-     */
-    boolean signInSocialNetwork(String Username, String password);
+    Token<?> getToken();
+
+    void setToken(Token<?> token);
 
     /**
-     * Post data on Social Media
+     * Post media on this Social Media under the keyword
      * @param media data to upload
-     * @param hashtag hastag
+     * @param keyword keyword to search this post by
      * @return true if successful
      */
-    boolean postToSocialNetwork(byte[] media, String hashtag);
+    boolean postToSocialNetwork(byte[] media, String keyword);
 
     /**
-     * Subscribe to a hashtag
-     * @param hashtag hashtag
+     * Subscribe to a keyword (Hashtag / Title / ...)
+     * @param keyword keyword to subscribe to
      * @return true if successful
      */
-    boolean subscribeToHashtag(String hashtag);
+    boolean subscribeToKeyword(String keyword);
 
     /**
-     * Get Medias
-     * @param hashtag hashtag
+     * Get Medias posted under keyword
+     * @param keyword hashtag
      * @return true if successful
      */
-    byte[] getRecentMediaForHashtag(String hashtag);
+    List<byte[]> getRecentMediaForKeyword(String keyword);
 }

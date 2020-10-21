@@ -16,25 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import apis.SocialMedia;
+package apis;
 
-import java.util.List;
+/**
+ * Represents the authentication needed for a Social Media API
+ */
+public interface Token<T> {
 
-public interface SocialMediaSteganography {
-
-    /**
-     * Encodes payload in carrier and posts the result to socialMedia
-     * @param socialMedia Social Media
-     * @param carrier data used to encode payload in
-     * @param payload payload to encode
-     * @return
-     */
-    boolean encodeAndPost(SocialMedia socialMedia, byte[] carrier, byte[] payload);
-
-    /**
-     * Searches a specific Social Media for hidden messages
-     * @return decoded hidden messages
-     */
-    List<byte[]> searchForHiddenMessages(SocialMedia socialMedia, String keyword);
-
+    T getAuth();
 }

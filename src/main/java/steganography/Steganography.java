@@ -28,15 +28,40 @@ public interface Steganography {
      * @param payload data to hide
      * @return steganographic data
      */
-    public byte[] hide(byte[] carrier, byte[] payload);
+    byte[] encode(byte[] carrier, byte[] payload);
 
     /**
-     * Retrieves data from a steganographic file
+     * conceals payload in carrier (container used to hide payload)
+     * using the given seed
+     *
+     * @param carrier carrier used to hide the data
+     * @param payload data to hide
+     * @param seed affects the resulting steganographic data (similar to a password)
+     * @return steganographic data
+     */
+    byte[] encode(byte[] carrier, byte[] payload, String seed);
+
+    /**
+     * Retrieves hidden message from a steganographic file
      *
      * @param steganographicData Data containing data to extract
      * @return retrieved data
      */
-    public byte[] unhide(byte[] steganographicData);
+    byte[] decode(byte[] steganographicData);
 
+    /**
+     * Retrieves hidden message from a steganographic file
+     *
+     * @param steganographicData Data containing data to extract
+     * @param seed seed that was used to encode the given stenographicData
+     * @return hidden message
+     */
+    byte[] decode(byte[] steganographicData, String seed);
+
+    /**
+     * Tests if the given data has a hidden message encoded in it
+     * @param data data to test
+     * @return true if the given data has a hidden message encoded in it
+     */
     boolean isSteganographicData(byte[] data);
 }
