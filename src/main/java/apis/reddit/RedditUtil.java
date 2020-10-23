@@ -30,34 +30,26 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class RedditUtil {
 
-    public static File download(String url) {
-        File file = new File("_dl.jpg");
-        try{
-            System.out.println("URL:" + url);
-            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
-            FileOutputStream fis = new FileOutputStream(file);
-            FileChannel fileChannel = fis.getChannel();
-            fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-            return file;
-        }catch (Exception e){
-            e.printStackTrace();
-            System.err.println("An error occured.");
+    private final static Logger logger = Logger.getLogger(Reddit.class.getName());
+
+    public RedditUtil(){
+        logger.info("RedditUtil init.");
+    }
+
+    public MyDate getLatestTimestamp(List<PostEntry> postEntries){
+        if(postEntries.size() > 0){
+            return postEntries.get(postEntries.size()-1).getDate();
         }
         return null;
     }
 
-    public static long getLatestTimestamp(String jsonResponse){
-        System.out.println();
-        return 0;
-    }
-
-    public static MyDate getTimestamp(RedditResponse.ResponseChildData data, boolean inUTC){
+    public MyDate getTimestamp(RedditResponse.ResponseChildData data, boolean inUTC){
         String info;
         if(inUTC){
             info = data.getData().getCreated_utc();
@@ -69,8 +61,8 @@ public class RedditUtil {
         return new MyDate(new Date((long)msDouble*1000));
     }
 
-    public static String getUrl(RedditResponse.ResponseChildData data){
-        return RedditUtil.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
+    public String getUrl(RedditResponse.ResponseChildData data){
+        return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
     }
 
     /**
@@ -78,35 +70,38 @@ public class RedditUtil {
      * @param responseString JSON String (Reddit response)
      * @return
      */
-    public static List<PostEntry> getPosts(String responseString){
+    public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
         RedditResponse responseArray = new Gson().fromJson(responseString, RedditResponse.class);
 
         for(RedditResponse.ResponseChildData child : responseArray.getData().getChildren()){
-            if(child != null && !RedditUtil.hasNullObjects(child)){
-                postEntries.add(new PostEntry(RedditUtil.encodeUrl(RedditUtil.getUrl(child)), RedditUtil.getTimestamp(child, false)));
+            if(child != null && !this.hasNullObjects(child)){
+                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false)));
             }
         }
-
+        this.sortPostEntries(postEntries);
         return postEntries;
     }
 
-    public static boolean hasNullObjects(RedditResponse.ResponseChildData responseChildData){
+    public boolean hasNullObjects(RedditResponse.ResponseChildData responseChildData){
         try{
-            System.out.println((responseChildData == null));
-            RedditUtil.getTimestamp(responseChildData, false);
-            RedditUtil.getUrl(responseChildData);
+            this.getTimestamp(responseChildData, false);
+            this.getUrl(responseChildData);
         }catch (Exception e){
             return true;
         }
         return false;
     }
 
-    public static String encodeUrl(String url){
+    public String encodeUrl(String url){
         return url.replace("amp;s", "s");
     }
 
-    public static MediaType getMediaType(String url){
+    public void sortPostEntries(List<PostEntry> postEntries){
+        Collections.sort(postEntries);
+    }
+
+    public MediaType getMediaType(String url){
         if(url.contains(MediaType.BMP.name().toLowerCase())){
             return MediaType.BMP;
         }else if(url.contains(MediaType.GIF.name().toLowerCase())){

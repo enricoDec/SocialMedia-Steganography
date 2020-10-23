@@ -48,6 +48,9 @@ public interface RedditConstants {
     String KEY_RAW_JSON = "raw_json=";
     String VAL_RAW_JSON_TRUE = "1";
 
+    String KEY_SORT = "sort=";
+    String VAL_DATE = "date";
+
 
     //********* PATH COMPONENTS *******************************************
 

@@ -19,6 +19,7 @@
 package apis.reddit;
 
 import apis.*;
+import apis.reddit.models.MyDate;
 import apis.reddit.models.PostEntry;
 import apis.reddit.models.RedditToken;
 import apis.utils.BlobConverterImpl;
@@ -40,14 +41,18 @@ public class Reddit implements SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
 
+    private RedditUtil redditUtil;
+
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
-    private Double latestPostTimestamp;
+    private MyDate latestPostTimestamp;
     private String latestReponse;
+    private List<PostEntry> latestPostEntries;
     private Boolean newPostAvailable;
-    private List<byte[]> newPosts;
+    private List<PostEntry[]> newPosts;
 
     public Reddit() {
+        this.redditUtil = new RedditUtil();
         this.loadSupportedMedias();
     }
 
@@ -98,20 +103,31 @@ public class Reddit implements SocialMedia {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        long latesTimestamp = RedditUtil.getLatestTimestamp(this.latestReponse);
-        if(this.latestPostTimestamp == null || latesTimestamp > this.latestPostTimestamp){
+        if(this.latestPostEntries == null){
+            this.getRecentMediaForKeyword(keyword);
+        }
+
+        MyDate latesTimestamp = this.redditUtil.getLatestTimestamp(this.latestPostEntries);
+
+        //compareTo: 1 == this is newser
+        if(this.latestPostTimestamp == null || latesTimestamp.compareTo(this.latestPostTimestamp) == 1){
             this.newPostAvailable = true;
+
+            /**
+             * TODO
+             * Neue liste mit alter liste vergleichen: alle neuen zu this.newPostentries
+             */
+
         }else {
             this.newPostAvailable = false;
         }
 
-        return false;
+        return true;
     }
 
     @Override
@@ -120,7 +136,9 @@ public class Reddit implements SocialMedia {
             URL url = new URL(
                     RedditConstants.BASE +
                             RedditConstants.STATIC_SUBREDDIT + //Hier hashtage
-                            RedditConstants.AS_JSON);
+                            RedditConstants.AS_JSON + "?" +
+                    RedditConstants.KEY_SORT +
+                    RedditConstants.VAL_DATE);
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(RedditConstants.GET);
@@ -138,14 +156,14 @@ public class Reddit implements SocialMedia {
             }
 
             String responseString = br.lines().collect(Collectors.joining());
-            this.latestReponse = responseString;
-
             logger.info(String.valueOf(con.getURL()));
-            List<PostEntry> downloadLinks = RedditUtil.getPosts(responseString);
+
+            List<PostEntry> postEntries = this.redditUtil.getPosts(responseString);
+            this.latestPostEntries = postEntries;
 
             List<byte[]> byteList = new ArrayList<>();
-            for(PostEntry dl : downloadLinks){
-                byteList.add(BlobConverterImpl.downloadToByte(dl.getUrl()));
+            for(PostEntry pe : postEntries){
+                byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
             }
 
             return byteList;
@@ -197,11 +215,11 @@ public class Reddit implements SocialMedia {
         this.supportedMedia = supportedMedia;
     }
 
-    public Double getLatestPostTimestamp() {
+    public MyDate getLatestPostTimestamp() {
         return latestPostTimestamp;
     }
 
-    public void setLatestPostTimestamp(Double latestPostTimestamp) {
+    public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
         this.latestPostTimestamp = latestPostTimestamp;
     }
 
@@ -220,45 +238,4 @@ public class Reddit implements SocialMedia {
     public void setNewPostAvailable(Boolean newPostAvailable) {
         this.newPostAvailable = newPostAvailable;
     }
-
-    /**
-     *
-
-     public String getModhash() {
-
-     try {
-     URL url = new URL(
-     RedditConstants.BASE +
-     RedditConstants.ME + RedditConstants.AS_JSON);
-
-     HttpURLConnection con = (HttpURLConnection) url.openConnection();
-     con.setRequestMethod(RedditConstants.GET);
-     con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-     con.setDoOutput(true);
-
-     BufferedReader br;
-
-     if (!this.hasErrorCode(con.getResponseCode())) {
-     logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-     br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-     } else {
-     logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-     br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-     }
-
-     String responseString = br.lines().collect(Collectors.joining());
-     System.out.println(responseString);
-
-     return "good";
-
-     } catch (MalformedURLException e) {
-     e.printStackTrace();
-     } catch (IOException e) {
-     e.printStackTrace();
-     }
-
-     return "failed";
-     }
-     * @return
-     */
 }

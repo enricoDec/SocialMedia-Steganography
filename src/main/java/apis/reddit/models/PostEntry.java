@@ -26,7 +26,7 @@ package apis.reddit.models;
  * Represents a post from reddit
  *
  */
-public class PostEntry implements Comparable{
+public class PostEntry implements Comparable<PostEntry>{
 
     /**
      * A downloadable URL for a media i.e. an image
@@ -58,16 +58,12 @@ public class PostEntry implements Comparable{
 
     /**
      *
-     * @param o
+     * @param postEntry
      * @return 1 if equal
      * @return -1 if not equal
      */
     @Override
-    public int compareTo(Object o) {
-        PostEntry postEntry = (PostEntry) o;
-        if(this.url == postEntry.getUrl()){
-            return 1;
-        }
-        return -1;
+    public int compareTo(PostEntry postEntry) {
+        return this.getDate().compareTo(postEntry.getDate());
     }
 }
