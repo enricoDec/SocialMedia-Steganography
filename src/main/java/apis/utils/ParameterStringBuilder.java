@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis;
+package apis.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

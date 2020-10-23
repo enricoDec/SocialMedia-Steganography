@@ -19,15 +19,16 @@
 package apis.reddit;
 
 import apis.*;
-import apis.blob.BlobConverterImpl;
+import apis.reddit.models.PostEntry;
+import apis.reddit.models.RedditToken;
+import apis.utils.BlobConverterImpl;
+import apis.utils.ParameterStringBuilder;
 import com.google.gson.Gson;
-
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,10 @@ public class Reddit implements SocialMedia {
 
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
+    private Double latestPostTimestamp;
+    private String latestReponse;
+    private Boolean newPostAvailable;
+    private List<byte[]> newPosts;
 
     public Reddit() {
         this.loadSupportedMedias();
@@ -54,20 +59,6 @@ public class Reddit implements SocialMedia {
         this.supportedMedia.add(MediaType.GIF);
         this.supportedMedia.add(MediaType.TIFF);
         this.supportedMedia.add(MediaType.JPG);
-    }
-
-    @Override
-    public Token<?> getToken() {
-        return this.token;
-    }
-
-    @Override
-    public void setToken(Token<?> token) {
-        if(token instanceof RedditToken){
-            this.token = (Token<RedditToken>) token;
-        }else{
-            logger.info("Must be instance of 'RedditToken'");
-        }
     }
 
     @Override
@@ -92,7 +83,7 @@ public class Reddit implements SocialMedia {
             params.put(RedditConstants.KEY_HEADER, "");
             params.put(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE);
             params.put(RedditConstants.KEY_NAME, "testname");
-            params.put(RedditConstants.KEY_UH, this.getModhash());
+            //params.put(RedditConstants.KEY_UH, this.getModhash());
             params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
 
 
@@ -113,6 +104,13 @@ public class Reddit implements SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
+        long latesTimestamp = RedditUtil.getLatestTimestamp(this.latestReponse);
+        if(this.latestPostTimestamp == null || latesTimestamp > this.latestPostTimestamp){
+            this.newPostAvailable = true;
+        }else {
+            this.newPostAvailable = false;
+        }
+
         return false;
     }
 
@@ -140,13 +138,14 @@ public class Reddit implements SocialMedia {
             }
 
             String responseString = br.lines().collect(Collectors.joining());
+            this.latestReponse = responseString;
 
             logger.info(String.valueOf(con.getURL()));
-            List<String> downloadLinks = Helper.getDownloadLinks(responseString);
+            List<PostEntry> downloadLinks = RedditUtil.getPosts(responseString);
 
             List<byte[]> byteList = new ArrayList<>();
-            for(String dl : downloadLinks){
-                byteList.add(BlobConverterImpl.downloadMedia(dl));
+            for(PostEntry dl : downloadLinks){
+                byteList.add(BlobConverterImpl.downloadToByte(dl.getUrl()));
             }
 
             return byteList;
@@ -157,88 +156,6 @@ public class Reddit implements SocialMedia {
         }
 
         return null;
-    }
-
-
-    public String getAccessToken() {
-        try {
-            URL url = new URL(
-                    RedditConstants.BASE +
-                            RedditConstants.LOGIN);
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.POST);
-            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setDoOutput(true);
-
-            Map<String, String> params = new HashMap<>();
-            params.put(RedditConstants.KEY_USERNAME, URLEncoder.encode("username", "UTF-8"));
-            params.put(RedditConstants.KEY_PASSWORD, URLEncoder.encode("password", "UTF-8"));
-
-            DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            out.writeBytes(ParameterStringBuilder.getParamsString(params));
-            out.flush();
-            out.close();
-
-
-            BufferedReader br;
-
-            if (!this.hasErrorCode(con.getResponseCode())) {
-                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else {
-                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            }
-
-            String responseString = br.lines().collect(Collectors.joining());
-            System.out.println(responseString);
-
-            return "good";
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return "fail";
-    }
-
-    public String getModhash() {
-
-        try {
-            URL url = new URL(
-                    RedditConstants.BASE +
-                            RedditConstants.ME + RedditConstants.AS_JSON);
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.GET);
-            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setDoOutput(true);
-
-            BufferedReader br;
-
-            if (!this.hasErrorCode(con.getResponseCode())) {
-                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else {
-                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            }
-
-            String responseString = br.lines().collect(Collectors.joining());
-            System.out.println(responseString);
-
-            return "good";
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return "failed";
     }
 
     public String getProperty(String key) {
@@ -254,12 +171,94 @@ public class Reddit implements SocialMedia {
         }
     }
 
-    public String getUserAccessToken() {
-
-        return "";
-    }
-
     public boolean supportsMediaType(MediaType mediaType) {
         return this.supportedMedia.contains(mediaType);
     }
+
+    @Override
+    public Token<?> getToken() {
+        return this.token;
+    }
+
+    @Override
+    public void setToken(Token<?> token) {
+        if(token instanceof RedditToken){
+            this.token = (Token<RedditToken>) token;
+        }else{
+            logger.info("Must be instance of 'RedditToken'");
+        }
+    }
+
+    public List<MediaType> getSupportedMedia() {
+        return supportedMedia;
+    }
+
+    public void setSupportedMedia(List<MediaType> supportedMedia) {
+        this.supportedMedia = supportedMedia;
+    }
+
+    public Double getLatestPostTimestamp() {
+        return latestPostTimestamp;
+    }
+
+    public void setLatestPostTimestamp(Double latestPostTimestamp) {
+        this.latestPostTimestamp = latestPostTimestamp;
+    }
+
+    public String getLatestReponse() {
+        return latestReponse;
+    }
+
+    public void setLatestReponse(String latestReponse) {
+        this.latestReponse = latestReponse;
+    }
+
+    public Boolean getNewPostAvailable() {
+        return newPostAvailable;
+    }
+
+    public void setNewPostAvailable(Boolean newPostAvailable) {
+        this.newPostAvailable = newPostAvailable;
+    }
+
+    /**
+     *
+
+     public String getModhash() {
+
+     try {
+     URL url = new URL(
+     RedditConstants.BASE +
+     RedditConstants.ME + RedditConstants.AS_JSON);
+
+     HttpURLConnection con = (HttpURLConnection) url.openConnection();
+     con.setRequestMethod(RedditConstants.GET);
+     con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
+     con.setDoOutput(true);
+
+     BufferedReader br;
+
+     if (!this.hasErrorCode(con.getResponseCode())) {
+     logger.info("Response Code: " + con.getResponseCode() + ". No error.");
+     br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+     } else {
+     logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
+     br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+     }
+
+     String responseString = br.lines().collect(Collectors.joining());
+     System.out.println(responseString);
+
+     return "good";
+
+     } catch (MalformedURLException e) {
+     e.printStackTrace();
+     } catch (IOException e) {
+     e.printStackTrace();
+     }
+
+     return "failed";
+     }
+     * @return
+     */
 }

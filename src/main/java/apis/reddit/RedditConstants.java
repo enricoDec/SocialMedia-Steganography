@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis;
+package apis.reddit;
 
 public interface RedditConstants {
     String APP_NAME = "SharksystemsStega";

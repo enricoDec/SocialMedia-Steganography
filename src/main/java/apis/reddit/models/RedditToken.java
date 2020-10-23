@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis.reddit.models;
 
 import apis.Token;
 
 public class RedditToken implements Token {
 
+    private String tokenString;
     private RedditToken token;
 
     public RedditToken(RedditToken token){

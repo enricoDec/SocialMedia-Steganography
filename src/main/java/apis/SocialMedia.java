@@ -27,7 +27,7 @@ public interface SocialMedia {
     void setToken(Token<?> token);
 
     /**
-     * Post media on this Social Media under the keyword
+     * PostEntry media on this Social Media under the keyword
      * @param media data to upload
      * @param keyword keyword to search this post by
      * @return true if successful

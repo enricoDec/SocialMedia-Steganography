@@ -19,8 +19,10 @@
 package apis.reddit;
 
 import apis.MediaType;
+import apis.reddit.models.MyDate;
+import apis.reddit.models.PostEntry;
+import apis.reddit.models.RedditResponse;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,12 +31,10 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
-public class Helper {
+public class RedditUtil {
 
     public static File download(String url) {
         File file = new File("_dl.jpg");
@@ -52,59 +52,58 @@ public class Helper {
         return null;
     }
 
-    public static List<String> getDownloadLinks(String responseString){
-        Map json = new Gson().fromJson(responseString, Map.class);
+    public static long getLatestTimestamp(String jsonResponse){
+        System.out.println();
+        return 0;
+    }
 
-        LinkedTreeMap obj = (LinkedTreeMap) json.get("data");
-        ArrayList obj2 = (ArrayList) obj.get("children");
-        List<LinkedTreeMap> ltm = new ArrayList<>();
-        for(Object os : obj2){
-            ltm.add((LinkedTreeMap) os);
+    public static MyDate getTimestamp(RedditResponse.ResponseChildData data, boolean inUTC){
+        String info;
+        if(inUTC){
+            info = data.getData().getCreated_utc();
+        }else{
+            info = data.getData().getCreated();
         }
 
-        List<LinkedTreeMap> ltm2 = new ArrayList<>();
-        for(LinkedTreeMap item : ltm){
-            ltm2.add((LinkedTreeMap) item.get("data"));
-        }
+        double msDouble = Double.parseDouble(info);
+        return new MyDate(new Date((long)msDouble*1000));
+    }
 
-        List<LinkedTreeMap> ltm3 = new ArrayList<>();
-        for(LinkedTreeMap s : ltm2){
-            if(s.containsKey("preview")){
-                ltm3.add((LinkedTreeMap) s.get("preview"));
+    public static String getUrl(RedditResponse.ResponseChildData data){
+        return RedditUtil.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
+    }
+
+    /**
+     * Returns a list of Postentries (downloadlinks and timestamps) from a json-String
+     * @param responseString JSON String (Reddit response)
+     * @return
+     */
+    public static List<PostEntry> getPosts(String responseString){
+        List<PostEntry> postEntries = new ArrayList<>();
+        RedditResponse responseArray = new Gson().fromJson(responseString, RedditResponse.class);
+
+        for(RedditResponse.ResponseChildData child : responseArray.getData().getChildren()){
+            if(child != null && !RedditUtil.hasNullObjects(child)){
+                postEntries.add(new PostEntry(RedditUtil.encodeUrl(RedditUtil.getUrl(child)), RedditUtil.getTimestamp(child, false)));
             }
         }
 
-        ArrayList ltm4 = new ArrayList<>();
-        for(LinkedTreeMap a : ltm3){
-            if(a.containsKey("images")){
-                ltm4.add(a.get("images"));
-            }
-        }
+        return postEntries;
+    }
 
-        ArrayList ltm5 = new ArrayList<>();
-        for(Object q : ltm4){
-            ArrayList qa = (ArrayList) q;
-            ltm5.add(qa.get(0));
+    public static boolean hasNullObjects(RedditResponse.ResponseChildData responseChildData){
+        try{
+            System.out.println((responseChildData == null));
+            RedditUtil.getTimestamp(responseChildData, false);
+            RedditUtil.getUrl(responseChildData);
+        }catch (Exception e){
+            return true;
         }
+        return false;
+    }
 
-        List<LinkedTreeMap> ltm6 = new ArrayList<>();
-        for(Object r : ltm5){
-            LinkedTreeMap re = (LinkedTreeMap) r;
-            if(re.containsKey("source")){
-                ltm6.add((LinkedTreeMap) re.get("source"));
-            }
-        }
-
-        List<String> ltm7 = new ArrayList<>();
-        for(Object r : ltm6){
-            LinkedTreeMap re = (LinkedTreeMap) r;
-            if(re.containsKey("url")){
-                String temp = (String) re.get("url");
-                temp = temp.replace("amp;s", "s");
-                ltm7.add(temp);
-            }
-        }
-        return ltm7;
+    public static String encodeUrl(String url){
+        return url.replace("amp;s", "s");
     }
 
     public static MediaType getMediaType(String url){
