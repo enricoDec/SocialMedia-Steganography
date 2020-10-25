@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class SubscriptionDeamon implements Runnable{
+public class SubscriptionDeamon implements Runnable {
 
     private static final Logger logger = Logger.getLogger(SubscriptionDeamon.class.getName());
     private RedditUtil redditUtil;
@@ -45,9 +45,10 @@ public class SubscriptionDeamon implements Runnable{
 
     /**
      * Subcription for a Keyword in a Social Media
+     *
      * @param subscriptionKeyword The keyword
      */
-    public SubscriptionDeamon(String subscriptionKeyword){
+    public SubscriptionDeamon(String subscriptionKeyword) {
         this.subscriptionKeyword = subscriptionKeyword;
         this.redditUtil = new RedditUtil();
     }
@@ -58,38 +59,46 @@ public class SubscriptionDeamon implements Runnable{
     }
 
     /**
-     *
      * @return
      */
-    public boolean checkForNewPostEntries(){
+    public boolean checkForNewPostEntries() {
+        logger.info("Check for new post entries for keyword '" + this.subscriptionKeyword + "' ...");
         List<PostEntry> oldPostEntries = this.latestPostEntries;
         MyDate oldPostTimestamp = this.latestPostTimestamp;
 
         //Pull
-        this.getRecentMediaForKeyword();
+        if(this.getRecentMediaForKeyword() != null) {
+            //Check by null
+            if (oldPostEntries == null && this.latestPostEntries != null) {
+                return true;
+            }
 
-        for(PostEntry pe : this.latestPostEntries){
-            System.out.println("Entry:" + pe.getUrl());
+            //Check by timestamp
+            if (oldPostTimestamp != null && this.latestPostTimestamp.compareTo(oldPostTimestamp) > 0) {
+                return true;
+            }
         }
-
-        //Check by null
-        if(oldPostEntries == null && this.latestPostEntries != null ){
-            return true;
-        }
-
-        //Check by timestamp
-        if(oldPostTimestamp != null && this.latestPostTimestamp.compareTo(oldPostTimestamp) > 0){
-            return true;
-        }
-
         return false;
+    }
+
+    /**
+     * Searches for the given keyword. The old keyword which was decleared for the subscription will stay for the search.
+     * @param keyword
+     * @return
+     */
+    public List<byte[]> getRecentMediaForKeyword(String keyword) {
+        String temp = this.subscriptionKeyword;
+        this.subscriptionKeyword = keyword;
+        List<byte[]> recentMedia = this.getRecentMediaForKeyword();
+        this.subscriptionKeyword = temp;
+        return recentMedia;
     }
 
     public List<byte[]> getRecentMediaForKeyword() {
         try {
             URL url = new URL(
                     RedditConstants.BASE +
-                            RedditConstants.SUBREDDIT_PREFIX + this.subscriptionKeyword +//Hier hashtage
+                            RedditConstants.SUBREDDIT_PREFIX + this.subscriptionKeyword +
                             RedditConstants.AS_JSON + "?" +
                             RedditConstants.KEY_SORT +
                             RedditConstants.VAL_DATE);
@@ -116,7 +125,7 @@ public class SubscriptionDeamon implements Runnable{
             this.setLatestPostTimestamp(this.redditUtil.getLatestTimestamp(postEntries));
 
             List<byte[]> byteList = new ArrayList<>();
-            for(PostEntry pe : postEntries){
+            for (PostEntry pe : postEntries) {
                 byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
             }
 
@@ -152,5 +161,13 @@ public class SubscriptionDeamon implements Runnable{
 
     public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
         this.latestPostTimestamp = latestPostTimestamp;
+    }
+
+    public boolean isNewPostAvailable() {
+        return newPostAvailable;
+    }
+
+    public void setNewPostAvailable(boolean newPostAvailable) {
+        this.newPostAvailable = newPostAvailable;
     }
 }

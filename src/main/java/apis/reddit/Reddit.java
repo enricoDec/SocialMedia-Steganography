@@ -21,7 +21,6 @@ package apis.reddit;
 import apis.*;
 import apis.reddit.models.RedditToken;
 import apis.utils.ParameterStringBuilder;
-import com.google.gson.Gson;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +44,9 @@ public class Reddit implements SocialMedia {
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
     private String latestReponse;
+
+    private TimeUnit timeUnit;
+    private Integer interval;
 
     public Reddit() {
         this.redditUtil = new RedditUtil();
@@ -87,7 +88,6 @@ public class Reddit implements SocialMedia {
             //params.put(RedditConstants.KEY_UH, this.getModhash());
             params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
 
-
             con.setDoOutput(true);
             DataOutputStream out = new DataOutputStream(con.getOutputStream());
             out.writeBytes(ParameterStringBuilder.getParamsString(params));
@@ -105,20 +105,26 @@ public class Reddit implements SocialMedia {
     @Override
     public boolean subscribeToKeyword(String keyword) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        //Subscription
         this.subscriptionDeamon = new SubscriptionDeamon(keyword);
 
-        executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,30, TimeUnit.SECONDS);
+        if(this.interval == null || this.timeUnit == null){
+            executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,5, TimeUnit.MINUTES);
+        }else{
+            executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,this.interval, this.timeUnit);
+        }
 
         return true;
+    }
+
+    public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval){
+        this.timeUnit = timeUnit;
+        this.interval = interval;
     }
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
         //Should not be calleable... should be only callable for the threaded deamon
-
-        return null;
+        return this.subscriptionDeamon.getRecentMediaForKeyword(keyword);
     }
 
     public boolean supportsMediaType(MediaType mediaType) {
