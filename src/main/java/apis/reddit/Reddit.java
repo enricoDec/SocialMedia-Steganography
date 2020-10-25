@@ -42,7 +42,7 @@ public class Reddit implements SocialMedia {
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
 
     private RedditUtil redditUtil;
-
+    private boolean subscribed;
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
     private MyDate latestPostTimestamp;
@@ -123,11 +123,29 @@ public class Reddit implements SocialMedia {
              * Neue liste mit alter liste vergleichen: alle neuen zu this.newPostentries
              */
 
+
         }else {
             this.newPostAvailable = false;
         }
 
         return true;
+    }
+
+    public boolean checkForNewPostEntries(String keyword){
+        if(this.latestPostEntries == null){
+            this.getRecentMediaForKeyword(keyword);
+        }
+
+        MyDate latesTimestamp = this.redditUtil.getLatestTimestamp(this.latestPostEntries);
+
+        //compareTo: 1 == this is newer
+        if(this.latestPostTimestamp == null || latesTimestamp.compareTo(this.latestPostTimestamp) == 1){
+            this.newPostAvailable = true;
+            return true;
+        }else {
+            this.newPostAvailable = false;
+            return false;
+        }
     }
 
     @Override
