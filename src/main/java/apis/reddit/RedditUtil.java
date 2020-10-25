@@ -117,4 +117,12 @@ public class RedditUtil {
         }
         return null;
     }
+
+    public boolean hasErrorCode(int responseCode) {
+        if (100 <= responseCode && responseCode <= 399) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

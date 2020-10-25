@@ -60,7 +60,7 @@ public interface RedditConstants {
     String AUTH = "/v1/authorize";
     String LOGIN = "/login";
 
-    String STATIC_SUBREDDIT = "/r/nature";
+    String SUBREDDIT_PREFIX = "/r/";
 
     String POST_PATH = "/upload_sr_img";
 

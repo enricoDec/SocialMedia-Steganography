@@ -25,7 +25,7 @@ import java.io.IOException;
 public class App {
     public static void main(String[] args) throws IOException {
         SocialMedia reddit = new Reddit();
-        reddit.getRecentMediaForKeyword("");
+        reddit.subscribeToKeyword("nature");
 
       /*  byte[] pic = reddit.getRecentMediaForHashtag("java");
         for(byte b : pic){

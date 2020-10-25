@@ -19,10 +19,7 @@
 package apis.reddit;
 
 import apis.*;
-import apis.reddit.models.MyDate;
-import apis.reddit.models.PostEntry;
 import apis.reddit.models.RedditToken;
-import apis.utils.BlobConverterImpl;
 import apis.utils.ParameterStringBuilder;
 import com.google.gson.Gson;
 
@@ -34,22 +31,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class Reddit implements SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
 
     private RedditUtil redditUtil;
-    private boolean subscribed;
+    private SubscriptionDeamon subscriptionDeamon;
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
-    private MyDate latestPostTimestamp;
     private String latestReponse;
-    private List<PostEntry> latestPostEntries;
-    private Boolean newPostAvailable;
-    private List<PostEntry[]> newPosts;
 
     public Reddit() {
         this.redditUtil = new RedditUtil();
@@ -76,7 +72,7 @@ public class Reddit implements SocialMedia {
         try {
             URL url = new URL(
                     RedditConstants.BASE +
-                            RedditConstants.STATIC_SUBREDDIT +
+                            RedditConstants.SUBREDDIT_PREFIX +
                             RedditConstants.POST_PATH);
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -108,103 +104,21 @@ public class Reddit implements SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        if(this.latestPostEntries == null){
-            this.getRecentMediaForKeyword(keyword);
-        }
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        MyDate latesTimestamp = this.redditUtil.getLatestTimestamp(this.latestPostEntries);
+        //Subscription
+        this.subscriptionDeamon = new SubscriptionDeamon(keyword);
 
-        //compareTo: 1 == this is newser
-        if(this.latestPostTimestamp == null || latesTimestamp.compareTo(this.latestPostTimestamp) == 1){
-            this.newPostAvailable = true;
-
-            /**
-             * TODO
-             * Neue liste mit alter liste vergleichen: alle neuen zu this.newPostentries
-             */
-
-
-        }else {
-            this.newPostAvailable = false;
-        }
+        executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,30, TimeUnit.SECONDS);
 
         return true;
     }
 
-    public boolean checkForNewPostEntries(String keyword){
-        if(this.latestPostEntries == null){
-            this.getRecentMediaForKeyword(keyword);
-        }
-
-        MyDate latesTimestamp = this.redditUtil.getLatestTimestamp(this.latestPostEntries);
-
-        //compareTo: 1 == this is newer
-        if(this.latestPostTimestamp == null || latesTimestamp.compareTo(this.latestPostTimestamp) == 1){
-            this.newPostAvailable = true;
-            return true;
-        }else {
-            this.newPostAvailable = false;
-            return false;
-        }
-    }
-
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        try {
-            URL url = new URL(
-                    RedditConstants.BASE +
-                            RedditConstants.STATIC_SUBREDDIT + //Hier hashtage
-                            RedditConstants.AS_JSON + "?" +
-                    RedditConstants.KEY_SORT +
-                    RedditConstants.VAL_DATE);
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.GET);
-            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setDoOutput(true);
-
-            BufferedReader br;
-
-            if (!this.hasErrorCode(con.getResponseCode())) {
-                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else {
-                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            }
-
-            String responseString = br.lines().collect(Collectors.joining());
-            logger.info(String.valueOf(con.getURL()));
-
-            List<PostEntry> postEntries = this.redditUtil.getPosts(responseString);
-            this.latestPostEntries = postEntries;
-
-            List<byte[]> byteList = new ArrayList<>();
-            for(PostEntry pe : postEntries){
-                byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
-            }
-
-            return byteList;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //Should not be calleable... should be only callable for the threaded deamon
 
         return null;
-    }
-
-    public String getProperty(String key) {
-        Map json = new Gson().fromJson(key, Map.class);
-        return (String) json.get(key);
-    }
-
-    public boolean hasErrorCode(int responseCode) {
-        if (100 <= responseCode && responseCode <= 399) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public boolean supportsMediaType(MediaType mediaType) {
@@ -233,27 +147,11 @@ public class Reddit implements SocialMedia {
         this.supportedMedia = supportedMedia;
     }
 
-    public MyDate getLatestPostTimestamp() {
-        return latestPostTimestamp;
-    }
-
-    public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
-        this.latestPostTimestamp = latestPostTimestamp;
-    }
-
     public String getLatestReponse() {
         return latestReponse;
     }
 
     public void setLatestReponse(String latestReponse) {
         this.latestReponse = latestReponse;
-    }
-
-    public Boolean getNewPostAvailable() {
-        return newPostAvailable;
-    }
-
-    public void setNewPostAvailable(Boolean newPostAvailable) {
-        this.newPostAvailable = newPostAvailable;
     }
 }
