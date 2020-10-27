@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit.models;
+package apis.models;
 /*
  *
  * @author Mario Teklic
@@ -25,6 +25,7 @@ package apis.reddit.models;
 import java.util.Date;
 
 public class MyDate implements Comparable<MyDate>{
+
     private Date date;
 
     /**

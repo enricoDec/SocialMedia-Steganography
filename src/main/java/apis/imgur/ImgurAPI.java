@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,27 +18,26 @@
 
 package apis.imgur;
 
-import apis.imgur.models.ImgurResponse;
+import apis.imgur.models.ImgurPostResponse;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 import retrofit2.http.*;
 
-
 public interface ImgurAPI {
-    String server = "https://api.imgur.com/3/";
+    String baseUri = "https://api.imgur.com/3/";
 
     @Multipart
     @Headers({"Authorization: Client-ID 6d628f37c5f9729"})
     @POST("image")
-    Call<ImgurResponse> postImage(
+    Call<ImgurPostResponse> postImage(
             @Query("title") String title,
             @Query("description") String description,
             @Part MultipartBody.Part file);
 
     Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(server)
+            .baseUrl(baseUri)
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 }

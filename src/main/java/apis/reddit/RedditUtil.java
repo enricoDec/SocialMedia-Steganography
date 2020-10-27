@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,47 +19,17 @@
 package apis.reddit;
 
 import apis.MediaType;
-import apis.reddit.models.MyDate;
-import apis.reddit.models.PostEntry;
+import apis.models.PostEntry;
 import apis.reddit.models.RedditResponse;
+import apis.utils.BaseUtil;
 import com.google.gson.Gson;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-public class RedditUtil {
+public class RedditUtil extends BaseUtil {
 
     private final static Logger logger = Logger.getLogger(Reddit.class.getName());
-
-    public RedditUtil(){
-        logger.info("RedditUtil init.");
-    }
-
-    public MyDate getLatestTimestamp(List<PostEntry> postEntries){
-        if(postEntries.size() > 0){
-            return postEntries.get(postEntries.size()-1).getDate();
-        }
-        return null;
-    }
-
-    public MyDate getTimestamp(RedditResponse.ResponseChildData data, boolean inUTC){
-        String info;
-        if(inUTC){
-            info = data.getData().getCreated_utc();
-        }else{
-            info = data.getData().getCreated();
-        }
-
-        double msDouble = Double.parseDouble(info);
-        return new MyDate(new Date((long)msDouble*1000));
-    }
 
     public String getUrl(RedditResponse.ResponseChildData data){
         return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
@@ -93,14 +63,6 @@ public class RedditUtil {
         return false;
     }
 
-    public String encodeUrl(String url){
-        return url.replace("amp;s", "s");
-    }
-
-    public void sortPostEntries(List<PostEntry> postEntries){
-        Collections.sort(postEntries);
-    }
-
     public MediaType getMediaType(String url){
         if(url.contains(MediaType.BMP.name().toLowerCase())){
             return MediaType.BMP;
@@ -116,13 +78,5 @@ public class RedditUtil {
             return MediaType.JPG;
         }
         return null;
-    }
-
-    public boolean hasErrorCode(int responseCode) {
-        if (100 <= responseCode && responseCode <= 399) {
-            return false;
-        } else {
-            return true;
-        }
     }
 }

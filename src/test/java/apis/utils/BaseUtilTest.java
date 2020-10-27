@@ -16,59 +16,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis.utils;
 
+import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SubscriptionDeamonTest {
+class BaseUtilTest {
+
+    private BaseUtil baseUtil = new BaseUtil();
 
     @Test
-    void run() {
+    void sortPostEntries() {
     }
 
     @Test
-    void checkForNewPostEntries() {
+    void getLatestTimestamp() {
     }
 
     @Test
-    void getRecentMediaForKeyword() {
+    void getTimestamp() {
     }
 
     @Test
-    void testGetRecentMediaForKeyword() {
+    void testGetTimestamp() {
     }
 
     @Test
-    void getSubscriptionKeyword() {
+    void hasErrorCode() {
     }
 
     @Test
-    void setSubscriptionKeyword() {
-    }
-
-    @Test
-    void getLatestPostEntries() {
-    }
-
-    @Test
-    void setLatestPostEntries() {
-    }
-
-    @Test
-    void getLatestPostTimestamp() {
-    }
-
-    @Test
-    void setLatestPostTimestamp() {
-    }
-
-    @Test
-    void isNewPostAvailable() {
-    }
-
-    @Test
-    void setNewPostAvailable() {
+    void encodeUrl() {
+        String s = "thisamp;isamp;anamp;example";
+        s = baseUtil.encodeUrl(s);
+        Assertions.assertEquals("thisisanexample", s);
     }
 }

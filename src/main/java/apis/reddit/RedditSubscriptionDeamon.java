@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,10 @@
 
 package apis.reddit;
 
-import apis.reddit.models.MyDate;
-import apis.reddit.models.PostEntry;
+import apis.SubscriptionDeamon;
 import apis.utils.BlobConverterImpl;
+import apis.models.MyDate;
+import apis.models.PostEntry;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,9 +34,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class SubscriptionDeamon implements Runnable {
+public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
-    private static final Logger logger = Logger.getLogger(SubscriptionDeamon.class.getName());
+    private static final Logger logger = Logger.getLogger(RedditSubscriptionDeamon.class.getName());
     private RedditUtil redditUtil;
 
     private String subscriptionKeyword;
@@ -48,7 +49,7 @@ public class SubscriptionDeamon implements Runnable {
      *
      * @param subscriptionKeyword The keyword
      */
-    public SubscriptionDeamon(String subscriptionKeyword) {
+    public RedditSubscriptionDeamon(String subscriptionKeyword) {
         this.subscriptionKeyword = subscriptionKeyword;
         this.redditUtil = new RedditUtil();
     }
@@ -61,13 +62,14 @@ public class SubscriptionDeamon implements Runnable {
     /**
      * @return
      */
+    @Override
     public boolean checkForNewPostEntries() {
         logger.info("Check for new post entries for keyword '" + this.subscriptionKeyword + "' ...");
         List<PostEntry> oldPostEntries = this.latestPostEntries;
         MyDate oldPostTimestamp = this.latestPostTimestamp;
 
         //Pull
-        if(this.getRecentMediaForKeyword() != null) {
+        if(this.getRecentMedia() != null) {
             //Check by null
             if (oldPostEntries == null && this.latestPostEntries != null) {
                 return true;
@@ -86,15 +88,17 @@ public class SubscriptionDeamon implements Runnable {
      * @param keyword
      * @return
      */
+    @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
         String temp = this.subscriptionKeyword;
         this.subscriptionKeyword = keyword;
-        List<byte[]> recentMedia = this.getRecentMediaForKeyword();
+        List<byte[]> recentMedia = this.getRecentMedia();
         this.subscriptionKeyword = temp;
         return recentMedia;
     }
 
-    public List<byte[]> getRecentMediaForKeyword() {
+    @Override
+    public List<byte[]> getRecentMedia() {
         try {
             URL url = new URL(
                     RedditConstants.BASE +
@@ -139,34 +143,42 @@ public class SubscriptionDeamon implements Runnable {
         return null;
     }
 
+    @Override
     public String getSubscriptionKeyword() {
         return subscriptionKeyword;
     }
 
+    @Override
     public void setSubscriptionKeyword(String subscriptionKeyword) {
         this.subscriptionKeyword = subscriptionKeyword;
     }
 
+    @Override
     public List<PostEntry> getLatestPostEntries() {
         return latestPostEntries;
     }
 
+    @Override
     public void setLatestPostEntries(List<PostEntry> latestPostEntries) {
         this.latestPostEntries = latestPostEntries;
     }
 
+    @Override
     public MyDate getLatestPostTimestamp() {
         return latestPostTimestamp;
     }
 
+    @Override
     public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
         this.latestPostTimestamp = latestPostTimestamp;
     }
 
+    @Override
     public boolean isNewPostAvailable() {
         return newPostAvailable;
     }
 
+    @Override
     public void setNewPostAvailable(boolean newPostAvailable) {
         this.newPostAvailable = newPostAvailable;
     }

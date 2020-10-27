@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 package apis.imgur.models;
 
-public class ImgurResponse {
+public class ImgurPostResponse {
     public boolean success;
     public int status;
     public UploadedImage data;

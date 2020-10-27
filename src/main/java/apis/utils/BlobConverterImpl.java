@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,11 @@
 
 package apis.utils;
 
-import apis.MediaType;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BlobConverterImpl {
 
@@ -41,15 +37,15 @@ public class BlobConverterImpl {
     }
 
     /**
-     * Creates a file called 'temp.' with mediatype extenstion.
-     * Example: temp.jpg
-     * @param data Data as bytearray
-     * @param mediaType
+     * Converts an bytearray to a file
+     * @param data Media
+     * @param filename Storatelocation
      * @throws IOException
+     * @return Created file
      */
-    public static void convertToBlob(byte[] data, MediaType mediaType) throws IOException {
-        InputStream is = new ByteArrayInputStream(data);
-        OutputStream os = new FileOutputStream("temp." + mediaType.name().toLowerCase());
-        IOUtils.copy(is, os);
+    public static File byteToFile(byte[] data, String filename) throws IOException {
+        File f = new File(filename);
+        FileUtils.writeByteArrayToFile(f, data);
+        return f;
     }
 }

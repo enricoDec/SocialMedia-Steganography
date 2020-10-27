@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@ public class ParameterStringBuilder {
             result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
             result.append("&");
         }
-
-        System.out.println(result.toString());
 
         String resultString = result.toString();
         return resultString.length() > 0

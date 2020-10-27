@@ -18,8 +18,8 @@
 
 package apis;
 
-import apis.SocialMedia;
-import apis.imgur.ImgurUploader;
+import apis.imgur.Imgur;
+import apis.imgur.ImgurUtil;
 import apis.reddit.Reddit;
 
 import java.io.IOException;
@@ -27,7 +27,12 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        SocialMedia reddit = new Reddit();
+
+        SocialMedia imgur = new Imgur();
+        imgur.subscribeToKeyword("nature");
+
+
+        /* SocialMedia reddit = new Reddit();
 
         reddit.subscribeToKeyword("nature");
         List<byte[]> byts = reddit.getRecentMediaForKeyword("nature");
@@ -35,8 +40,11 @@ public class App {
         System.out.println((byts.size()+1) + " treffer.");
         //reddit.setToken(new RedditToken("1L-t-mee2bsrW7zkS4IHC_FzeYU"));
 
-        ImgurUploader imgurUploader = new ImgurUploader();
-        imgurUploader.uploadPicture(byts.get(byts.size()-1));
+        ImgurUtil imgurUtil = new ImgurUtil();
+        imgurUtil.uploadPicture(byts.get(byts.size()-1), "nature");
+*/
+
+
 
       /*  byte[] pic = reddit.getRecentMediaForHashtag("java");
         for(byte b : pic){
