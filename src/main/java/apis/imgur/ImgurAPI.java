@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit.imgur;
+package apis.imgur;
 
+import apis.imgur.models.ImgurResponse;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 import retrofit2.http.*;

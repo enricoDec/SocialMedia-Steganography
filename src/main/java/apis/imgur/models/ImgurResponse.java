@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit.imgur;
+package apis.imgur.models;
 
 public class ImgurResponse {
     public boolean success;

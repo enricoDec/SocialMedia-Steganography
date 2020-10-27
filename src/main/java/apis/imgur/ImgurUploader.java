@@ -16,12 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit.imgur;
+package apis.imgur;
 
-import apis.blob.BlobConverterImpl;
-import apis.reddit.RedditConstants;
-import apis.utils.ParameterStringBuilder;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import apis.imgur.models.ImgurResponse;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -30,7 +27,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.io.*;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static apis.blob.BlobConverterImpl.byteToFile;

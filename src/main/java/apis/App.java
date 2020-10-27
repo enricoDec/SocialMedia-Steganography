@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis;
 
 import apis.SocialMedia;
-import apis.reddit.imgur.ImgurUploader;
+import apis.imgur.ImgurUploader;
+import apis.reddit.Reddit;
 
 import java.io.IOException;
 import java.util.List;
