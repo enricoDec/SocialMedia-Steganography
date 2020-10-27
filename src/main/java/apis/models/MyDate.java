@@ -48,6 +48,10 @@ public class MyDate implements Comparable<MyDate>{
         this.components = date.toString().split(" ");
     }
 
+    public long getTime(){
+        return this.date.getTime();
+    }
+
     public String toString() {
         return date.toString();
     }

@@ -16,16 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis.imgur;
 
+import apis.utils.BlobConverterImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RedditTest {
+class ImgurTest {
+
+    private Imgur imgur = new Imgur();
 
     @Test
-    void postToSocialNetwork() {
+    void getToken() {
+        Assertions.assertNull(imgur.getToken());
+    }
+
+    @Test
+    void postToSocialNetwork() throws IOException {
+        byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
+        System.out.println(byts.length);
+        boolean result = imgur.postToSocialNetwork(byts, "hashtag");
+        //Assertions.assertTrue(result);
+
+
     }
 
     @Test
@@ -38,33 +56,5 @@ class RedditTest {
 
     @Test
     void getRecentMediaForKeyword() {
-    }
-
-    @Test
-    void supportsMediaType() {
-    }
-
-    @Test
-    void getToken() {
-    }
-
-    @Test
-    void setToken() {
-    }
-
-    @Test
-    void getSupportedMedia() {
-    }
-
-    @Test
-    void setSupportedMedia() {
-    }
-
-    @Test
-    void getLatestReponse() {
-    }
-
-    @Test
-    void setLatestReponse() {
     }
 }

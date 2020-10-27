@@ -21,6 +21,7 @@ package apis;
 import apis.imgur.Imgur;
 import apis.imgur.ImgurUtil;
 import apis.reddit.Reddit;
+import apis.utils.BlobConverterImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,9 +30,11 @@ public class App {
     public static void main(String[] args) throws IOException {
 
         SocialMedia imgur = new Imgur();
-        imgur.subscribeToKeyword("nature");
+        //imgur.subscribeToKeyword("nature");
 
-
+        byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
+        System.out.println(byts.length);
+        boolean result = imgur.postToSocialNetwork(byts, "yodababy");
         /* SocialMedia reddit = new Reddit();
 
         reddit.subscribeToKeyword("nature");

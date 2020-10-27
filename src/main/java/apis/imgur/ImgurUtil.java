@@ -80,7 +80,7 @@ public class ImgurUtil extends BaseUtil {
                     return;
                 }
                 if (response.isSuccessful()) {
-                    logger.info("Upload successfull. ULR: " + "http://imgur.com/" + response.body().data.id);
+                    logger.info("Upload successfull. URL: " + "http://imgur.com/" + response.body().data.id);
                     successfullUploaded = true;
                     latestLink = "http://imgur.com/" + response.body().data.id;
                 }
