@@ -19,13 +19,23 @@
 package apis.reddit;
 
 import apis.SocialMedia;
+import apis.reddit.imgur.ImgurUploader;
 
 import java.io.IOException;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
         SocialMedia reddit = new Reddit();
+
         reddit.subscribeToKeyword("nature");
+        List<byte[]> byts = reddit.getRecentMediaForKeyword("nature");
+
+        System.out.println((byts.size()+1) + " treffer.");
+        //reddit.setToken(new RedditToken("1L-t-mee2bsrW7zkS4IHC_FzeYU"));
+
+        ImgurUploader imgurUploader = new ImgurUploader();
+        imgurUploader.uploadPicture(byts.get(byts.size()-1));
 
       /*  byte[] pic = reddit.getRecentMediaForHashtag("java");
         for(byte b : pic){
