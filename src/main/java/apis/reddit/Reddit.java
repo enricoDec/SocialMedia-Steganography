@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class Reddit implements SocialMedia {
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
 
     private RedditUtil redditUtil;
-    private SubscriptionDeamon subscriptionDeamon;
+    private RedditSubscriptionDeamon redditSubscriptionDeamon;
     private Token<RedditToken> token;
     private List<MediaType> supportedMedia;
     private String latestReponse;
@@ -74,6 +74,7 @@ public class Reddit implements SocialMedia {
             URL url = new URL(
                     RedditConstants.BASE +
                             RedditConstants.SUBREDDIT_PREFIX +
+                            this.redditSubscriptionDeamon.getSubscriptionKeyword() +
                             RedditConstants.POST_PATH);
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -85,7 +86,6 @@ public class Reddit implements SocialMedia {
             params.put(RedditConstants.KEY_HEADER, "");
             params.put(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE);
             params.put(RedditConstants.KEY_NAME, "testname");
-            //params.put(RedditConstants.KEY_UH, this.getModhash());
             params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
 
             con.setDoOutput(true);
@@ -105,12 +105,12 @@ public class Reddit implements SocialMedia {
     @Override
     public boolean subscribeToKeyword(String keyword) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        this.subscriptionDeamon = new SubscriptionDeamon(keyword);
+        this.redditSubscriptionDeamon = new RedditSubscriptionDeamon(keyword);
 
         if(this.interval == null || this.timeUnit == null){
-            executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,5, TimeUnit.MINUTES);
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0 ,5, TimeUnit.MINUTES);
         }else{
-            executor.scheduleAtFixedRate(this.subscriptionDeamon,0 ,this.interval, this.timeUnit);
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0 ,this.interval, this.timeUnit);
         }
 
         return true;
@@ -124,7 +124,7 @@ public class Reddit implements SocialMedia {
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
         //Should not be calleable... should be only callable for the threaded deamon
-        return this.subscriptionDeamon.getRecentMediaForKeyword(keyword);
+        return this.redditSubscriptionDeamon.getRecentMediaForKeyword(keyword);
     }
 
     public boolean supportsMediaType(MediaType mediaType) {

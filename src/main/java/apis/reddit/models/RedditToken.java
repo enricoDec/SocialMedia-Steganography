@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,9 @@ import apis.Token;
 public class RedditToken implements Token {
 
     private String tokenString;
-    private RedditToken token;
 
-    public RedditToken(RedditToken token){
-        this.token = token;
+    public RedditToken(String token){
+        this.tokenString = token;
     }
 
     @Override

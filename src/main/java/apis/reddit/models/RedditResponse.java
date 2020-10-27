@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,9 +76,14 @@ public class RedditResponse {
         public ChildData getData() {
             return data;
         }
+
+        public void setData(ChildData data) {
+            this.data = data;
+        }
     }
 
     public static class ChildData {
+        private String url_overridden_by_dest;
         private PreviewData preview;
         private String domain;
         private String banned_by;
@@ -114,6 +119,14 @@ public class RedditResponse {
         private String media;
         private String num_reports;
         private int ups;
+
+        public String getUrl_overridden_by_dest() {
+            return url_overridden_by_dest;
+        }
+
+        public void setUrl_overridden_by_dest(String url_overridden_by_dest) {
+            this.url_overridden_by_dest = url_overridden_by_dest;
+        }
 
         public PreviewData getPreview() {
             return preview;
@@ -240,6 +253,10 @@ public class RedditResponse {
 
         public String getCreated_utc() {
             return created_utc;
+        }
+
+        public void setCreated_utc(String created_utc) {
+            this.created_utc = created_utc;
         }
 
         public String getMedia() {
