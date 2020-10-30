@@ -30,11 +30,16 @@ public abstract class SocialMedia {
         socialMediaListeners.add(socialMediaListener);
     }
 
+    public void removeAsListener(SocialMediaListener socialMediaListener){
+        socialMediaListeners.remove(socialMediaListener);
+    }
+
     private void updateListeners(){
         for(SocialMediaListener socialMediaListener : socialMediaListeners){
             socialMediaListener.updateSocialMediaMessage(message);
         }
     }
+
 
     abstract Token<?> getToken();
 
