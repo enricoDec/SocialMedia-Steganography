@@ -19,16 +19,15 @@
 package apis;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public interface SocialMedia {
 
-    Token getToken();
+    Token<?> getToken();
 
-    void setToken(Token token);
+    void setToken(Token<?> token);
 
     /**
-     * PostEntry media on this Social Media under the keyword
+     * Post media on this Social Media under the keyword
      * @param media data to upload
      * @param keyword keyword to search this post by
      * @return true if successful
@@ -48,6 +47,4 @@ public interface SocialMedia {
      * @return true if successful
      */
     List<byte[]> getRecentMediaForKeyword(String keyword);
-
-    void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval);
 }
