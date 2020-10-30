@@ -20,7 +20,9 @@ package apis;
 
 import apis.imgur.Imgur;
 import apis.imgur.ImgurUtil;
+import apis.models.PostEntry;
 import apis.reddit.Reddit;
+import apis.reddit.models.RedditToken;
 import apis.utils.BlobConverterImpl;
 
 import java.io.IOException;
@@ -34,7 +36,15 @@ public class App {
 
         byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
         System.out.println(byts.length);
-        boolean result = imgur.postToSocialNetwork(byts, "yodababy");
+        //boolean result = imgur.postToSocialNetwork(byts, "yodababy");
+
+
+        SocialMedia reddit = new Reddit();
+        reddit.setToken(new RedditToken("Isrdt0TeRtL7Cygrt6Lk4jphfAg"));
+        boolean res = reddit.postToSocialNetwork(byts, "TestHashTag");
+
+        System.out.println(res + " .. " + reddit.getRecentMediaForKeyword("TestHashTag").size());
+
         /* SocialMedia reddit = new Reddit();
 
         reddit.subscribeToKeyword("nature");

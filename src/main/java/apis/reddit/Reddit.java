@@ -19,6 +19,8 @@
 package apis.reddit;
 
 import apis.*;
+import apis.imgur.Imgur;
+import apis.imgur.ImgurUtil;
 import apis.reddit.models.RedditToken;
 import apis.utils.ParameterStringBuilder;
 
@@ -26,10 +28,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +70,14 @@ public class Reddit implements SocialMedia {
         }
 
         try {
+            ImgurUtil imgur = new ImgurUtil();
+            if(!imgur.uploadPicture(media, hashtag)){
+                logger.info("Upload not successfull.");
+                return false;
+            }
+
+            String imgUrl = imgur.getLatestLink() + ".jpg";
+
             URL url = new URL(
                     RedditConstants.BASE +
                             RedditConstants.SUBREDDIT_PREFIX +
@@ -80,10 +87,11 @@ public class Reddit implements SocialMedia {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(RedditConstants.POST);
             con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Authorization", "Bearer " + token.getAuth().toString());
 
             Map<String, String> params = new HashMap<>();
-            params.put(RedditConstants.KEY_FILE, "");
-            params.put(RedditConstants.KEY_HEADER, "");
+            params.put(RedditConstants.KEY_FILE, imgUrl);
+            //params.put(RedditConstants.KEY_HEADER, "");
             params.put(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE);
             params.put(RedditConstants.KEY_NAME, "testname");
             params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
@@ -160,4 +168,5 @@ public class Reddit implements SocialMedia {
     public void setLatestReponse(String latestReponse) {
         this.latestReponse = latestReponse;
     }
+
 }

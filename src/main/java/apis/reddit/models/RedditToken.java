@@ -32,4 +32,9 @@ public class RedditToken implements Token {
     public RedditToken getAuth() {
         return null;
     }
+
+    @Override
+    public String toString(){
+        return this.tokenString;
+    }
 }
