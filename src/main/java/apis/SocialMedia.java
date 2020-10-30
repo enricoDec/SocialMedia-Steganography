@@ -18,13 +18,27 @@
 
 package apis;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface SocialMedia {
+public abstract class SocialMedia {
+    private String message;
 
-    Token<?> getToken();
+    List<SocialMediaListener> socialMediaListeners = new ArrayList<SocialMediaListener>();
 
-    void setToken(Token<?> token);
+    public void addAsListener(SocialMediaListener socialMediaListener){
+        socialMediaListeners.add(socialMediaListener);
+    }
+
+    private void updateListeners(){
+        for(SocialMediaListener socialMediaListener : socialMediaListeners){
+            socialMediaListener.updateSocialMediaMessage(message);
+        }
+    }
+
+    abstract Token<?> getToken();
+
+    abstract void setToken(Token<?> token);
 
     /**
      * Post media on this Social Media under the keyword
@@ -32,19 +46,19 @@ public interface SocialMedia {
      * @param keyword keyword to search this post by
      * @return true if successful
      */
-    boolean postToSocialNetwork(byte[] media, String keyword);
+    abstract boolean postToSocialNetwork(byte[] media, String keyword);
 
     /**
      * Subscribe to a keyword (Hashtag / Title / ...)
      * @param keyword keyword to subscribe to
      * @return true if successful
      */
-    boolean subscribeToKeyword(String keyword);
+     abstract boolean subscribeToKeyword(String keyword);
 
     /**
      * Get Medias posted under keyword
      * @param keyword hashtag
      * @return true if successful
      */
-    List<byte[]> getRecentMediaForKeyword(String keyword);
+    abstract List<byte[]> getRecentMediaForKeyword(String keyword);
 }
