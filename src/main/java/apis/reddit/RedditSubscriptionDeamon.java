@@ -32,6 +32,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
 
 public class RedditSubscriptionDeamon implements SubscriptionDeamon {
@@ -50,6 +52,9 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
      * @param subscriptionKeyword The keyword
      */
     public RedditSubscriptionDeamon(String subscriptionKeyword) {
+        SimpleFormatter fmt = new SimpleFormatter();
+        StreamHandler sh = new StreamHandler(System.out, fmt);
+        logger.addHandler(sh);
         this.subscriptionKeyword = subscriptionKeyword;
         this.redditUtil = new RedditUtil();
     }
@@ -124,6 +129,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
             logger.info(String.valueOf(con.getURL()));
 
+            System.out.println(responseString);
             List<PostEntry> postEntries = this.redditUtil.getPosts(responseString);
             this.setLatestPostEntries(postEntries);
             this.setLatestPostTimestamp(this.redditUtil.getLatestTimestamp(postEntries));

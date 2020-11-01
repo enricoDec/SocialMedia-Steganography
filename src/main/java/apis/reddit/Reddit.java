@@ -19,11 +19,18 @@
 package apis.reddit;
 
 import apis.*;
+import okhttp3.MediaType;
 import apis.imgur.Imgur;
 import apis.imgur.ImgurUtil;
 import apis.reddit.models.RedditToken;
+import apis.utils.BlobConverterImpl;
 import apis.utils.ParameterStringBuilder;
+import okhttp3.*;
+import okio.Buffer;
+import org.apache.http.entity.mime.content.FileBody;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -32,7 +39,10 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 public class Reddit implements SocialMedia {
 
@@ -48,18 +58,15 @@ public class Reddit implements SocialMedia {
     private Integer interval;
 
     public Reddit() {
+        SimpleFormatter fmt = new SimpleFormatter();
+        StreamHandler sh = new StreamHandler(System.out, fmt);
+        logger.addHandler(sh);
         this.redditUtil = new RedditUtil();
         this.loadSupportedMedias();
     }
 
     private void loadSupportedMedias() {
         this.supportedMedia = new ArrayList<>();
-        this.supportedMedia.add(MediaType.JPEG);
-        this.supportedMedia.add(MediaType.BMP);
-        this.supportedMedia.add(MediaType.PNG);
-        this.supportedMedia.add(MediaType.GIF);
-        this.supportedMedia.add(MediaType.TIFF);
-        this.supportedMedia.add(MediaType.JPG);
     }
 
     @Override
@@ -69,29 +76,98 @@ public class Reddit implements SocialMedia {
             return false;
         }
 
+        /*ImgurUtil imgur = new ImgurUtil();
+        if (!imgur.uploadPicture(media, hashtag)) {
+            logger.info("Upload not successfull.");
+            return false;
+        }
+        String imgUrl = imgur.getLatestLink() + ".jpg";*/
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new BearerInterceptor(this.getToken().returnValue())).build();
+
+        RequestBody mBody = null;
+        String filename = "";
+
         try {
-            ImgurUtil imgur = new ImgurUtil();
-            if(!imgur.uploadPicture(media, hashtag)){
-                logger.info("Upload not successfull.");
-                return false;
+
+            filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+            mBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart(RedditConstants.KEY_FILE, filename, RequestBody.create(media, MediaType.parse("image/jpg")))
+                    .addFormDataPart(RedditConstants.KEY_HEADER, "1")
+                    .addFormDataPart("api_type", "json")
+                    .addFormDataPart(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE)
+                    .addFormDataPart(RedditConstants.KEY_NAME, "testname")
+                    .addFormDataPart(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE)
+                    .build();
+
+
+            /**
+             * RequestBody body = new FormBody.Builder().
+             *                 add(RedditConstants.KEY_FILE, imgUrl).
+             *                 add(RedditConstants.KEY_HEADER, "1").
+             *                 add(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE).
+             *                 add(RedditConstants.KEY_NAME, "testname").
+             *                 add(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE)
+             *                 .build();
+             */
+
+            //https://oauth.reddit.com//https://oauth.reddit.com//https://oauth.reddit.com
+            Request request = new Request.Builder()
+                    .url("https://oauth.reddit.com" +
+                            RedditConstants.SUBREDDIT_PREFIX +
+                            hashtag +
+                            "/api" +
+                            RedditConstants.POST_PATH)
+                    .post(mBody)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseString = response.body().string();
+            System.out.println("Response String: " + responseString);
+        } catch (Exception e) {
+            logger.info("Error while creating request body.");
+            e.printStackTrace();
+        }
+
+        File f = new File(filename);
+        if(f.exists()){
+            f.delete();
+        }
+
+
+        /*
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                logger.info("Failed to upload.");
             }
 
-            String imgUrl = imgur.getLatestLink() + ".jpg";
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                logger.info("Reponse: " + response.headers());
+                String resp = response.body().string();
+                logger.info(resp);
+            }
+        });*/
 
+/*
             URL url = new URL(
                     RedditConstants.BASE +
                             RedditConstants.SUBREDDIT_PREFIX +
-                            this.redditSubscriptionDeamon.getSubscriptionKeyword() +
+                            hashtag +
                             RedditConstants.POST_PATH);
+
+            logger.info(url.toString());
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(RedditConstants.POST);
-            con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Authorization", "Bearer " + token.getAuth().toString());
+            con.setRequestProperty("User-Agent", RedditConstants.APP_NAME + " by User");
 
             Map<String, String> params = new HashMap<>();
             params.put(RedditConstants.KEY_FILE, imgUrl);
-            //params.put(RedditConstants.KEY_HEADER, "");
+            params.put(RedditConstants.KEY_HEADER, "1");
             params.put(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE);
             params.put(RedditConstants.KEY_NAME, "testname");
             params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
@@ -102,11 +178,13 @@ public class Reddit implements SocialMedia {
             out.flush();
             out.close();
 
+            logger.info(con.getResponseMessage());
+            return true;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
         return false;
     }
 
@@ -115,22 +193,26 @@ public class Reddit implements SocialMedia {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         this.redditSubscriptionDeamon = new RedditSubscriptionDeamon(keyword);
 
-        if(this.interval == null || this.timeUnit == null){
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0 ,5, TimeUnit.MINUTES);
-        }else{
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0 ,this.interval, this.timeUnit);
+        if (this.interval == null || this.timeUnit == null) {
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
+        } else {
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, this.interval, this.timeUnit);
         }
 
         return true;
     }
 
-    public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval){
+    public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval) {
         this.timeUnit = timeUnit;
         this.interval = interval;
     }
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
+        if (this.redditSubscriptionDeamon == null) {
+            logger.info("Subscription Deamon is not running.");
+            return null;
+        }
         //Should not be calleable... should be only callable for the threaded deamon
         return this.redditSubscriptionDeamon.getRecentMediaForKeyword(keyword);
     }
@@ -146,9 +228,9 @@ public class Reddit implements SocialMedia {
 
     @Override
     public void setToken(Token<?> token) {
-        if(token instanceof RedditToken){
+        if (token instanceof RedditToken) {
             this.token = (Token<RedditToken>) token;
-        }else{
+        } else {
             logger.info("Must be instance of 'RedditToken'");
         }
     }

@@ -24,4 +24,6 @@ package apis;
 public interface Token<T> {
 
     T getAuth();
+
+    String returnValue();
 }

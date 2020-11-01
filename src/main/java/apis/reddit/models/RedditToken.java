@@ -37,4 +37,9 @@ public class RedditToken implements Token {
     public String toString(){
         return this.tokenString;
     }
+
+    @Override
+    public String returnValue(){
+        return this.tokenString;
+    }
 }

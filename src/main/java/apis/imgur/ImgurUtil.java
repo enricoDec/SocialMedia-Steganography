@@ -34,6 +34,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import static apis.utils.BlobConverterImpl.byteToFile;
 
@@ -46,6 +48,12 @@ public class ImgurUtil extends BaseUtil {
     private static final Logger logger = Logger.getLogger(ImgurUtil.class.getName());
 
     private ImgurAPI imgurAPI = ImgurAPI.retrofit.create(ImgurAPI.class);
+
+    public ImgurUtil(){
+        SimpleFormatter fmt = new SimpleFormatter();
+        StreamHandler sh = new StreamHandler(System.out, fmt);
+        logger.addHandler(sh);
+    }
 
     public boolean uploadPicture(byte[] file, String keyword) {
         latestLink = null;

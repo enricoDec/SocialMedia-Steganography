@@ -76,12 +76,12 @@ public interface RedditConstants {
 
     //********* KEY - VALUE * POST ***************************************
 
-    String KEY_FILE = "file=";
-    String KEY_FORMID = "formid=";
-    String KEY_HEADER = "header=";
-    String KEY_IMG_TYPE = "img_type=";
+    String KEY_FILE = "file";
+    String KEY_FORMID = "formid";
+    String KEY_HEADER = "header";
+    String KEY_IMG_TYPE = "img_type";
     String VAL_IMG_TYPE = "jpg";
-    String KEY_NAME = "name=";
+    String KEY_NAME = "name";
     String KEY_UPLOAD_TYPE = "upload_type";
     String VAL_UPLOAD_TYPE = "img";
     String KEY_UH = "uh=";
