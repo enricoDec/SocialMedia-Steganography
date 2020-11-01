@@ -21,9 +21,35 @@ package apis;
 /**
  * Represents the authentication needed for a Social Media API
  */
-public interface Token<T> {
+public class Token {
 
-    T getAuth();
+    /**
+     * Code of the Token
+     */
+    private String token;
+    /**
+     * time of creation in ms
+     */
+    private long time;
 
-    String returnValue();
+    public Token(String token, long time) {
+        this.token = token;
+        this.time = time;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 }

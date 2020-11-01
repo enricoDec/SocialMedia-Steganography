@@ -22,9 +22,9 @@ import java.util.List;
 
 public interface SocialMedia {
 
-    Token<?> getToken();
+    Token getToken();
 
-    void setToken(Token<?> token);
+    void setToken(Token token);
 
     /**
      * PostEntry media on this Social Media under the keyword

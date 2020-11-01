@@ -18,28 +18,16 @@
 
 package apis.reddit;
 
-import apis.*;
-import okhttp3.MediaType;
-import apis.imgur.Imgur;
-import apis.imgur.ImgurUtil;
-import apis.reddit.models.RedditToken;
-import apis.utils.BlobConverterImpl;
-import apis.utils.ParameterStringBuilder;
+import apis.SocialMedia;
+import apis.Token;
 import okhttp3.*;
-import okio.Buffer;
-import org.apache.http.entity.mime.content.FileBody;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -50,7 +38,7 @@ public class Reddit implements SocialMedia {
 
     private RedditUtil redditUtil;
     private RedditSubscriptionDeamon redditSubscriptionDeamon;
-    private Token<RedditToken> token;
+    private Token token;
     private List<MediaType> supportedMedia;
     private String latestReponse;
 
@@ -83,7 +71,7 @@ public class Reddit implements SocialMedia {
         }
         String imgUrl = imgur.getLatestLink() + ".jpg";*/
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new BearerInterceptor(this.getToken().returnValue())).build();
+                .addInterceptor(new BearerInterceptor(this.getToken().getToken())).build();
 
         RequestBody mBody = null;
         String filename = "";
@@ -222,17 +210,13 @@ public class Reddit implements SocialMedia {
     }
 
     @Override
-    public Token<?> getToken() {
+    public Token getToken() {
         return this.token;
     }
 
     @Override
-    public void setToken(Token<?> token) {
-        if (token instanceof RedditToken) {
-            this.token = (Token<RedditToken>) token;
-        } else {
-            logger.info("Must be instance of 'RedditToken'");
-        }
+    public void setToken(Token token) {
+        this.token = token;
     }
 
     public List<MediaType> getSupportedMedia() {

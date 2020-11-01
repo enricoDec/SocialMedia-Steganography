@@ -44,12 +44,12 @@ public class Imgur implements SocialMedia {
      * @return null
      */
     @Override
-    public Token<?> getToken() {
+    public Token getToken() {
         return null;
     }
 
     @Override
-    public void setToken(Token<?> token) {
+    public void setToken(Token token) {
     }
 
     @Override
