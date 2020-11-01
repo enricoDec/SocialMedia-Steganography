@@ -30,42 +30,5 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
-
-        SocialMedia imgur = new Imgur();
-        //imgur.subscribeToKeyword("nature");
-
-        byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
-        System.out.println(byts.length);
-        //boolean result = imgur.postToSocialNetwork(byts, "yodababy");
-
-
-        SocialMedia reddit = new Reddit();
-        reddit.setToken(new RedditToken("Isrdt0TeRtL7Cygrt6Lk4jphfAg"));
-        boolean res = reddit.postToSocialNetwork(byts, "TestHashTag");
-
-        System.out.println(res + " .. " + reddit.getRecentMediaForKeyword("TestHashTag").size());
-
-        /* SocialMedia reddit = new Reddit();
-
-        reddit.subscribeToKeyword("nature");
-        List<byte[]> byts = reddit.getRecentMediaForKeyword("nature");
-
-        System.out.println((byts.size()+1) + " treffer.");
-        //reddit.setToken(new RedditToken("1L-t-mee2bsrW7zkS4IHC_FzeYU"));
-
-        ImgurUtil imgurUtil = new ImgurUtil();
-        imgurUtil.uploadPicture(byts.get(byts.size()-1), "nature");
-*/
-
-
-
-      /*  byte[] pic = reddit.getRecentMediaForHashtag("java");
-        for(byte b : pic){
-            System.out.println(b);
-        }*/
-        //System.out.println(reddit.postToSocialNetwork(pic, "meinHashtag"));
-        //System.out.println(((Reddit) reddit).getModhash());
-        //reddit.signInSocialNetwork("sharksystember","Mktcs1995");
-        //((Reddit) reddit).tokenize();
     }
 }
