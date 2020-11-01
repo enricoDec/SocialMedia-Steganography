@@ -20,6 +20,7 @@ package apis.reddit;
 
 import apis.SocialMedia;
 import apis.Token;
+import apis.utils.BlobConverterImpl;
 import okhttp3.*;
 
 import java.io.File;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
+
+import static apis.utils.BlobConverterImpl.byteToFile;
 
 public class Reddit implements SocialMedia {
 
@@ -79,34 +82,39 @@ public class Reddit implements SocialMedia {
         try {
 
             filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+
             mBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart(RedditConstants.KEY_FILE, filename, RequestBody.create(media, MediaType.parse("image/jpg")))
-                    .addFormDataPart(RedditConstants.KEY_HEADER, "1")
+                    //.addFormDataPart("imagename", filename, RequestBody.create(byteToFile(media, filename), MediaType.parse("image/jpg")))
+                    .addFormDataPart("title", "test:title")
+                    .addFormDataPart("kind", "link")
+                    .addFormDataPart("url", "https://www.reddit.com/dev/api/#POST_api_submit")
+                    .addFormDataPart("nsfw", "false")
+                    .addFormDataPart("text", "Nothing special here.")
+                    .addFormDataPart("sr", hashtag)
+                    .addFormDataPart("resubmit", "true")
+                    .addFormDataPart("send_replies", "true")
                     .addFormDataPart("api_type", "json")
-                    .addFormDataPart(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE)
-                    .addFormDataPart(RedditConstants.KEY_NAME, "testname")
-                    .addFormDataPart(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE)
                     .build();
 
+            /*
+            mBody = new FormBody.Builder()
+                    .add("title", "test:title")
+                    .add("kind", "self")
+                    .add("text", "test:text")
+                    .add("sr", hashtag)
+                    .add("resubmit", "true")
+                    .add("send_replies", "true")
+                    .add("api_type", "json")
+                    .build();
+*/
 
-            /**
-             * RequestBody body = new FormBody.Builder().
-             *                 add(RedditConstants.KEY_FILE, imgUrl).
-             *                 add(RedditConstants.KEY_HEADER, "1").
-             *                 add(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE).
-             *                 add(RedditConstants.KEY_NAME, "testname").
-             *                 add(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE)
-             *                 .build();
-             */
 
             //https://oauth.reddit.com//https://oauth.reddit.com//https://oauth.reddit.com
             Request request = new Request.Builder()
-                    .url("https://oauth.reddit.com" +
-                            RedditConstants.SUBREDDIT_PREFIX +
-                            hashtag +
-                            "/api" +
-                            RedditConstants.POST_PATH)
+                    .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .url(RedditConstants.OAUTH_BASE +
+                            RedditConstants.UPLOAD_PATH)
                     .post(mBody)
                     .build();
 

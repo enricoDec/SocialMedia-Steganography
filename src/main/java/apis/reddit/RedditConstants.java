@@ -55,6 +55,7 @@ public interface RedditConstants {
     //********* PATH COMPONENTS *******************************************
 
     String BASE = "https://www.reddit.com";
+    String OAUTH_BASE = "https://oauth.reddit.com";
     String API = "/api";
     String ME = "/v1/me";
     String AUTH = "/v1/authorize";
@@ -62,7 +63,7 @@ public interface RedditConstants {
 
     String SUBREDDIT_PREFIX = "/r/";
 
-    String POST_PATH = "/upload_sr_img";
+    String UPLOAD_PATH = "/api/submit";
 
     String GET_PATH = "/...";
 
