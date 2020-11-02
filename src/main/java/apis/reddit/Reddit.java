@@ -20,10 +20,11 @@ package apis.reddit;
 
 import apis.SocialMedia;
 import apis.Token;
-import apis.utils.BlobConverterImpl;
+import apis.imgur.Imgur;
+import apis.reddit.models.RedditPostResponse;
+import com.google.gson.Gson;
 import okhttp3.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -33,13 +34,11 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-import static apis.utils.BlobConverterImpl.byteToFile;
-
 public class Reddit implements SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
 
-    private RedditUtil redditUtil;
+    List<RedditPostResponse> uploadedFiles;
     private RedditSubscriptionDeamon redditSubscriptionDeamon;
     private Token token;
     private List<MediaType> supportedMedia;
@@ -52,7 +51,7 @@ public class Reddit implements SocialMedia {
         SimpleFormatter fmt = new SimpleFormatter();
         StreamHandler sh = new StreamHandler(System.out, fmt);
         logger.addHandler(sh);
-        this.redditUtil = new RedditUtil();
+        this.uploadedFiles = new ArrayList<>();
         this.loadSupportedMedias();
     }
 
@@ -67,37 +66,27 @@ public class Reddit implements SocialMedia {
             return false;
         }
 
-        /*ImgurUtil imgur = new ImgurUtil();
-        if (!imgur.uploadPicture(media, hashtag)) {
-            logger.info("Upload not successfull.");
-            return false;
-        }
-        String imgUrl = imgur.getLatestLink() + ".jpg";*/
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new BearerInterceptor(this.getToken().getToken())).build();
 
         RequestBody mBody = null;
-        String filename = "";
 
         try {
 
-            filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+            String url = Imgur.uploadPicture(media, hashtag).data.link;
 
             mBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.jpg"), MediaType.parse("image/*")))
-                    .addFormDataPart("title", "test:title")
+                    .addFormDataPart("title", "Hello World")
                     .addFormDataPart("kind", "image")
-                    .addFormDataPart("text", "Nothing special here.")
+                    .addFormDataPart("text", "Baby Yoda.")
                     .addFormDataPart("sr", hashtag)
                     .addFormDataPart("resubmit", "true")
                     .addFormDataPart("send_replies", "true")
                     .addFormDataPart("api_type", "json")
-                    .addFormDataPart("url", "https://www.google.de/")
+                    .addFormDataPart("url", url)
                     .build();
 
-
-            //https://oauth.reddit.com//https://oauth.reddit.com//https://oauth.reddit.com
             Request request = new Request.Builder()
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
                     .headers(Headers.of("Authorization", ("Bearer " + this.token.getToken())))
@@ -108,67 +97,18 @@ public class Reddit implements SocialMedia {
 
             Response response = client.newCall(request).execute();
             String responseString = response.body().string();
-            System.out.println("Response String: " + responseString);
+            logger.info("Response String: " + responseString);
+            int respCode = response.code();
+            if(199 < respCode && respCode < 399){
+                Gson gson = new Gson();
+                this.uploadedFiles.add(gson.fromJson(responseString, RedditPostResponse.class));
+                return true;
+            }
         } catch (Exception e) {
-            logger.info("Error while creating request body.");
+            logger.info("Error while creating new post on reddit.");
             e.printStackTrace();
         }
 
-        File f = new File(filename);
-        if(f.exists()){
-            f.delete();
-        }
-
-
-        /*
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                logger.info("Failed to upload.");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                logger.info("Reponse: " + response.headers());
-                String resp = response.body().string();
-                logger.info(resp);
-            }
-        });*/
-
-/*
-            URL url = new URL(
-                    RedditConstants.BASE +
-                            RedditConstants.SUBREDDIT_PREFIX +
-                            hashtag +
-                            RedditConstants.POST_PATH);
-
-            logger.info(url.toString());
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.POST);
-            con.setRequestProperty("Authorization", "Bearer " + token.getAuth().toString());
-            con.setRequestProperty("User-Agent", RedditConstants.APP_NAME + " by User");
-
-            Map<String, String> params = new HashMap<>();
-            params.put(RedditConstants.KEY_FILE, imgUrl);
-            params.put(RedditConstants.KEY_HEADER, "1");
-            params.put(RedditConstants.KEY_IMG_TYPE, RedditConstants.VAL_IMG_TYPE);
-            params.put(RedditConstants.KEY_NAME, "testname");
-            params.put(RedditConstants.KEY_UPLOAD_TYPE, RedditConstants.VAL_UPLOAD_TYPE);
-
-            con.setDoOutput(true);
-            DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            out.writeBytes(ParameterStringBuilder.getParamsString(params));
-            out.flush();
-            out.close();
-
-            logger.info(con.getResponseMessage());
-            return true;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         return false;
     }
 

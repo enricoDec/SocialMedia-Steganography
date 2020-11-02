@@ -20,7 +20,7 @@ package apis.utils;
 
 import apis.models.MyDate;
 import apis.models.PostEntry;
-import apis.reddit.models.RedditResponse;
+import apis.reddit.models.RedditGetResponse;
 
 import java.util.Collections;
 import java.util.Date;
@@ -44,7 +44,7 @@ public class BaseUtil {
         return new MyDate(new Date((long)msDouble*1000));
     }
 
-    public MyDate getTimestamp(RedditResponse.ResponseChildData data, boolean inUTC){
+    public MyDate getTimestamp(RedditGetResponse.ResponseChildData data, boolean inUTC){
         String info;
         if(inUTC){
             info = data.getData().getCreated_utc();

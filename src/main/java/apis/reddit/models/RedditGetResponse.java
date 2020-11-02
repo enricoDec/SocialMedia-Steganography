@@ -29,7 +29,7 @@ import java.util.List;
  * Has several properties which are not used for this application at this point.
  * Maybe they can be usefull later, therefore they should be kept.
  */
-public class RedditResponse {
+public class RedditGetResponse {
     private String kind;
     private ResponseData data;
 

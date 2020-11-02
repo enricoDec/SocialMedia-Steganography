@@ -20,15 +20,13 @@ package apis.utils;
 
 import apis.models.MyDate;
 import apis.models.PostEntry;
-import apis.reddit.models.RedditResponse;
+import apis.reddit.models.RedditGetResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BaseUtilTest {
 
@@ -133,8 +131,8 @@ class BaseUtilTest {
     @Test
     void testGetTimestamp_byResponseData() {
         String dateValue = "1603813248";
-        RedditResponse.ResponseChildData data = new RedditResponse.ResponseChildData();
-        RedditResponse.ChildData cData = new RedditResponse.ChildData();
+        RedditGetResponse.ResponseChildData data = new RedditGetResponse.ResponseChildData();
+        RedditGetResponse.ChildData cData = new RedditGetResponse.ChildData();
         cData.setCreated_utc(dateValue);
         data.setData(cData);
 

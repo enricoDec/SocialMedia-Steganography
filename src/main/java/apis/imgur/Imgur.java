@@ -97,6 +97,45 @@ public class Imgur implements SocialMedia {
         return false;
     }
 
+    /**
+     * Uploads a picture to Imgur anonymoulsy
+     * @param media File as bytearray
+     * @param keyword Keyword will be used as the title
+     * @return JSON response from Imgur as a POJO
+     */
+    public static ImgurPostResponse uploadPicture(byte[] media, String keyword) {
+        OkHttpClient client = new OkHttpClient.Builder().build();
+
+        String filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+        RequestBody body = null;
+        try {
+            body = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("image", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.jpg"), MediaType.parse("image/*")))
+                    .addFormDataPart("title", keyword)
+                    .addFormDataPart("description", "Hello World!")
+                    .build();
+
+            Request request = new Request.Builder()
+                    .addHeader("User-Agent", "Sharksystems Steganography by Anon-User")
+                    .headers(Headers.of("Authorization", ("Client-ID " + ImgurConstants.CLIENT_ID)))
+                    .url(ImgurConstants.UPLOAD_URL + ".json")
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            Gson gson = new Gson();
+            ImgurPostResponse ipr = gson.fromJson(response.body().string(), ImgurPostResponse.class);
+
+            logger.info("Successfull uploaded anonymously.\nURL: " + ipr.data.link);
+            return ipr;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     @Override
     public boolean subscribeToKeyword(String keyword) {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

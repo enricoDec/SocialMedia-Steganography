@@ -20,7 +20,7 @@ package apis.reddit;
 
 import apis.MediaType;
 import apis.models.PostEntry;
-import apis.reddit.models.RedditResponse;
+import apis.reddit.models.RedditGetResponse;
 import apis.utils.BaseUtil;
 import com.google.gson.Gson;
 
@@ -31,7 +31,7 @@ public class RedditUtil extends BaseUtil {
 
     private final static Logger logger = Logger.getLogger(Reddit.class.getName());
 
-    public String getUrl(RedditResponse.ResponseChildData data){
+    public String getUrl(RedditGetResponse.ResponseChildData data){
         return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
     }
 
@@ -42,9 +42,9 @@ public class RedditUtil extends BaseUtil {
      */
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
-        RedditResponse responseArray = new Gson().fromJson(responseString, RedditResponse.class);
+        RedditGetResponse responseArray = new Gson().fromJson(responseString, RedditGetResponse.class);
 
-        for(RedditResponse.ResponseChildData child : responseArray.getData().getChildren()){
+        for(RedditGetResponse.ResponseChildData child : responseArray.getData().getChildren()){
             if(child != null && !this.hasNullObjects(child)){
                 postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false)));
             }
@@ -53,7 +53,7 @@ public class RedditUtil extends BaseUtil {
         return postEntries;
     }
 
-    public boolean hasNullObjects(RedditResponse.ResponseChildData responseChildData){
+    public boolean hasNullObjects(RedditGetResponse.ResponseChildData responseChildData){
         try{
             this.getTimestamp(responseChildData, false);
             this.getUrl(responseChildData);
