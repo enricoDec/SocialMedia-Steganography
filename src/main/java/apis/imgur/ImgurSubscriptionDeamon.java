@@ -72,7 +72,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(RedditConstants.GET);
             con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setRequestProperty("Authorization", "Client-ID 6d628f37c5f9729");
+            con.setRequestProperty("Authorization", "Client-ID " + ImgurConstants.CLIENT_ID);
             con.setDoOutput(true);
 
             String responseString = "";

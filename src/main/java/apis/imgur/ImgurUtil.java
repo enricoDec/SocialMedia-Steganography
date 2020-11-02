@@ -19,95 +19,27 @@
 package apis.imgur;
 
 import apis.imgur.models.ImgurGetResponse;
-import apis.imgur.models.ImgurPostResponse;
 import apis.models.PostEntry;
 import apis.utils.BaseUtil;
 import com.google.gson.Gson;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-import static apis.utils.BlobConverterImpl.byteToFile;
 
 public class ImgurUtil extends BaseUtil {
-
-    public static Boolean successfullUploaded;
 
     public static String latestLink;
 
     private static final Logger logger = Logger.getLogger(ImgurUtil.class.getName());
 
-    private ImgurAPI imgurAPI = ImgurAPI.retrofit.create(ImgurAPI.class);
-
     public ImgurUtil(){
         SimpleFormatter fmt = new SimpleFormatter();
         StreamHandler sh = new StreamHandler(System.out, fmt);
         logger.addHandler(sh);
-    }
-
-    public boolean uploadPicture(byte[] file, String keyword) {
-        latestLink = null;
-        String filename = "tempFile";
-        File f = null;
-
-        try {
-            f = new File(filename);
-            byteToFile(file, filename);
-        } catch (IOException e) {
-            logger.info("Error converting byte-array to file.");
-            logger.info(e.getMessage());
-            return false;
-        }
-
-        if(f == null || !f.exists()){
-            logger.info("Converted file does not exist");
-        }
-
-        final Call<ImgurPostResponse> call = imgurAPI.postImage(keyword,
-                keyword,
-                MultipartBody.Part.createFormData(
-                        "image", filename, RequestBody.create(MediaType.parse("image/*"), f)
-                ));
-
-        call.enqueue(new Callback<ImgurPostResponse>(){
-            @Override
-            public void onResponse(Call<ImgurPostResponse> call, Response<ImgurPostResponse> response) {
-                if (response == null) {
-                    logger.info("Upload not successfull.");
-                    successfullUploaded = false;
-                    return;
-                }
-                if (response.isSuccessful()) {
-                    logger.info("Upload successfull. URL: " + "http://imgur.com/" + response.body().data.id);
-                    successfullUploaded = true;
-                    latestLink = "http://imgur.com/" + response.body().data.id;
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ImgurPostResponse> call, Throwable throwable) {
-                logger.info("Upload not successfull. Unknown error occured.");
-                successfullUploaded = false;
-            }
-        });
-
-        if(successfullUploaded != null && successfullUploaded){
-            successfullUploaded = null;
-            return true;
-        }else{
-            successfullUploaded = null;
-            return false;
-        }
     }
 
     /**
@@ -136,6 +68,5 @@ public class ImgurUtil extends BaseUtil {
     public String getLatestLink() {
         return latestLink;
     }
-
 
 }

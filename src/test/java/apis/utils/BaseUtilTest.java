@@ -21,8 +21,6 @@ package apis.utils;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.reddit.models.RedditResponse;
-import javafx.geometry.Pos;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

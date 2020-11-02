@@ -16,24 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis.imgur;
 
-import okhttp3.Headers;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
+import apis.reddit.RedditConstants;
+import okhttp3.*;
 import okio.Buffer;
 
 import java.io.IOException;
-import java.util.logging.LogManager;
+import java.util.Base64;
 import java.util.logging.Logger;
 
-public class BearerInterceptor implements Interceptor {
+public class ClientIDInterceptor implements Interceptor {
 
-    private static final Logger logger = Logger.getLogger(BearerInterceptor.class.getName());
+    private static final Logger logger = Logger.getLogger(ClientIDInterceptor.class.getName());
     private String token;
 
-    public BearerInterceptor(String token){
+    public ClientIDInterceptor(String token){
         this.token = token;
     }
 

@@ -17,39 +17,13 @@
  */
 
 package apis.imgur;
+/*
+ *
+ * @author Mario Teklic
+ */
 
-import apis.utils.BlobConverterImpl;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+public interface ImgurConstants {
 
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class ImgurTest {
-
-    private Imgur imgur = new Imgur();
-
-    @Test
-    void getToken() {
-        Assertions.assertNull(imgur.getToken());
-    }
-
-    @Test
-    void postToSocialNetwork() throws IOException {
-
-    }
-
-    @Test
-    void subscribeToKeyword() {
-    }
-
-    @Test
-    void changeSubscriptionInterval() {
-    }
-
-    @Test
-    void getRecentMediaForKeyword() {
-    }
+    String UPLOAD_URL = "https://api.imgur.com/3/image";
+    String CLIENT_ID = "6d628f37c5f9729";
 }

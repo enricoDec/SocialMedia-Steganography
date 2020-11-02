@@ -31,10 +31,10 @@ public class App {
 
         //Upload on Imgur
 
-        /**
+        /*
 
          SocialMedia imgur = new Imgur();
-         imgur.setToken(new Token("56854d0e9b12d3f894145fb7abe5819e29de05a6", 123));
+         imgur.setToken(new Token("d1ee40fb83f13086ece3a6dd942f72e7ac42c16c", 123));
          //imgur.subscribeToKeyword("nature");
 
          byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
@@ -42,15 +42,13 @@ public class App {
 
          */
 
+
         //Upload on Reddit
 
-        /**
 
-
-         */
 
         SocialMedia reddit = new Reddit();
-        reddit.setToken(new Token("668533834712-8n-oexRjkmlqqmToL_7kn-F3k-bLZw", 12123));
+        reddit.setToken(new Token("668533834712-NmLEkvUiK2LzDITSUrnE32zdDDByZQ", 12123));
         byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
 
         reddit.postToSocialNetwork(byts, "test");

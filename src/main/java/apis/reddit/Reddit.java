@@ -85,34 +85,22 @@ public class Reddit implements SocialMedia {
 
             mBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    //.addFormDataPart("imagename", filename, RequestBody.create(byteToFile(media, filename), MediaType.parse("image/jpg")))
+                    .addFormDataPart("file", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.jpg"), MediaType.parse("image/*")))
                     .addFormDataPart("title", "test:title")
-                    .addFormDataPart("kind", "link")
-                    .addFormDataPart("url", "https://www.reddit.com/dev/api/#POST_api_submit")
-                    .addFormDataPart("nsfw", "false")
+                    .addFormDataPart("kind", "image")
                     .addFormDataPart("text", "Nothing special here.")
                     .addFormDataPart("sr", hashtag)
                     .addFormDataPart("resubmit", "true")
                     .addFormDataPart("send_replies", "true")
                     .addFormDataPart("api_type", "json")
+                    .addFormDataPart("url", "https://www.google.de/")
                     .build();
-
-            /*
-            mBody = new FormBody.Builder()
-                    .add("title", "test:title")
-                    .add("kind", "self")
-                    .add("text", "test:text")
-                    .add("sr", hashtag)
-                    .add("resubmit", "true")
-                    .add("send_replies", "true")
-                    .add("api_type", "json")
-                    .build();
-*/
 
 
             //https://oauth.reddit.com//https://oauth.reddit.com//https://oauth.reddit.com
             Request request = new Request.Builder()
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .headers(Headers.of("Authorization", ("Bearer " + this.token.getToken())))
                     .url(RedditConstants.OAUTH_BASE +
                             RedditConstants.UPLOAD_PATH)
                     .post(mBody)
