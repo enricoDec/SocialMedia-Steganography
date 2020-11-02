@@ -22,6 +22,7 @@ import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.reddit.models.RedditGetResponse;
 
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -42,17 +43,6 @@ public class BaseUtil {
     public MyDate getTimestamp(String info){
         double msDouble = Double.parseDouble(info);
         return new MyDate(new Date((long)msDouble*1000));
-    }
-
-    public MyDate getTimestamp(RedditGetResponse.ResponseChildData data, boolean inUTC){
-        String info;
-        if(inUTC){
-            info = data.getData().getCreated_utc();
-        }else{
-            info = data.getData().getCreated();
-        }
-
-        return this.getTimestamp(info);
     }
 
     public boolean hasErrorCode(int responseCode) {

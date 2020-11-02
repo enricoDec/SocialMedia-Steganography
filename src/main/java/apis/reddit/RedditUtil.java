@@ -19,13 +19,23 @@
 package apis.reddit;
 
 import apis.MediaType;
+import apis.models.MyDate;
 import apis.models.PostEntry;
+import apis.reddit.models.RedditAboutResponse;
 import apis.reddit.models.RedditGetResponse;
 import apis.utils.BaseUtil;
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class RedditUtil extends BaseUtil {
 
@@ -35,6 +45,17 @@ public class RedditUtil extends BaseUtil {
         return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
     }
 
+    public MyDate getTimestamp(RedditGetResponse.ResponseChildData data, boolean inUTC){
+        String info;
+        if(inUTC){
+            info = data.getData().getCreated_utc();
+        }else{
+            info = data.getData().getCreated();
+        }
+
+        return this.getTimestamp(info);
+    }
+
     /**
      * Returns a list of Postentries (downloadlinks and timestamps) from a json-String
      * @param responseString JSON String (Reddit response)
@@ -42,12 +63,18 @@ public class RedditUtil extends BaseUtil {
      */
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
-        RedditGetResponse responseArray = new Gson().fromJson(responseString, RedditGetResponse.class);
 
+
+        try{
+            RedditGetResponse responseArray = new Gson().fromJson(responseString, RedditGetResponse.class);
         for(RedditGetResponse.ResponseChildData child : responseArray.getData().getChildren()){
             if(child != null && !this.hasNullObjects(child)){
                 postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false)));
             }
+        }
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
         this.sortPostEntries(postEntries);
         return postEntries;
@@ -59,6 +86,39 @@ public class RedditUtil extends BaseUtil {
             this.getUrl(responseChildData);
         }catch (Exception e){
             return true;
+        }
+        return false;
+    }
+
+    public boolean isImageUploadAllowed(String subreddit){
+        try {
+            URL url = new URL(RedditConstants.BASE +
+                    RedditConstants.SUBREDDIT_PREFIX + subreddit +
+                    "/about" + RedditConstants.AS_JSON);
+
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod(RedditConstants.GET);
+            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
+            con.setDoOutput(true);
+
+            String responseString = "";
+
+            if (!this.hasErrorCode(con.getResponseCode())) {
+                responseString = new BufferedReader(new InputStreamReader(con.getInputStream())).lines().collect(Collectors.joining());
+                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
+            } else {
+                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
+                return false;
+            }
+
+            RedditAboutResponse redditAboutResponse = new Gson().fromJson(responseString, RedditAboutResponse.class);
+            return redditAboutResponse.getData().isAllow_images();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }

@@ -20,6 +20,8 @@ package apis.utils;
 
 import apis.models.MyDate;
 import apis.models.PostEntry;
+import apis.reddit.Reddit;
+import apis.reddit.RedditUtil;
 import apis.reddit.models.RedditGetResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -136,7 +138,7 @@ class BaseUtilTest {
         cData.setCreated_utc(dateValue);
         data.setData(cData);
 
-        MyDate myDate = baseUtil.getTimestamp(data, true);
+        MyDate myDate = new RedditUtil().getTimestamp(data, true);
 
         Assertions.assertEquals(2020, myDate.getYear());
         Assertions.assertEquals(10, myDate.getMonth());

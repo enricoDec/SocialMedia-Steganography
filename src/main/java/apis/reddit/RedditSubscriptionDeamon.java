@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -52,9 +53,6 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
      * @param subscriptionKeyword The keyword
      */
     public RedditSubscriptionDeamon(String subscriptionKeyword) {
-        SimpleFormatter fmt = new SimpleFormatter();
-        StreamHandler sh = new StreamHandler(System.out, fmt);
-        logger.addHandler(sh);
         this.subscriptionKeyword = subscriptionKeyword;
         this.redditUtil = new RedditUtil();
     }
@@ -108,9 +106,9 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
             URL url = new URL(
                     RedditConstants.BASE +
                             RedditConstants.SUBREDDIT_PREFIX + this.subscriptionKeyword +
-                            RedditConstants.AS_JSON + "?" +
-                            RedditConstants.KEY_SORT +
-                            RedditConstants.VAL_DATE);
+                            "/new/" +
+                            RedditConstants.AS_JSON +
+                            "?count=20");
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod(RedditConstants.GET);
@@ -129,7 +127,6 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
             logger.info(String.valueOf(con.getURL()));
 
-            System.out.println(responseString);
             List<PostEntry> postEntries = this.redditUtil.getPosts(responseString);
             this.setLatestPostEntries(postEntries);
             this.setLatestPostTimestamp(this.redditUtil.getLatestTimestamp(postEntries));
@@ -139,13 +136,16 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
                 byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
             }
 
+            logger.info((byteList.size() + 1) + " postentries found.\nLatest entry: "
+                    + postEntries.get(postEntries.size()-1).getUrl() + " " + postEntries.get(postEntries.size()-1).getDate().toString());
+
             return byteList;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        logger.info("Error: Could not get reccent media (reddit).");
         return null;
     }
 

@@ -37,8 +37,16 @@ public class RedditGetResponse {
         return kind;
     }
 
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
     public ResponseData getData() {
         return data;
+    }
+
+    public void setData(ResponseData data) {
+        this.data = data;
     }
 
     public static class ResponseData {
@@ -51,17 +59,32 @@ public class RedditGetResponse {
             return modhash;
         }
 
+        public void setModhash(String modhash) {
+            this.modhash = modhash;
+        }
 
         public List<ResponseChildData> getChildren() {
             return children;
+        }
+
+        public void setChildren(List<ResponseChildData> children) {
+            this.children = children;
         }
 
         public String getAfter() {
             return after;
         }
 
+        public void setAfter(String after) {
+            this.after = after;
+        }
+
         public String getBefore() {
             return before;
+        }
+
+        public void setBefore(String before) {
+            this.before = before;
         }
     }
 
@@ -71,6 +94,10 @@ public class RedditGetResponse {
 
         public String getKind() {
             return kind;
+        }
+
+        public void setKind(String kind) {
+            this.kind = kind;
         }
 
         public ChildData getData() {
@@ -84,41 +111,13 @@ public class RedditGetResponse {
 
     public static class ChildData {
         private String url_overridden_by_dest;
-        private PreviewData preview;
-        private String domain;
-        private String banned_by;
-        private Object media_embed;
-        private String subreddit;
-        private String selftext_html;
-        private String selftext;
-        private String likes;
-        private String link_flair_text;
-        private String id;
-        private boolean clicked;
         private String title;
-        private int num_comments;
-        private int score;
-        private String approved_by;
-        private boolean over_18;
-        private boolean hidden;
-        private String thumbnail;
         private String subreddit_id;
-        private boolean edited;
-        private boolean link_flair_css_class;
-        private boolean author_flair_css_class;
-        private int downs;
-        private boolean saved;
-        private boolean is_self;
-        private String permalink;
         private String name;
         private String created;
         private String url;
-        private String author_flair_text;
-        private String author;
         private String created_utc;
-        private String media;
-        private String num_reports;
-        private int ups;
+        private PreviewData preview;
 
         public String getUrl_overridden_by_dest() {
             return url_overridden_by_dest;
@@ -128,127 +127,44 @@ public class RedditGetResponse {
             this.url_overridden_by_dest = url_overridden_by_dest;
         }
 
-        public PreviewData getPreview() {
-            return preview;
-        }
-
-        public String getDomain() {
-            return domain;
-        }
-
-        public String getBanned_by() {
-            return banned_by;
-        }
-
-        public Object getMedia_embed() {
-            return media_embed;
-        }
-
-        public String getSubreddit() {
-            return subreddit;
-        }
-
-        public String getSelftext_html() {
-            return selftext_html;
-        }
-        public String getSelftext() {
-            return selftext;
-        }
-
-        public String getLikes() {
-            return likes;
-        }
-
-        public String getLink_flair_text() {
-            return link_flair_text;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public boolean isClicked() {
-            return clicked;
-        }
-
         public String getTitle() {
             return title;
         }
 
-        public int getNum_comments() {
-            return num_comments;
-        }
-
-        public int getScore() {
-            return score;
-        }
-
-        public String getApproved_by() {
-            return approved_by;
-        }
-
-        public boolean isOver_18() {
-            return over_18;
-        }
-
-        public boolean isHidden() {
-            return hidden;
-        }
-
-        public String getThumbnail() {
-            return thumbnail;
+        public void setTitle(String title) {
+            this.title = title;
         }
 
         public String getSubreddit_id() {
             return subreddit_id;
         }
 
-        public boolean isEdited() {
-            return edited;
-        }
-
-        public boolean isLink_flair_css_class() {
-            return link_flair_css_class;
-        }
-
-        public boolean isAuthor_flair_css_class() {
-            return author_flair_css_class;
-        }
-
-        public int getDowns() {
-            return downs;
-        }
-
-        public boolean isSaved() {
-            return saved;
-        }
-
-        public boolean isIs_self() {
-            return is_self;
-        }
-
-        public String getPermalink() {
-            return permalink;
+        public void setSubreddit_id(String subreddit_id) {
+            this.subreddit_id = subreddit_id;
         }
 
         public String getName() {
             return name;
         }
 
+        public void setName(String name) {
+            this.name = name;
+        }
+
         public String getCreated() {
             return created;
+        }
+
+        public void setCreated(String created) {
+            this.created = created;
         }
 
         public String getUrl() {
             return url;
         }
 
-        public String getAuthor_flair_text() {
-            return author_flair_text;
-        }
-
-        public String getAuthor() {
-            return author;
+        public void setUrl(String url) {
+            this.url = url;
         }
 
         public String getCreated_utc() {
@@ -259,16 +175,12 @@ public class RedditGetResponse {
             this.created_utc = created_utc;
         }
 
-        public String getMedia() {
-            return media;
+        public PreviewData getPreview() {
+            return preview;
         }
 
-        public String getNum_reports() {
-            return num_reports;
-        }
-
-        public int getUps() {
-            return ups;
+        public void setPreview(PreviewData preview) {
+            this.preview = preview;
         }
     }
 
@@ -282,6 +194,10 @@ public class RedditGetResponse {
         public ImageData getImages() {
             return images.get(0);
         }
+
+        public void setImages(List<ImageData> images) {
+            this.images = images;
+        }
     }
 
     public static class ImageData{
@@ -290,6 +206,10 @@ public class RedditGetResponse {
         public SourceData getSource() {
             return source;
         }
+
+        public void setSource(SourceData source) {
+            this.source = source;
+        }
     }
 
     public static class SourceData{
@@ -297,6 +217,10 @@ public class RedditGetResponse {
 
         public String getUrl() {
             return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
         }
     }
 }

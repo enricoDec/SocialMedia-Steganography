@@ -21,10 +21,18 @@ package apis.reddit;
 import apis.SocialMedia;
 import apis.Token;
 import apis.imgur.Imgur;
+import apis.reddit.models.RedditAboutResponse;
 import apis.reddit.models.RedditPostResponse;
 import com.google.gson.Gson;
 import okhttp3.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -33,12 +41,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
+import java.util.stream.Collectors;
 
 public class Reddit implements SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
-
-    List<RedditPostResponse> uploadedFiles;
+    private RedditUtil redditUtil;
+    private List<RedditPostResponse> uploadedFiles;
     private RedditSubscriptionDeamon redditSubscriptionDeamon;
     private Token token;
     private List<MediaType> supportedMedia;
@@ -48,9 +57,7 @@ public class Reddit implements SocialMedia {
     private Integer interval;
 
     public Reddit() {
-        SimpleFormatter fmt = new SimpleFormatter();
-        StreamHandler sh = new StreamHandler(System.out, fmt);
-        logger.addHandler(sh);
+        this.redditUtil = new RedditUtil();
         this.uploadedFiles = new ArrayList<>();
         this.loadSupportedMedias();
     }
@@ -64,10 +71,13 @@ public class Reddit implements SocialMedia {
         if (this.token == null) {
             logger.info("User not logged in.");
             return false;
+        }else if(!this.redditUtil.isImageUploadAllowed(hashtag)){
+            logger.info("Subreddit '" + hashtag + "' does not allow to upload images.");
+            return false;
         }
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new BearerInterceptor(this.getToken().getToken())).build();
+                .addInterceptor(new BearerInterceptor()).build();
 
         RequestBody mBody = null;
 
@@ -97,11 +107,12 @@ public class Reddit implements SocialMedia {
 
             Response response = client.newCall(request).execute();
             String responseString = response.body().string();
-            logger.info("Response String: " + responseString);
             int respCode = response.code();
+            logger.info("Response code: " + respCode);
             if(199 < respCode && respCode < 399){
-                Gson gson = new Gson();
-                this.uploadedFiles.add(gson.fromJson(responseString, RedditPostResponse.class));
+                RedditPostResponse rpr = new Gson().fromJson(responseString, RedditPostResponse.class);
+                logger.info("Uploaded: " + rpr.getJson().getData().getUrl());
+                this.uploadedFiles.add(rpr);
                 return true;
             }
         } catch (Exception e) {
@@ -118,7 +129,7 @@ public class Reddit implements SocialMedia {
         this.redditSubscriptionDeamon = new RedditSubscriptionDeamon(keyword);
 
         if (this.interval == null || this.timeUnit == null) {
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 30, TimeUnit.MINUTES);
         } else {
             executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, this.interval, this.timeUnit);
         }
@@ -126,6 +137,7 @@ public class Reddit implements SocialMedia {
         return true;
     }
 
+    @Override
     public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval) {
         this.timeUnit = timeUnit;
         this.interval = interval;
@@ -133,12 +145,7 @@ public class Reddit implements SocialMedia {
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        if (this.redditSubscriptionDeamon == null) {
-            logger.info("Subscription Deamon is not running.");
-            return null;
-        }
-        //Should not be calleable... should be only callable for the threaded deamon
-        return this.redditSubscriptionDeamon.getRecentMediaForKeyword(keyword);
+        return new RedditSubscriptionDeamon(keyword).getRecentMedia();
     }
 
     public boolean supportsMediaType(MediaType mediaType) {

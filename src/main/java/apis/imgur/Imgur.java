@@ -66,7 +66,7 @@ public class Imgur implements SocialMedia {
     public boolean postToSocialNetwork(byte[] media, String keyword) {
         System.out.println(this.getToken() == null);
         System.out.println(this.getToken().getToken() == null);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor(this.getToken().getToken())).build();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor()).build();
 
         String filename = "tmp_" + System.currentTimeMillis() + ".jpg";
         RequestBody body = null;

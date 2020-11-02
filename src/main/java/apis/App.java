@@ -19,15 +19,13 @@
 package apis;
 
 
-import apis.imgur.Imgur;
 import apis.reddit.Reddit;
-import apis.utils.BlobConverterImpl;
 
 import java.io.IOException;
 import java.util.List;
 
 public class App {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         //Upload on Imgur
 
@@ -44,8 +42,7 @@ public class App {
 
 
         //Upload on Reddit
-
-
+        /*
 
         SocialMedia reddit = new Reddit();
         reddit.setToken(new Token("668533834712-NmLEkvUiK2LzDITSUrnE32zdDDByZQ", 12123));
@@ -53,6 +50,15 @@ public class App {
 
         reddit.postToSocialNetwork(byts, "test");
 
+         */
 
+        SocialMedia reddit = new Reddit();
+        //reddit.changeSubscriptionInterval(TimeUnit.SECONDS, 10);
+        //reddit.subscribeToKeyword("nature");
+        List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
+        byte[] tmpImage = resultList.get(resultList.size()-1);
+
+        reddit.setToken(new Token("668533834712-X4pJXG9FiecZVk7xcmY1D3CrSE7axQ", 123124));
+        reddit.postToSocialNetwork(tmpImage, "test");
     }
 }

@@ -19,6 +19,7 @@
 package apis;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public interface SocialMedia {
 
@@ -47,4 +48,6 @@ public interface SocialMedia {
      * @return true if successful
      */
     List<byte[]> getRecentMediaForKeyword(String keyword);
+
+    void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval);
 }

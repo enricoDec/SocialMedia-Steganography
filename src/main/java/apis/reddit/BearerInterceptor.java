@@ -31,10 +31,8 @@ import java.util.logging.Logger;
 public class BearerInterceptor implements Interceptor {
 
     private static final Logger logger = Logger.getLogger(BearerInterceptor.class.getName());
-    private String token;
 
-    public BearerInterceptor(String token){
-        this.token = token;
+    public BearerInterceptor(){
     }
 
     @Override
@@ -44,14 +42,15 @@ public class BearerInterceptor implements Interceptor {
                 .addHeader("User-Agent", RedditConstants.APP_NAME + " by User")
                 .build();
 
-        logger.info("Sending post to " + tokenedRequest.url() + " with headers: " + tokenedRequest.headers());
-        logger.info("Method: " + request.method());
+        //Uncomment to debug - dont delete comments.
+        //logger.info("Sending post to " + tokenedRequest.url() + " with headers: " + tokenedRequest.headers());
+        //logger.info("Method: " + request.method());
         Buffer buffer = new Buffer();
         tokenedRequest.body().writeTo(buffer);
-        logger.info("Body: " + buffer.readUtf8());
+        //logger.info("Body: " + buffer.readUtf8());
 
         Response response = chain.proceed(request);
-        logger.info("Received response for " + response.request().url() + "\nHeaders: " + response.headers());
+        //logger.info("Received response for " + response.request().url() + "\nHeaders: " + response.headers());
 
         return response;
     }
