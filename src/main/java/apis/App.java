@@ -19,46 +19,49 @@
 package apis;
 
 
+import apis.imgur.Imgur;
 import apis.reddit.Reddit;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class App {
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        //Upload on Imgur
+
 
         /*
+        //Upload on Imgur
 
          SocialMedia imgur = new Imgur();
          imgur.setToken(new Token("d1ee40fb83f13086ece3a6dd942f72e7ac42c16c", 123));
-         //imgur.subscribeToKeyword("nature");
-
          byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
          imgur.postToSocialNetwork(byts, "testword");
 
          */
 
 
-        //Upload on Reddit
         /*
+        //Upload on Reddit
 
         SocialMedia reddit = new Reddit();
-        reddit.setToken(new Token("668533834712-NmLEkvUiK2LzDITSUrnE32zdDDByZQ", 12123));
-        byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
-
-        reddit.postToSocialNetwork(byts, "test");
+        List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
+        byte[] tmpImage = resultList.get(resultList.size()-1);
+        reddit.setToken(new Token("668533834712-X4pJXG9FiecZVk7xcmY1D3CrSE7axQ", 123124));
+        reddit.postToSocialNetwork(tmpImage, "test");
 
          */
 
-        SocialMedia reddit = new Reddit();
-        //reddit.changeSubscriptionInterval(TimeUnit.SECONDS, 10);
-        //reddit.subscribeToKeyword("nature");
-        List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
-        byte[] tmpImage = resultList.get(resultList.size()-1);
+        /**
+         //Subscribe Imgur & Reddit
 
-        reddit.setToken(new Token("668533834712-X4pJXG9FiecZVk7xcmY1D3CrSE7axQ", 123124));
-        reddit.postToSocialNetwork(tmpImage, "test");
+        SocialMedia imgur = new Imgur();
+        imgur.changeSubscriptionInterval(TimeUnit.MINUTES, 5);
+        imgur.subscribeToKeyword("test");
+
+        SocialMedia reddit = new Reddit();
+        reddit.subscribeToKeyword("nature");
+        */
     }
 }

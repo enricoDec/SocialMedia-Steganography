@@ -96,6 +96,9 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
                 byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
             }
 
+            logger.info((byteList.size() + 1) + " postentries found.\nLatest entry: "
+                    + postEntries.get(postEntries.size()-1).getUrl() + " " + postEntries.get(postEntries.size()-1).getDate().toString());
+
             return byteList;
         } catch (MalformedURLException e) {
             e.printStackTrace();
