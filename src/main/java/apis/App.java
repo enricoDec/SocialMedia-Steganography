@@ -21,6 +21,7 @@ package apis;
 
 import apis.imgur.Imgur;
 import apis.reddit.Reddit;
+import apis.utils.BlobConverterImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,23 +36,22 @@ public class App {
         //Upload on Imgur
 
          SocialMedia imgur = new Imgur();
-         imgur.setToken(new Token("d1ee40fb83f13086ece3a6dd942f72e7ac42c16c", 123));
+         imgur.setToken(new Token("0d5ce353c61cbb597df3497669e7c4e85f072e2a", 123));
          byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
          imgur.postToSocialNetwork(byts, "testword");
+        */
 
-         */
-
-
+        
         /*
         //Upload on Reddit
 
         SocialMedia reddit = new Reddit();
         List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
         byte[] tmpImage = resultList.get(resultList.size()-1);
-        reddit.setToken(new Token("668533834712-X4pJXG9FiecZVk7xcmY1D3CrSE7axQ", 123124));
+        reddit.setToken(new Token("668533834712-LUw9kEH1saPGx5UwQBdZuE-hfrJKTg", 123124));
         reddit.postToSocialNetwork(tmpImage, "test");
+        */
 
-         */
 
         /**
          //Subscribe Imgur & Reddit
