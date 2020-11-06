@@ -68,12 +68,12 @@ public class Imgur implements SocialMedia {
         System.out.println(this.getToken().getToken() == null);
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor()).build();
 
-        String filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+        String filename = "tmp_" + System.currentTimeMillis() + ".png";
         RequestBody body = null;
         try {
             body = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("image", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.jpg"), MediaType.parse("image/*")))
+                    .addFormDataPart("image", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.png"), MediaType.parse("image/*")))
                     .addFormDataPart("title", keyword)
                     .addFormDataPart("description", "Hello World!")
                     .build();
@@ -85,6 +85,7 @@ public class Imgur implements SocialMedia {
                     .build();
 
             Response response = client.newCall(request).execute();
+
             Gson gson = new Gson();
             ImgurPostResponse ipr = gson.fromJson(response.body().string(), ImgurPostResponse.class);
             this.uploadedFiles.add(ipr);
@@ -106,12 +107,12 @@ public class Imgur implements SocialMedia {
     public static ImgurPostResponse uploadPicture(byte[] media, String keyword) {
         OkHttpClient client = new OkHttpClient.Builder().build();
 
-        String filename = "tmp_" + System.currentTimeMillis() + ".jpg";
+        String filename = "tmp_" + System.currentTimeMillis() + ".png";
         RequestBody body = null;
         try {
             body = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("image", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.jpg"), MediaType.parse("image/*")))
+                    .addFormDataPart("image", filename, RequestBody.create(BlobConverterImpl.byteToFile(media, "tmp.png"), MediaType.parse("image/*")))
                     .addFormDataPart("title", keyword)
                     .addFormDataPart("description", "Hello World!")
                     .build();

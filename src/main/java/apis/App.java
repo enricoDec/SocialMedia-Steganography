@@ -24,27 +24,25 @@ import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class App {
     public static void main(String[] args) throws IOException, InterruptedException {
-
-
 
         /*
         //Upload on Imgur
 
          SocialMedia imgur = new Imgur();
          imgur.setToken(new Token("0d5ce353c61cbb597df3497669e7c4e85f072e2a", 123));
-         byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/PRBdEij.jpeg");
+         byte[] byts = BlobConverterImpl.downloadToByte("https://www.webdesign-aus-braunschweig.de/images/bilder-bearbeiten/png_877x877px_quality-2.png");
          imgur.postToSocialNetwork(byts, "testword");
+
         */
-
         
-        /*
-        //Upload on Reddit
 
+        //Upload on Reddit
+        /*
         SocialMedia reddit = new Reddit();
         List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
         byte[] tmpImage = resultList.get(resultList.size()-1);
