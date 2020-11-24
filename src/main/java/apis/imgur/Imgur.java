@@ -21,7 +21,7 @@ package apis.imgur;
 import apis.SocialMedia;
 import apis.Token;
 import apis.imgur.models.ImgurPostResponse;
-import apis.reddit.BearerInterceptor;
+import apis.interceptors.BearerInterceptor;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;

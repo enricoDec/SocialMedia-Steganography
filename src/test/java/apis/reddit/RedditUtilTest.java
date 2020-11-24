@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.utils;
+package apis.reddit;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,25 +27,21 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mario Teklic
  */
 
-class BaseUtilTest {
-
-    @Test
-    void sortPostEntries() {
-    }
-
-    @Test
-    void getLatestTimestamp() {
-    }
+class RedditUtilTest {
 
     @Test
     void getTimestamp() {
     }
 
     @Test
-    void hasErrorCode() {
+    void getPosts() {
     }
 
     @Test
-    void encodeUrl() {
+    void hasNullObjects() {
+    }
+
+    @Test
+    void isImageUploadAllowed() {
     }
 }

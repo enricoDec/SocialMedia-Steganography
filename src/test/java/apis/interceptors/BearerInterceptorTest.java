@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.utils;
+package apis.interceptors;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,25 +27,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mario Teklic
  */
 
-class BaseUtilTest {
+class BearerInterceptorTest {
 
     @Test
-    void sortPostEntries() {
-    }
-
-    @Test
-    void getLatestTimestamp() {
-    }
-
-    @Test
-    void getTimestamp() {
-    }
-
-    @Test
-    void hasErrorCode() {
-    }
-
-    @Test
-    void encodeUrl() {
+    void intercept() {
     }
 }

@@ -16,16 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.reddit;
+package apis.interceptors;
 
-import okhttp3.Headers;
+import apis.reddit.RedditConstants;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 import okio.Buffer;
 
 import java.io.IOException;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class BearerInterceptor implements Interceptor {

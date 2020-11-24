@@ -18,27 +18,27 @@
 
 package apis.imgur;
 
-import apis.utils.BlobConverterImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+ *
+ * @author Mario Teklic
+ */
+
 class ImgurTest {
 
-    private Imgur imgur = new Imgur();
-
     @Test
-    void getToken() {
-        Assertions.assertNull(imgur.getToken());
+    void setToken() {
     }
 
     @Test
-    void postToSocialNetwork() throws IOException {
+    void postToSocialNetwork() {
+    }
 
+    @Test
+    void uploadPicture() {
     }
 
     @Test

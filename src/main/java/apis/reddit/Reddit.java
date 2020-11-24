@@ -21,27 +21,17 @@ package apis.reddit;
 import apis.SocialMedia;
 import apis.Token;
 import apis.imgur.Imgur;
-import apis.reddit.models.RedditAboutResponse;
+import apis.interceptors.BearerInterceptor;
 import apis.reddit.models.RedditPostResponse;
 import com.google.gson.Gson;
 import okhttp3.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
-import java.util.stream.Collectors;
 
 public class Reddit implements SocialMedia {
 

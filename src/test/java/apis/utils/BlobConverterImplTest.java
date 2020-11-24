@@ -27,25 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mario Teklic
  */
 
-class BaseUtilTest {
+class BlobConverterImplTest {
 
     @Test
-    void sortPostEntries() {
+    void downloadToByte() {
     }
 
     @Test
-    void getLatestTimestamp() {
-    }
-
-    @Test
-    void getTimestamp() {
-    }
-
-    @Test
-    void hasErrorCode() {
-    }
-
-    @Test
-    void encodeUrl() {
+    void byteToFile() {
     }
 }

@@ -30,26 +30,26 @@ import java.util.List;
 public class App {
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        /*
+
         //Upload on Imgur
 
          SocialMedia imgur = new Imgur();
          imgur.setToken(new Token("0d5ce353c61cbb597df3497669e7c4e85f072e2a", 123));
-         byte[] byts = BlobConverterImpl.downloadToByte("https://www.webdesign-aus-braunschweig.de/images/bilder-bearbeiten/png_877x877px_quality-2.png");
+         byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/SJZyZQ1.png");
          imgur.postToSocialNetwork(byts, "testword");
 
-        */
-        
 
+        
+/*
         //Upload on Reddit
-        /*
+
         SocialMedia reddit = new Reddit();
         List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
         byte[] tmpImage = resultList.get(resultList.size()-1);
-        reddit.setToken(new Token("668533834712-LUw9kEH1saPGx5UwQBdZuE-hfrJKTg", 123124));
+        reddit.setToken(new Token("668533834712-q_itL79dEvxBQgWCRsktUkpTBScVQw", 123124));
         reddit.postToSocialNetwork(tmpImage, "test");
-        */
 
+*/
 
         /**
          //Subscribe Imgur & Reddit
