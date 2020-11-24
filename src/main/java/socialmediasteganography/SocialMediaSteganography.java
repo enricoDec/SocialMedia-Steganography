@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import apis.SocialMedia;
+package socialmediasteganography;import apis.SocialMedia;
 
 import java.util.List;
 

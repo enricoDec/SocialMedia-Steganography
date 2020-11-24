@@ -51,9 +51,6 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
     private boolean newPostAvailable;
 
     public ImgurSubscriptionDeamon(String subscriptionKeyword){
-        SimpleFormatter fmt = new SimpleFormatter();
-        StreamHandler sh = new StreamHandler(System.out, fmt);
-        logger.addHandler(sh);
         this.subscriptionKeyword = subscriptionKeyword;
         this.imgurUtil = new ImgurUtil();
     }

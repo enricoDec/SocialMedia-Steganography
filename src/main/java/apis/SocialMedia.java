@@ -36,9 +36,9 @@ public abstract class SocialMedia {
         }
     }
 
-    abstract Token<?> getToken();
+    public abstract Token getToken();
 
-    abstract void setToken(Token<?> token);
+    public abstract void setToken(Token token);
 
     /**
      * Post media on this Social Media under the keyword
@@ -46,19 +46,19 @@ public abstract class SocialMedia {
      * @param keyword keyword to search this post by
      * @return true if successful
      */
-    abstract boolean postToSocialNetwork(byte[] media, String keyword);
+    public abstract boolean postToSocialNetwork(byte[] media, String keyword);
 
     /**
      * Subscribe to a keyword (Hashtag / Title / ...)
      * @param keyword keyword to subscribe to
      * @return true if successful
      */
-     abstract boolean subscribeToKeyword(String keyword);
+    public abstract boolean subscribeToKeyword(String keyword);
 
     /**
      * Get Medias posted under keyword
      * @param keyword hashtag
      * @return true if successful
      */
-    abstract List<byte[]> getRecentMediaForKeyword(String keyword);
+    public abstract List<byte[]> getRecentMediaForKeyword(String keyword);
 }

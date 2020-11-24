@@ -34,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class Imgur implements SocialMedia {
+public class Imgur extends SocialMedia {
 
     private final static Logger logger = Logger.getLogger(Imgur.class.getName());
     private ImgurSubscriptionDeamon imgurSubscriptionDeamon;
@@ -45,6 +45,7 @@ public class Imgur implements SocialMedia {
 
     public Imgur() {
         this.uploadedFiles = new ArrayList<>();
+        imgurSubscriptionDeamon = new ImgurSubscriptionDeamon("");
     }
 
     /**

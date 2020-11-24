@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class Reddit implements SocialMedia {
+public class Reddit extends SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
     private RedditUtil redditUtil;
@@ -127,7 +127,6 @@ public class Reddit implements SocialMedia {
         return true;
     }
 
-    @Override
     public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval) {
         this.timeUnit = timeUnit;
         this.interval = interval;
