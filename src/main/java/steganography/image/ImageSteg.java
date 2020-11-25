@@ -28,10 +28,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Iterator;
 
 public class ImageSteg implements Steganography {
@@ -48,7 +45,7 @@ public class ImageSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
-        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
+        BufferedImageCoordinateOverlay overlay = new RemoveTransparentShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
         encoder.encode(int2bytes(HEADER_SIGNATURE));
         encoder.encode(int2bytes(payload.length));
@@ -66,7 +63,7 @@ public class ImageSteg implements Steganography {
     public byte[] decode(byte[] steganographicData, long seed) throws IOException {
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
 
-        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
+        BufferedImageCoordinateOverlay overlay = new RemoveTransparentShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
 
         // decode 4 bytes and compare them to header signature
@@ -91,32 +88,61 @@ public class ImageSteg implements Steganography {
         return bytesToInt(encoder.decode(4)) == HEADER_SIGNATURE;
     }
 
+    /**
+     * Returns the maximum number of bytes that can be encoded in the given image.
+     * @param image image to potentially encode bytes in
+     * @param withTransparent should transparent pixels account to the capacity
+     * @return the payload-capacity of image
+     */
+    public int getImageCapacity(byte[] image, boolean withTransparent) throws IOException {
+        BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
+        int capacity;
+        if (!withTransparent) {
+            capacity = bufferedImage.getWidth() * bufferedImage.getHeight();
+        } else {
+            capacity = countIntransparent(bufferedImage);
+        }
+        return capacity / 8;
+    }
+
+    private int countIntransparent(BufferedImage bufferedImage) {
+        int count = 0;
+        for(int y = 0; y < bufferedImage.getHeight(); y++) {
+            for (int x = 0; x < bufferedImage.getWidth(); x++) {
+                int pixel = bufferedImage.getRGB(x, y);
+                if(((pixel >> 24) & 0xff) != 0)
+                    count++;
+            }
+        }
+        return count;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     //                                       UTIL
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     private BuffImgAndFormat carrier2BufferedImage(byte[] carrier) throws IOException {
-        ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier));
+        BuffImgAndFormat buffImgAndFormat;
 
-        Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+        try(ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
 
-        BuffImgAndFormat buffImgAndFormat = null;
+            if (readers.hasNext()) {
+                ImageReader reader = readers.next();
 
-        if (readers.hasNext()) {
-            ImageReader reader = readers.next();
+                try {
+                    reader.setInput(imageInputStream);
 
-            try {
-                reader.setInput(imageInputStream);
+                    buffImgAndFormat = new BuffImgAndFormat(reader.read(0), reader.getFormatName());
 
-                buffImgAndFormat = new BuffImgAndFormat(reader.read(0), reader.getFormatName());
-
-            } finally {
-                reader.dispose();
+                } finally {
+                    reader.dispose();
+                }
+            } else {
+                // TODO: Specialized Exception
+                throw new UnsupportedEncodingException("No image could be read from input.");
             }
-        } else {
-            // TODO: Specialized Exception
-            throw new UnsupportedEncodingException("No image could be read from input.");
         }
 
         return buffImgAndFormat;
