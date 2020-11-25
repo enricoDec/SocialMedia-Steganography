@@ -24,11 +24,9 @@ import steganography.Steganography;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -55,6 +53,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
 
             return socialMedia.postToSocialNetwork(bytes, "test");
         }catch (Exception e){
+            e.printStackTrace();
             return false;
         }
     }
@@ -65,13 +64,24 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
         List<byte[]> decodedResultsInBytes = new ArrayList<>();
 
         try {
+            byte[] possImg = resultsInBytes.get(4);
+            BufferedImage bImg = ImageIO.read(new ByteArrayInputStream(possImg));
+            byte[] bDecoded;
+            if (bImg != null)
+                bDecoded = steganography.decode(possImg);
+            else
+                System.out.println("No Image");
+            /*
             for(byte[] b : resultsInBytes){
+
+                /*
                 byte[] bDecoded = steganography.decode(b);
                 if(bDecoded.length > 0)
                     decodedResultsInBytes.add(bDecoded);
                 logger.info("Decoded successfully.");
-            }
-        } catch (IOException e) {
+
+              */
+    } catch (IOException e) {
             e.printStackTrace();
             logger.info("Decoding failed.");
         }
