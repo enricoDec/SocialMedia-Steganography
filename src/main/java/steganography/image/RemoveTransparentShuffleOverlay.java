@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by Henk-Joas Lubig
+ * Contributed by NAME HERE
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,11 @@ package steganography.image;
 import steganography.util.BufferedImageCoordinateOverlay;
 
 import java.awt.image.BufferedImage;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ShuffleOverlay implements BufferedImageCoordinateOverlay {
+public class RemoveTransparentShuffleOverlay implements BufferedImageCoordinateOverlay {
 
     private BufferedImage bufferedImage;
     private List<Integer> pixelOrder;
@@ -34,17 +33,30 @@ public class ShuffleOverlay implements BufferedImageCoordinateOverlay {
     private int currentX = 0;
     private int currentY = 0;
 
-    public ShuffleOverlay(BufferedImage bufferedImage, long seed) {
+    public RemoveTransparentShuffleOverlay(BufferedImage bufferedImage, long seed) {
         this.bufferedImage = bufferedImage;
         createOverlay();
+        removeTransparent();
         Collections.shuffle(this.pixelOrder, new Random(seed));
     }
 
+    private void removeTransparent() {
+
+    }
+
     private void createOverlay() {
-        this.pixelOrder =
-                IntStream.range(0, bufferedImage.getHeight() * bufferedImage.getWidth())
-                        .boxed()
-                        .collect(Collectors.toList());
+        this.pixelOrder = new ArrayList<>();
+        for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
+            for (int x = 0; x < this.bufferedImage.getWidth(); x++) {
+                int pixel = this.bufferedImage.getRGB(x, y);
+                if(((pixel >> 24) & 0xff) != 0)
+                    this.pixelOrder.add(x + (y * this.bufferedImage.getWidth()));
+            }
+        }
+    }
+
+    public void useColors(int[][] colors) {
+
     }
 
     @Override

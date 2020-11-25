@@ -29,16 +29,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94cb77b4-78ec-4b46-a90d-b95d33e85fbf" name="Default Changelist" comment="feature branches">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/apis/SocialMedia.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/steganography/Steganography.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ProjektSteganography.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ProjektSteganography.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Steganography.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SocialMediaSteganography.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/steganography/video/delete.me" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/steganography/image/ImageSteg.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/steganography/image/ImageSteg.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/steganography/image/PixelBit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/steganography/image/PixelBit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/steganography/image/ShuffleOverlay.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/steganography/image/ShuffleOverlay.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,7 +74,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../KompBasEntw/Kantaper" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -91,14 +85,14 @@
       <recent name="steganography" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Programmieren\Git\Steganografie\ProjektStudiumSteganography\src\main\java\steganography\image" />
+      <recent name="D:\Programmieren\Git\Steganografie\ProjektStudiumSteganography\src\main\java\steganography\util" />
       <recent name="$PROJECT_DIR$/src/main/resources" />
       <recent name="$PROJECT_DIR$/src/main/java/steganography/video" />
       <recent name="$PROJECT_DIR$/src/main/java/steganography/util" />
-      <recent name="$PROJECT_DIR$/src/main/java/steganography/image" />
-      <recent name="$PROJECT_DIR$/src/main/java/steganography/audio" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.test">
     <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
@@ -106,6 +100,19 @@
         </value>
       </option>
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="steganography.image.test" />
+      <module name="ProjektSteganography" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="steganography.image.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -120,6 +127,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.test" />
         <item itemvalue="JUnit.All in ProjektSteganography" />
       </list>
     </recent_temporary>
@@ -192,13 +200,15 @@
       <screen x="0" y="23" width="1440" height="834" />
     </state>
     <state x="208" y="23" width="1024" height="834" key="#Project_Structure/0.23.1440.834@0.23.1440.834" timestamp="1602279146433" />
-    <state x="437" y="249" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1602252127722">
-      <screen x="0" y="23" width="1440" height="836" />
+    <state x="2503" y="281" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605108926045">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
+    <state x="2503" y="281" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1605108926045" />
     <state x="437" y="249" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.836@0.23.1440.836" timestamp="1602252127722" />
-    <state x="533" y="154" key="#com.intellij.ide.util.MemberChooser" timestamp="1602268137766">
-      <screen x="0" y="23" width="1440" height="835" />
+    <state x="711" y="163" key="#com.intellij.ide.util.MemberChooser" timestamp="1605219823411">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="711" y="163" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1605219823411" />
     <state x="533" y="154" key="#com.intellij.ide.util.MemberChooser/0.23.1440.835@0.23.1440.835" timestamp="1602268137766" />
     <state x="336" y="136" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1602250539616">
       <screen x="0" y="23" width="1440" height="835" />
@@ -212,6 +222,10 @@
       <screen x="0" y="23" width="1440" height="835" />
     </state>
     <state x="490" y="316" width="460" height="256" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.23.1440.835@0.23.1440.835" timestamp="1602268069092" />
+    <state x="473" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1605220178559">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="473" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1605220178559" />
     <state x="458" y="194" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1602268862184">
       <screen x="0" y="23" width="1440" height="834" />
     </state>
@@ -220,21 +234,29 @@
       <screen x="0" y="23" width="1440" height="835" />
     </state>
     <state x="144" y="95" key="DiffContextDialog/0.23.1440.835@0.23.1440.835" timestamp="1602251703052" />
-    <state width="1398" height="217" key="GridCell.Tab.0.bottom" timestamp="1602251358755">
-      <screen x="0" y="23" width="1440" height="836" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1605789822454">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1605789822454" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1606309922476">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1606309922476" />
     <state width="1398" height="217" key="GridCell.Tab.0.bottom/0.23.1440.836@0.23.1440.836" timestamp="1602251358755" />
-    <state width="1398" height="217" key="GridCell.Tab.0.center" timestamp="1602251358755">
-      <screen x="0" y="23" width="1440" height="836" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1606309922476">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1606309922476" />
     <state width="1398" height="217" key="GridCell.Tab.0.center/0.23.1440.836@0.23.1440.836" timestamp="1602251358755" />
-    <state width="1398" height="217" key="GridCell.Tab.0.left" timestamp="1602251358755">
-      <screen x="0" y="23" width="1440" height="836" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1606309922476">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1606309922476" />
     <state width="1398" height="217" key="GridCell.Tab.0.left/0.23.1440.836@0.23.1440.836" timestamp="1602251358755" />
-    <state width="1398" height="217" key="GridCell.Tab.0.right" timestamp="1602251358755">
-      <screen x="0" y="23" width="1440" height="836" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1606309922476">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1606309922476" />
     <state width="1398" height="217" key="GridCell.Tab.0.right/0.23.1440.836@0.23.1440.836" timestamp="1602251358755" />
     <state x="221" y="23" width="1024" height="829" key="SettingsEditor" timestamp="1602745948036">
       <screen x="0" y="23" width="1440" height="829" />
