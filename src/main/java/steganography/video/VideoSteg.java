@@ -21,6 +21,7 @@ package steganography.video;
 import steganography.Steganography;
 import steganography.image.ImageSteg;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,8 +87,13 @@ public class VideoSteg implements Steganography {
 
         List<byte[]> secretMessageList = decodeUsingHenkAlgo(imageList, seed);
 
-        // TODO: What to do ?
-        return secretMessageList.get(0);
+        // TODO: figure out how to calc max possible payload size from encoded video
+        byte[] result = new byte[steganographicData.length];
+        for (byte[] secret : secretMessageList) {
+            if (secret != null)
+                System.arraycopy(secret, 0, result, result.length, secret.length);
+        }
+        return result;
     }
 
     @Override
@@ -110,23 +116,44 @@ public class VideoSteg implements Steganography {
 
     /**
      * Encodes a given list of byte[] of Pictures using the "Henk-Algo"
-     * Each Picture is encoded in a own thread,
-     * the max concurrent number of threads is set by maxEncodingThreads (by default 10)
+     * Set maxEncodingThreads to use multithreading (by default single threaded)
      *
      * @param imageList list of byte[] of Pictures
      * @param payload   payload (secret)
      * @return Encoded list of Pictures
      */
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException {
+        //If Single Thread
         if (maxEncodingThreads == 1) {
             List<byte[]> resultList = new ArrayList<>();
+
             int i = 0;
+            int payloadIndex = 0;
             for (byte[] bytes : imageList) {
-                Steganography steganography = new ImageSteg();
-                resultList.add(steganography.encode(bytes, payload, seed));
-                if (logging)
-                    System.out.println("Encoded Frame (" + i + "/" + imageList.size() + ")");
-                i++;
+                //If entire payload encoded just copy raw pictures into list
+                if (payloadIndex >= payload.length) {
+                    resultList.add(bytes);
+                } else {
+                    //Distribute payload into frames
+                    ImageSteg steganography = new ImageSteg();
+                    int maxImagePayload = steganography.getImageCapacity(bytes, true, false);
+                    //New copy of payload array that holds max amount of payload the current image can hold
+                    byte[] payloadChunk;
+                    //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
+                    if (payload.length - payloadIndex > maxImagePayload) {
+                        payloadChunk = new byte[maxImagePayload];
+                    } else {
+                        // else encode only payload length
+                        payloadChunk = new byte[payload.length - payloadIndex];
+                    }
+                    System.arraycopy(payload, payloadIndex, payloadChunk, 0, payloadChunk.length);
+                    //Encode payload chunk
+                    resultList.add(steganography.encode(bytes, payloadChunk, seed));
+                    payloadIndex = payloadChunk.length + 1;
+                    if (logging)
+                        System.out.println("Encoded Frame (" + i + "/" + imageList.size() + ")");
+                    i++;
+                }
             }
             return resultList;
         } else {
@@ -242,5 +269,25 @@ public class VideoSteg implements Steganography {
 
     public void setLogging(boolean logging) {
         this.logging = logging;
+    }
+
+    /**
+     * Returns the maximum number of bytes that can be encoded in the given video.
+     *
+     * @param carrier         carrier to be used (Video)
+     * @param withTransparent should transparent pixel be counted for
+     * @return max amount of total number of bytes that can be encoded in the carrier
+     * @throws IOException if IO Exception occurs
+     */
+    public long getVideoCapacity(byte[] carrier, boolean subtractDefaultHeader, boolean withTransparent) throws IOException {
+        VideoDecoder videoDecoder = new VideoDecoder(carrier, new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.logging);
+        List<byte[]> pictureList = videoDecoder.toPictureByteArray();
+        ImageSteg imageSteg = new ImageSteg();
+
+        long totalCapacity = 0;
+        for (byte[] picture : pictureList) {
+            totalCapacity += imageSteg.getImageCapacity(picture, subtractDefaultHeader, withTransparent);
+        }
+        return totalCapacity;
     }
 }
