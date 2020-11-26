@@ -40,6 +40,7 @@ public class Video {
     private int frameHeight;
     private Long timebase;
     private final byte[] videoByteArray;
+    private File audioFile;
 
     public Video(byte[] videoByteArray, File ffmpegBin) {
         this.videoByteArray = videoByteArray;
@@ -101,5 +102,13 @@ public class Video {
 
     public Long getTimebase() {
         return timebase;
+    }
+
+    public File getAudioFile() {
+        return audioFile;
+    }
+
+    public void setAudioFile(File audioFile) {
+        this.audioFile = audioFile;
     }
 }

@@ -26,6 +26,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +40,6 @@ import java.util.List;
  **/
 public class VideoDecoder {
     private final File ffmpegBin;
-    private String soundPath;
     private final byte[] videoByteArray;
     private final List<Long> ptsList = new ArrayList<>();
     private final boolean logging;
@@ -50,13 +52,21 @@ public class VideoDecoder {
         this.video = video;
     }
 
-    public List<byte[]> toPictureByteArray() throws IllegalArgumentException {
+    public List<byte[]> toPictureByteArray() throws IllegalArgumentException, IOException {
         List<byte[]> imageList = new ArrayList<>();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
+        File soundFile = File.createTempFile("VideoSteganography-", ".mp3");
+        SeekableByteChannel sbc = Files.newByteChannel(soundFile.toPath(), StandardOpenOption.WRITE);
 
         FFmpeg.atPath(ffmpegBin.toPath())
                 .addInput(PipeInput.pumpFrom(inputStream))
+                //Create Audio File
+                .addOutput(ChannelOutput
+                        .toChannel(soundFile.getName(), sbc)
+                        .disableStream(StreamType.VIDEO)
+                        .disableStream(StreamType.DATA)
+                )
                 .addOutput(FrameOutput
                         .withConsumer(
                                 new FrameConsumer() {
@@ -64,7 +74,6 @@ public class VideoDecoder {
 
                                     @Override
                                     public void consumeStreams(List<Stream> streams) {
-                                        // TODO: Consume Audio (Demux)
                                     }
 
                                     @Override
@@ -75,6 +84,7 @@ public class VideoDecoder {
                                         }
                                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                         try {
+                                            //TODO: Make this faster
                                             ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
                                             ptsList.add(frame.getPts());
                                             if (logging && frameNumber % 2 == 0)
@@ -92,6 +102,8 @@ public class VideoDecoder {
                         .disableStream(StreamType.AUDIO)
                 )
                 .execute();
+
+        video.setAudioFile(soundFile);
         return imageList;
     }
 
