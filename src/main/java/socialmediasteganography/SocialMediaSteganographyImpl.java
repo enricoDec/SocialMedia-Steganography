@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
+public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
 
     private static final Logger logger = Logger.getLogger(SocialMediaSteganographyImpl.class.getName());
 
@@ -42,17 +42,17 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
 
     @Override
     public boolean encodeAndPost(SocialMedia socialMedia, byte[] carrier, byte[] payload) {
-        try{
+        try {
             byte[] bytes = steganography.encode(carrier, payload);
 
-            /* //Zum pruefen, ob man das Bild nach dem enkodieren noch (manuell) öffnen kann.
-                InputStream is = new ByteArrayInputStream(bytes);
-                BufferedImage bImg = ImageIO.read(is);
-                ImageIO.write(bImg, "png", new File("myfile.png"));
-            */
+            //Zum pruefen, ob man das Bild nach dem enkodieren noch (manuell) öffnen kann.
+            InputStream is = new ByteArrayInputStream(bytes);
+            BufferedImage bImg = ImageIO.read(is);
+            ImageIO.write(bImg, "png", new File("myfileEncoded.png"));
+
 
             return socialMedia.postToSocialNetwork(bytes, "test");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -60,31 +60,22 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
 
     @Override
     public List<byte[]> searchForHiddenMessages(SocialMedia socialMedia, String keyword) {
-        List<byte[]> resultsInBytes = socialMedia.getRecentMediaForKeyword(keyword);
-        List<byte[]> decodedResultsInBytes = new ArrayList<>();
+        List<byte[]> recentMedias = socialMedia.getRecentMediaForKeyword(keyword);
+        List<byte[]> decodedMedias = new ArrayList<>();
 
-        try {
-            byte[] possImg = resultsInBytes.get(4);
-            BufferedImage bImg = ImageIO.read(new ByteArrayInputStream(possImg));
-            byte[] bDecoded;
-            if (bImg != null)
-                bDecoded = steganography.decode(possImg);
-            else
-                System.out.println("No Image");
-            /*
-            for(byte[] b : resultsInBytes){
-
-                /*
-                byte[] bDecoded = steganography.decode(b);
-                if(bDecoded.length > 0)
-                    decodedResultsInBytes.add(bDecoded);
-                logger.info("Decoded successfully.");
-
-              */
-    } catch (IOException e) {
-            e.printStackTrace();
-            logger.info("Decoding failed.");
+        for(int i = 0; i < recentMedias.size(); i++){
+            try {
+                byte[] bDecoded = steganography.decode(recentMedias.get(i));
+                if (bDecoded.length > 0) {
+                    decodedMedias.add(bDecoded);
+                    logger.info("Decoded successfully.");
+                    System.out.println("Hidden message was: " + new String(bDecoded));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                logger.info("Decoding failed for entry on index " + i + ".");
+            }
         }
-        return decodedResultsInBytes;
+        return decodedMedias;
     }
 }

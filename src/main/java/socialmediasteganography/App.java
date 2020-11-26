@@ -20,9 +20,11 @@ package socialmediasteganography;
 
 
 import apis.SocialMedia;
+import apis.Token;
 import apis.imgur.Imgur;
 import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import socialmediasteganography.SocialMediaSteganography;
 import socialmediasteganography.SocialMediaSteganographyImpl;
@@ -40,22 +42,23 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
+        //Setup
         SocialMedia socialMedia = new Imgur();
+        socialMedia.setToken(new Token("db67746b464982896455ae4a79541f3f3ca16a5b", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
-        byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/SJZyZQ1.png");
-        System.out.println(byts.length);
 
-        /**
-         * Zum testen, ob dieses Bild korrekt runtergeladen wurde.
-         */
-        InputStream is = new ByteArrayInputStream(byts);
-        BufferedImage bImg = ImageIO.read(is);
-        ImageIO.write(bImg, "png", new File("myfile.png"));
-
+        //Carrier, Payload
+        byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
         String payload = "HelloWorld";
 
+        //Encode and Post
         sms.encodeAndPost(socialMedia, byts, payload.getBytes());
+
+        //Search in social media for pictures and try to decode
         List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+
+        /*
+        //Auswertung als Strings
         List<String> messages = new ArrayList<>();
         for (byte[] b : results) {
             if (b.length > 0) {
@@ -65,8 +68,17 @@ public class App {
             } else {
                 System.out.println("No bytes for message type found");
             }
-
         }
+        */
+
+        /*
+         //Zum testen, ob dieses Bild korrekt runtergeladen wurde.
+
+        InputStream is = new ByteArrayInputStream(byts);
+        BufferedImage bImg = ImageIO.read(is);
+        ImageIO.write(bImg, "png", new File("myfile.png"));
+        */
+
     /*
         //Upload on Imgur
 

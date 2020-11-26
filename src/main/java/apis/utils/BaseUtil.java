@@ -45,7 +45,7 @@ public class BaseUtil {
         return new MyDate(new Date((long)msDouble*1000));
     }
 
-    public boolean hasErrorCode(int responseCode) {
+    public static boolean hasErrorCode(int responseCode) {
         if (100 <= responseCode && responseCode <= 399) {
             return false;
         } else {
@@ -53,7 +53,7 @@ public class BaseUtil {
         }
     }
 
-    public String encodeUrl(String url){
+    public static String encodeUrl(String url){
         return url.replace("amp;", "");
     }
 }

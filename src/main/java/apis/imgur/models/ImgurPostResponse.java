@@ -53,6 +53,10 @@ public class ImgurPostResponse {
         public String name;
         public String link;
 
+        public String getId(){
+            return this.id;
+        }
+
         public String getLink() {
             return link;
         }

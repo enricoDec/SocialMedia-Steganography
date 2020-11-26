@@ -64,12 +64,12 @@ public class RedditUtil extends BaseUtil {
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
 
-
+        System.out.println("REDDIT JSON RESPONSE: " + responseString);
         try{
             RedditGetResponse responseArray = new Gson().fromJson(responseString, RedditGetResponse.class);
         for(RedditGetResponse.ResponseChildData child : responseArray.getData().getChildren()){
             if(child != null && !this.hasNullObjects(child)){
-                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false)));
+                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false), ".png"));
             }
         }
 

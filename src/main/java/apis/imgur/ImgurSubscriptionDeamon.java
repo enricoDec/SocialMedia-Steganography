@@ -83,7 +83,6 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
             }
 
             logger.info(String.valueOf(con.getURL()));
-
             List<PostEntry> postEntries = this.imgurUtil.getPosts(responseString);
             this.setLatestPostEntries(postEntries);
             this.setLatestPostTimestamp(this.imgurUtil.getLatestTimestamp(postEntries));

@@ -38,6 +38,9 @@ public class ImgurGetResponse {
         private String description;
         private String link;
         private String datetime;
+        private String type;
+
+        private List<ImgurImages> images;
 
         public String getId() {
             return id;
@@ -77,6 +80,64 @@ public class ImgurGetResponse {
 
         public void setDatetime(String datetime) {
             this.datetime = datetime;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+
+    }
+
+    public class ImgurImages{
+        private String id;
+        private String title;
+        private String datetime;
+        private String type;
+        private String link;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDatetime() {
+            return datetime;
+        }
+
+        public void setDatetime(String datetime) {
+            this.datetime = datetime;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getLink() {
+            return link;
+        }
+
+        public void setLink(String link) {
+            this.link = link;
         }
     }
 }

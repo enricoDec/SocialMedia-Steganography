@@ -39,9 +39,20 @@ public class PostEntry implements Comparable<PostEntry>{
      */
     private final MyDate date;
 
-    public PostEntry(String url, MyDate date){
+    private String type;
+
+    public PostEntry(String url, MyDate date, String type){
         this.url = url;
         this.date = date;
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getUrl() {

@@ -53,11 +53,17 @@ public class ImgurUtil extends BaseUtil {
 
         for(ImgurGetResponse.ImgurData child : responseObject.getData()){
             if(child != null){
-                postEntries.add(new PostEntry(child.getLink(), this.getTimestamp(child.getDatetime())));
+                if(supportedFormat(child.getLink())){
+                    postEntries.add(new PostEntry(child.getLink(), this.getTimestamp(child.getDatetime()), child.getType()));
+                }
             }
         }
         this.sortPostEntries(postEntries);
         return postEntries;
+    }
+
+    private boolean supportedFormat(String link) {
+        return link.contains(".png");
     }
 
 

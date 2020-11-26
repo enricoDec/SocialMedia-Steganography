@@ -22,6 +22,7 @@ import apis.SocialMedia;
 import apis.Token;
 import apis.imgur.models.ImgurPostResponse;
 import apis.interceptors.BearerInterceptor;
+import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
@@ -65,8 +66,10 @@ public class Imgur extends SocialMedia {
 
     @Override
     public boolean postToSocialNetwork(byte[] media, String keyword) {
-        System.out.println(this.getToken() == null);
-        System.out.println(this.getToken().getToken() == null);
+        if(this.getToken() == null && this.getToken().getToken() == null){
+            logger.info("No Token was set!");
+        }
+
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor()).build();
 
         String filename = "tmp_" + System.currentTimeMillis() + ".png";
@@ -86,16 +89,60 @@ public class Imgur extends SocialMedia {
                     .build();
 
             Response response = client.newCall(request).execute();
-
             Gson gson = new Gson();
             ImgurPostResponse ipr = gson.fromJson(response.body().string(), ImgurPostResponse.class);
-            this.uploadedFiles.add(ipr);
-            logger.info("Successfull uploaded.\nURL: " + ipr.data.link);
-            return true;
+
+            int code = response.code();
+
+            if(BaseUtil.hasErrorCode(code)){
+                logger.info("Not uploaded successfully. Errorcode: " + code);
+                return false;
+            }else{
+                logger.info("Successfull uploaded.\nURL: " + ipr.getData().getLink());
+                this.uploadedFiles.add(ipr);
+                return shareWithCommunity(ipr, keyword);
+            }
         } catch (IOException e) {
+            logger.info("Error during posting to imgur with token (authenticated).");
             e.printStackTrace();
         }
 
+        return false;
+    }
+
+    private boolean shareWithCommunity(ImgurPostResponse postResponse, String keyword){
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor()).build();
+
+        RequestBody body = null;
+        try {
+            body = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("title", keyword)
+                    .addFormDataPart("topic", keyword)
+                    .addFormDataPart("terms", "1")
+                    .addFormDataPart("tags", keyword)
+                    .build();
+
+            Request request = new Request.Builder()
+                    .headers(Headers.of("Authorization", ("Bearer " + this.token.getToken())))
+                    .url("https://api.imgur.com/3/gallery/image/" + postResponse.getData().getId())
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            int code = response.code();
+            if(BaseUtil.hasErrorCode(code)){
+                logger.info("Could not share with community. Errorcode: " + code);
+                return false;
+            }else{
+                logger.info("Shared with community. Code: " + code);
+                return true;
+            }
+        }catch (Exception e){
+            logger.info("Exception during share with community request.");
+            e.printStackTrace();
+        }
         return false;
     }
 
