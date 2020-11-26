@@ -54,6 +54,7 @@ public class VideoEncoder {
         SeekableByteChannel sbc = Files.newByteChannel(tempFile.toPath(), StandardOpenOption.WRITE);
 
         FFmpeg.atPath(ffmpegBin.toPath())
+                .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
                 .addInput(
                         FrameInput.withProducer(
                                 new FrameProducer() {
