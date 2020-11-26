@@ -18,6 +18,8 @@
 
 package apis;
 
+import apis.models.Token;
+
 import java.util.ArrayList;
 import java.util.List;
 

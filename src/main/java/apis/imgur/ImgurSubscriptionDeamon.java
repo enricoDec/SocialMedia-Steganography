@@ -23,6 +23,7 @@ import apis.reddit.RedditConstants;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.utils.BlobConverterImpl;
+import persistence.JSONPersistentManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +37,9 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
+
+import static apis.models.APINames.IMGUR;
+import static apis.models.APINames.REDDIT;
 
 public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
@@ -61,6 +65,8 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
             logger.info("No subscription keyword was set.");
             return null;
         }
+
+        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, System.currentTimeMillis());
 
         try {
             URL url = new URL(

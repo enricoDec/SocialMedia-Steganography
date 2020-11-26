@@ -19,13 +19,14 @@
 package apis.imgur;
 
 import apis.SocialMedia;
-import apis.Token;
+import apis.models.Token;
 import apis.imgur.models.ImgurPostResponse;
 import apis.interceptors.BearerInterceptor;
 import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import static apis.models.APINames.IMGUR;
+import static apis.models.APINames.REDDIT;
 
 public class Imgur extends SocialMedia {
 
@@ -195,6 +199,9 @@ public class Imgur extends SocialMedia {
         } else {
             executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, this.interval, this.timeUnit);
         }
+
+        JSONPersistentManager.getInstance().addKeywordForAPI(IMGUR, keyword);
+
         return true;
     }
 

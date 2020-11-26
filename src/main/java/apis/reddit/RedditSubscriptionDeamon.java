@@ -22,6 +22,7 @@ import apis.SubscriptionDeamon;
 import apis.utils.BlobConverterImpl;
 import apis.models.MyDate;
 import apis.models.PostEntry;
+import persistence.JSONPersistentManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,11 +32,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
+
+import static apis.models.APINames.IMGUR;
+import static apis.models.APINames.REDDIT;
 
 public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
@@ -69,7 +74,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
     public boolean checkForNewPostEntries() {
         logger.info("Check for new post entries for keyword '" + this.subscriptionKeyword + "' ...");
         List<PostEntry> oldPostEntries = this.latestPostEntries;
-        MyDate oldPostTimestamp = this.latestPostTimestamp;
+        Optional<MyDate> oldPostTimestamp = Optional.ofNullable(JSONPersistentManager.getInstance().getLastTimeCheckedForAPI(REDDIT)).orElse();
 
         //Pull
         if(this.getRecentMedia() != null) {
@@ -102,6 +107,9 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
     @Override
     public List<byte[]> getRecentMedia() {
+
+        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, System.currentTimeMillis());
+
         try {
             URL url = new URL(
                     RedditConstants.BASE +

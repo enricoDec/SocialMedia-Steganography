@@ -20,24 +20,12 @@ package socialmediasteganography;
 
 
 import apis.SocialMedia;
-import apis.Token;
+import apis.models.Token;
 import apis.imgur.Imgur;
-import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import socialmediasteganography.SocialMediaSteganography;
-import socialmediasteganography.SocialMediaSteganographyImpl;
 import steganography.image.ImageSteg;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class App {

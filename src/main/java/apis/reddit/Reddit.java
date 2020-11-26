@@ -19,12 +19,14 @@
 package apis.reddit;
 
 import apis.SocialMedia;
-import apis.Token;
+import apis.models.APINames;
+import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.interceptors.BearerInterceptor;
 import apis.reddit.models.RedditPostResponse;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static apis.models.APINames.REDDIT;
+
 public class Reddit extends SocialMedia {
+
+    /**
+     * TODO Keywords, Timestamp
+     * Reddit, Imgur
+     */
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
     private RedditUtil redditUtil;
@@ -123,6 +132,8 @@ public class Reddit extends SocialMedia {
         } else {
             executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, this.interval, this.timeUnit);
         }
+
+        JSONPersistentManager.getInstance().addKeywordForAPI(REDDIT, keyword);
 
         return true;
     }
