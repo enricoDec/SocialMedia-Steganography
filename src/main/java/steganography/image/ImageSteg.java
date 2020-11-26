@@ -91,10 +91,13 @@ public class ImageSteg implements Steganography {
     /**
      * Returns the maximum number of bytes that can be encoded in the given image.
      * @param image image to potentially encode bytes in
-     * @param withTransparent should transparent pixels account to the capacity
+     * @param subtractDefaultHeader should the length of the default header be subtracted from the capacity?
+     * @param withTransparent should transparent pixels account to the capacity?
      * @return the payload-capacity of image
      */
-    public int getImageCapacity(byte[] image, boolean withTransparent) throws IOException {
+    public int getImageCapacity(byte[] image, boolean subtractDefaultHeader, boolean withTransparent)
+            throws IOException {
+
         BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
         int capacity;
         if (!withTransparent) {
@@ -102,7 +105,9 @@ public class ImageSteg implements Steganography {
         } else {
             capacity = countIntransparent(bufferedImage);
         }
-        return capacity / 8;
+        capacity /= 8;
+
+        return (subtractDefaultHeader && capacity >= 8) ? (capacity - 8) : capacity;
     }
 
     private int countIntransparent(BufferedImage bufferedImage) {
