@@ -16,40 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis;
+package apis.utils;
 
-/**
- * Represents the authentication needed for a Social Media API
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/*
+ *
+ * @author Mario Teklic
  */
-public class Token {
 
-    /**
-     * Code of the Token
-     */
-    private String token;
-    /**
-     * time of creation in ms
-     */
-    private long time;
+class BaseUtilTest {
 
-    public Token(String token, long time) {
-        this.token = token;
-        this.time = time;
+    @Test
+    void sortPostEntries() {
     }
 
-    public String getToken() {
-        return token;
+    @Test
+    void getLatestTimestamp() {
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    @Test
+    void getTimestamp() {
     }
 
-    public long getTime() {
-        return time;
+    @Test
+    void hasErrorCode() {
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    @Test
+    void encodeUrl() {
     }
 }

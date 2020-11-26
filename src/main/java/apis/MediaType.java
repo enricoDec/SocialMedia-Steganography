@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Mario Teklic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,38 +18,6 @@
 
 package apis;
 
-/**
- * Represents the authentication needed for a Social Media API
- */
-public class Token {
-
-    /**
-     * Code of the Token
-     */
-    private String token;
-    /**
-     * time of creation in ms
-     */
-    private long time;
-
-    public Token(String token, long time) {
-        this.token = token;
-        this.time = time;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
+public enum MediaType {
+    JPEG,JPG,BMP,PNG,GIF,TIFF;
 }

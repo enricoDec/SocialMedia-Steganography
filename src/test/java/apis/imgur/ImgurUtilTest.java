@@ -16,40 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis;
+package apis.imgur;
 
-/**
- * Represents the authentication needed for a Social Media API
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/*
+ *
+ * @author Mario Teklic
  */
-public class Token {
 
-    /**
-     * Code of the Token
-     */
-    private String token;
-    /**
-     * time of creation in ms
-     */
-    private long time;
+class ImgurUtilTest {
 
-    public Token(String token, long time) {
-        this.token = token;
-        this.time = time;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
+    @Test
+    void getPosts() {
     }
 }

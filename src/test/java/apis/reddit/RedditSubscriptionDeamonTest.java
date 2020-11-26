@@ -16,40 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis;
+package apis.reddit;
 
-/**
- * Represents the authentication needed for a Social Media API
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/*
+ *
+ * @author Mario Teklic
  */
-public class Token {
 
-    /**
-     * Code of the Token
-     */
-    private String token;
-    /**
-     * time of creation in ms
-     */
-    private long time;
+class RedditSubscriptionDeamonTest {
 
-    public Token(String token, long time) {
-        this.token = token;
-        this.time = time;
+    @Test
+    void checkForNewPostEntries() {
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
+    @Test
+    void getRecentMediaForKeyword() {
     }
 }
