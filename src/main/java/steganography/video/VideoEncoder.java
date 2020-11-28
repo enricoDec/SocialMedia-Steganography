@@ -48,6 +48,13 @@ public class VideoEncoder {
         this.video = video;
     }
 
+    /**
+     * Encode a list of images to a video
+     * @param stegImages list of images to be encoded
+     * @param ptsList list of pts of each frame
+     * @return video
+     * @throws IOException
+     */
     public byte[] imagesToVideo(List<byte[]> stegImages, List<Long> ptsList) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");
         tempFile.deleteOnExit();

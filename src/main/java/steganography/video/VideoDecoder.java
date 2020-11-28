@@ -52,6 +52,13 @@ public class VideoDecoder {
         this.video = video;
     }
 
+    /**
+     * Decode a Video into a list of single Pictures
+     *
+     * @return list of pictures
+     * @throws IllegalArgumentException
+     * @throws IOException
+     */
     public List<byte[]> toPictureByteArray() throws IllegalArgumentException, IOException {
         List<byte[]> imageList = new ArrayList<>();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(videoByteArray);

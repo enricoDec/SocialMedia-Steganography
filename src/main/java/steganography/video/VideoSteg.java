@@ -33,12 +33,13 @@ import java.util.concurrent.*;
  * @since : 23-11-2020
  **/
 public class VideoSteg implements Steganography {
-    private int maxEncodingThreads = 8;
-    private int maxDecodingThreads = 8;
-    private boolean logging = false;
+    private int maxEncodingThreads = 1;
+    private int maxDecodingThreads = 1;
+    private boolean debug = false;
     private long startTime = System.currentTimeMillis();
-    private final File ffmpegBin = new File("S:\\code\\HTW\\ProjektStudiumSteganography\\src\\main\\resources");
-    private final int seed = 1732341558;
+    // TODO: ASK if config or method
+    private final File ffmpegBin = new File("src/main/resources");
+    private final int seed = ImageSteg.DEFAULT_SEED;
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
@@ -49,22 +50,22 @@ public class VideoSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
-        VideoDecoder videoDecoder = new VideoDecoder(carrier, video, ffmpegBin, logging);
+        VideoDecoder videoDecoder = new VideoDecoder(carrier, video, ffmpegBin, debug);
         //List used to save the single frames decoded from the carrier
-        if (logging)
+        if (debug)
             log("Decoding Video Frames to images....");
         List<byte[]> imageList = videoDecoder.toPictureByteArray();
-        if (logging) {
+        if (debug) {
             log("Video decoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
             log("Encoding secret message into images...");
         }
         startTime = System.currentTimeMillis();
         List<byte[]> stegImagesList = encodeUsingHenkAlgo(imageList, payload, seed);
-        if (logging)
+        if (debug)
             log("All " + stegImagesList.size() + " images encoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
 
         //Re-Encode Images to Video
-        VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, logging);
+        VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
         return videoEncoder.imagesToVideo(stegImagesList, videoDecoder.getPtsList());
     }
 
@@ -79,41 +80,112 @@ public class VideoSteg implements Steganography {
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException {
         //If Single Thread
         if (maxEncodingThreads == 1) {
-            List<byte[]> resultList = new ArrayList<>();
-
+            List<byte[]> stegImageList = new ArrayList<>();
+            List<byte[]> payloadChunk = splitPayloadPerImage(imageList, payload);
             int i = 0;
-            int payloadCursor = 0;
             for (byte[] image : imageList) {
-                //If entire payload encoded just copy raw pictures into list
-                if (payloadCursor >= payload.length) {
-                    log("Payload Encoded now encoding blanks");
-                    resultList.add(image);
+                if (payloadChunk.get(i) != null) {
+                    ImageSteg imageSteg = new ImageSteg();
+                    stegImageList.add(imageSteg.encode(image, payloadChunk.get(i), seed));
+                    i++;
                 } else {
-                    //Distribute payload into frames
-                    ImageSteg steganography = new ImageSteg();
-                    int maxImagePayload = steganography.getImageCapacity(image, true, false);
-                    //New copy of payload array that holds max amount of payload the current image can hold
-                    byte[] payloadChunk;
-                    //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
-                    if (payload.length - payloadCursor > maxImagePayload) {
-                        payloadChunk = new byte[maxImagePayload];
-                    } else {
-                        // else encode only payload length
-                        payloadChunk = new byte[payload.length - payloadCursor];
-                    }
-                    System.arraycopy(payload, payloadCursor, payloadChunk, 0, payloadChunk.length);
-                    //Encode payload chunk
-                    resultList.add(steganography.encode(image, payloadChunk, seed));
-                    payloadCursor += payloadChunk.length;
-                    if (logging)
-                        log("Encoded Frame (" + i + "/" + imageList.size() + ")");
+                    stegImageList.add(image);
                 }
-                i++;
             }
-            return resultList;
+            return stegImageList;
         } else {
-            return multiThreadingCoding(imageList, payload, seed, false);
+            return multiThreadingEncode(imageList, payload, seed);
         }
+    }
+
+    /**
+     * Multi threaded version of encodeUsingHenkAlgo()
+     *
+     * @param imageList list of images to encode
+     * @param payload   payload in byte[]
+     * @param seed      seed to be used
+     * @return list of encoded images
+     * @throws IOException if any IO errors
+     */
+    private List<byte[]> multiThreadingEncode(List<byte[]> imageList, byte[] payload, long seed) throws IOException {
+        ExecutorService taskExecutor = Executors.newFixedThreadPool(maxEncodingThreads);
+        List<byte[]> payloadChunk = splitPayloadPerImage(imageList, payload);
+
+        //Make list of callable tasks that will be run by threads
+        List<Callable<byte[]>> taskList = new ArrayList<>();
+        for (int i = 0; i < imageList.size(); i++) {
+            int finalI = i;
+
+            //Each thread encodes a single image and returns result
+            taskList.add(() -> {
+                        if (payloadChunk.get(finalI) != null) {
+                            //ImageSteg is not threads safe yet, so need to make an instance for each thread
+                            ImageSteg steganography = new ImageSteg();
+                            return steganography.encode(imageList.get(finalI), payloadChunk.get(finalI), seed);
+                        } else {
+                            return imageList.get(finalI);
+                        }
+                    }
+            );
+        }
+
+        if (debug) {
+            log("All Callable tasks initialized" + System.lineSeparator() + "Running " + maxDecodingThreads + " Threads");
+        }
+
+        //Execute all tasks and add result to result list
+        List<Future<byte[]>> futureList;
+        List<byte[]> resultList = new ArrayList<>();
+        try {
+            futureList = taskExecutor.invokeAll(taskList);
+            //Wait for all results
+            for (Future<byte[]> result : futureList) {
+                resultList.add(result.get());
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            taskExecutor.shutdown();
+        }
+        return resultList;
+    }
+
+    /**
+     * Takes a payload and splits it in parts that fit in each image
+     * List entry is null if no payload split is present for the image
+     *
+     * @param imageList list of image to be used to split payload
+     * @param payload   payload to be split
+     * @return list of payload splits (index is equal to order of image list).
+     * Entry is Null if no payload for image
+     * @throws IOException if IO Exception is thrown during read operations
+     */
+    private List<byte[]> splitPayloadPerImage(List<byte[]> imageList, byte[] payload) throws IOException {
+        int chunkCursor = 0;
+        List<byte[]> payloadSplitted = new ArrayList<>();
+        ImageSteg steganography = new ImageSteg();
+        for (byte[] image : imageList) {
+            //If entire payload copied, just add null
+            if (chunkCursor >= payload.length) {
+                payloadSplitted.add(null);
+            } else {
+                //Distribute payload into frames
+                int maxImagePayload = steganography.getImageCapacity(image, true, false);
+                //New copy of payload array that holds max amount of payload the current image can hold
+                byte[] payloadChunk;
+                //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
+                if (payload.length - chunkCursor > maxImagePayload) {
+                    payloadChunk = new byte[maxImagePayload];
+                } else {
+                    // else encode only payload length
+                    payloadChunk = new byte[payload.length - chunkCursor];
+                }
+                System.arraycopy(payload, chunkCursor, payloadChunk, 0, payloadChunk.length);
+                payloadSplitted.add(payloadChunk);
+                chunkCursor += payloadChunk.length;
+            }
+        }
+        return payloadSplitted;
     }
 
     @Override
@@ -126,12 +198,20 @@ public class VideoSteg implements Steganography {
         Video video = new Video(steganographicData, ffmpegBin);
 
         //Decode Video Frames to pictures
-        VideoDecoder videoDecoder = new VideoDecoder(steganographicData, video, ffmpegBin, logging);
+        VideoDecoder videoDecoder = new VideoDecoder(steganographicData, video, ffmpegBin, debug);
         List<byte[]> imageList = videoDecoder.toPictureByteArray();
 
         return decodeUsingHenkAlgo(imageList, seed);
     }
 
+    /**
+     * Decode list of images using henk algorithm
+     *
+     * @param imageList List of images to be decoded
+     * @param seed seed to use to decode
+     * @return decoded byte[]
+     * @throws IOException If any IO errors
+     */
     private byte[] decodeUsingHenkAlgo(List<byte[]> imageList, long seed) throws IOException {
         if (maxEncodingThreads == 1) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -140,87 +220,75 @@ public class VideoSteg implements Steganography {
                 Steganography steganography = new ImageSteg();
                 try {
                     byteArrayOutputStream.write(steganography.decode(bytes, seed));
-                } catch (UnsupportedEncodingException e){
-                    if (logging)
+                } catch (UnsupportedEncodingException e) {
+                    if (debug)
                         log("Blank Frame found.");
                     return byteArrayOutputStream.toByteArray();
                 }
-                if (logging)
+                if (debug)
                     log("Decoded Frame (" + i + "/" + imageList.size() + ")");
                 i++;
             }
             return byteArrayOutputStream.toByteArray();
         } else {
-            //return multiThreadingCoding(imageList, null, seed, true);
+            return multiThreadingDecode(imageList, seed);
         }
-        return null;
     }
 
     /**
-     * Encode or Decode the secret message using multithreading
-     *
-     * @param imageList list of all the images to encode or decode
-     * @param seed      seed used to encode or decode
-     * @param decode    should decode?
-     * @return byte[] of all images encoded or decoded
+     * Multi threaded version of decodeUsingHenkAlgo()
+     * @param imageList list of images to decode
+     * @param seed seed to be used to decode
+     * @return decoded byte[]
+     * @throws IOException If any IO errors
      */
-    private List<byte[]> multiThreadingCoding(List<byte[]> imageList, byte[] payload, long seed, boolean decode) {
-        // Create ExecutorService with fixed amount of threads
-        // The pool of thread will execute the given runnable (void return) or callable (return)
-        ExecutorService taskExecutor;
-        if (!decode) {
-            // Encoding
-            //taskExecutor = new ThreadPoolExecutor(1, maxDecodingThreads, 5L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-            taskExecutor = Executors.newFixedThreadPool(maxEncodingThreads);
-        } else {
-            //Decoding
-            //taskExecutor = new ThreadPoolExecutor(1, maxEncodingThreads, 5L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-            taskExecutor = Executors.newFixedThreadPool(maxDecodingThreads);
-        }
+    private byte[] multiThreadingDecode(List<byte[]> imageList, long seed) throws IOException {
+        ExecutorService taskExecutor = Executors.newFixedThreadPool(maxDecodingThreads);
 
         //Make list of callable tasks that will be run by threads
         List<Callable<byte[]>> taskList = new ArrayList<>();
         for (int i = 0; i < imageList.size(); i++) {
             int finalI = i;
 
-            //Each thread decodes or encodes a single image and returns result
-            if (decode) {
-                taskList.add(() -> {
+            //Each thread decodes a single image and returns result
+            taskList.add(() -> {
+                        try {
                             //ImageSteg is not threads safe yet, so need to make an instance for each thread
                             ImageSteg steganography = new ImageSteg();
                             return steganography.decode(imageList.get(finalI), seed);
+                        } catch (UnsupportedEncodingException e) {
+                            if (debug)
+                                log("Blank Frame found.");
+                            return imageList.get(finalI);
                         }
-                );
-            } else {
-                taskList.add(() -> {
-                            //ImageSteg is not threads safe yet, so need to make an instance for each thread
-                            ImageSteg steganography = new ImageSteg();
-                            return steganography.encode(imageList.get(finalI), payload, seed);
-                        }
-                );
-            }
+                    }
+            );
         }
 
-        if (logging) {
+        if (debug) {
             log("All Callable tasks initialized" + System.lineSeparator() + "Running " + maxDecodingThreads + " Threads");
         }
 
         //Execute all tasks
-        List<byte[]> resultList = new ArrayList<>();
-        List<Future<byte[]>> futureList;         //I'm so ahead that I need a future List :3
+        List<Future<byte[]>> futureList;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             futureList = taskExecutor.invokeAll(taskList);
             //Wait for all results
             for (Future<byte[]> result : futureList) {
-                resultList.add(result.get());
+                byteArrayOutputStream.write(result.get());
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            if (debug)
+                log("Blank Frame found.");
+            return byteArrayOutputStream.toByteArray();
         } finally {
             taskExecutor.shutdown();
         }
 
-        return resultList;
+        return byteArrayOutputStream.toByteArray();
     }
 
     @Override
@@ -230,7 +298,7 @@ public class VideoSteg implements Steganography {
 
         //Decode Video to Single Frames
         Video video = new Video(data, ffmpegBin);
-        VideoDecoder videoDecoder = new VideoDecoder(data, video, ffmpegBin, logging);
+        VideoDecoder videoDecoder = new VideoDecoder(data, video, ffmpegBin, debug);
         imageList = videoDecoder.toPictureByteArray();
 
         boolean isSteganographicData = true;
@@ -244,7 +312,7 @@ public class VideoSteg implements Steganography {
     /**
      * Set the number of threads used to encode the pictures
      * WARNING very memory expensive might overflow max JVM heap
-     * VM option: -Xmx will help
+     * VM option: -Xmx might help
      * By default using 8 Threads
      * To not use multithreading set maxEncodingThreads to 1
      *
@@ -257,7 +325,7 @@ public class VideoSteg implements Steganography {
     /**
      * Set the number of threads used to decode the pictures
      * WARNING very memory expensive might overflow max JVM heap
-     * VM option: -Xmx will help
+     * VM option: -Xmx might help
      * By default using 8 Threads
      * To not use multithreading set maxDecodingThreads to 1
      *
@@ -267,8 +335,8 @@ public class VideoSteg implements Steganography {
         this.maxDecodingThreads = maxDecodingThreads;
     }
 
-    public void setLogging(boolean logging) {
-        this.logging = logging;
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     /**
@@ -280,7 +348,7 @@ public class VideoSteg implements Steganography {
      * @throws IOException if IO Exception occurs
      */
     public long getVideoCapacity(byte[] carrier, boolean subtractDefaultHeader, boolean withTransparent) throws IOException {
-        VideoDecoder videoDecoder = new VideoDecoder(carrier, new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.logging);
+        VideoDecoder videoDecoder = new VideoDecoder(carrier, new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
         List<byte[]> pictureList = videoDecoder.toPictureByteArray();
         ImageSteg imageSteg = new ImageSteg();
 
@@ -291,6 +359,10 @@ public class VideoSteg implements Steganography {
         return totalCapacity;
     }
 
+    /**
+     * Logging
+     * @param message message to log
+     */
     private void log(String message) {
         System.out.println(message);
     }
