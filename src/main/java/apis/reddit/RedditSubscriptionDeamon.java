@@ -19,6 +19,8 @@
 package apis.reddit;
 
 import apis.SubscriptionDeamon;
+import apis.models.APINames;
+import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import apis.models.MyDate;
 import apis.models.PostEntry;
@@ -31,12 +33,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.logging.Handler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
 
 import static apis.models.APINames.IMGUR;
@@ -47,144 +47,95 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
     private static final Logger logger = Logger.getLogger(RedditSubscriptionDeamon.class.getName());
     private RedditUtil redditUtil;
 
-    private String subscriptionKeyword;
-    private List<PostEntry> latestPostEntries;
-    private MyDate latestPostTimestamp;
     private boolean newPostAvailable;
+    private List<PostEntry> latestPostEntries;
 
     /**
      * Subcription for a Keyword in a Social Media
-     *
-     * @param subscriptionKeyword The keyword
      */
-    public RedditSubscriptionDeamon(String subscriptionKeyword) {
-        this.subscriptionKeyword = subscriptionKeyword;
+    public RedditSubscriptionDeamon() {
         this.redditUtil = new RedditUtil();
     }
 
     @Override
     public void run() {
-        this.newPostAvailable = this.checkForNewPostEntries();
+        this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
+    }
+
+    private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
+        List<String> keywords = redditUtil.getKeywordList(REDDIT, onceUsedKeyword);
+
+        if (keywords == null || keywords.size() == 0) {
+            logger.info("No keyword(s) were set.");
+            return null;
+        }
+
+        List<PostEntry> resultList = new ArrayList<>();
+
+        for (String keyword : keywords) {
+            try {
+                URL url = new URL(
+                        RedditConstants.BASE +
+                                RedditConstants.SUBREDDIT_PREFIX + keyword +
+                                "/new/" +
+                                RedditConstants.AS_JSON +
+                                "?count=20");
+
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod(RedditConstants.GET);
+                con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
+                con.setDoOutput(true);
+
+                String responseString = "";
+
+                if (!BaseUtil.hasErrorCode(con.getResponseCode())) {
+                    responseString = new BufferedReader(new InputStreamReader(con.getInputStream())).lines().collect(Collectors.joining());
+                    logger.info("Response Code: " + con.getResponseCode() + ". No error.");
+                } else {
+                    logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
+                    return null;
+                }
+
+                logger.info(String.valueOf(con.getURL()));
+                resultList.addAll(this.redditUtil.getPosts(responseString));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        logger.info((resultList.size() + 1) + " postentries found.");
+        return resultList;
     }
 
     /**
      * @return
      */
     @Override
-    public boolean checkForNewPostEntries() {
-        logger.info("Check for new post entries for keyword '" + this.subscriptionKeyword + "' ...");
-        List<PostEntry> oldPostEntries = this.latestPostEntries;
-        Optional<MyDate> oldPostTimestamp = Optional.ofNullable(JSONPersistentManager.getInstance().getLastTimeCheckedForAPI(REDDIT)).orElse();
+    public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
+        List<PostEntry> tmp = this.getRecentMedia(keyword);
 
-        //Pull
-        if(this.getRecentMedia() != null) {
-            //Check by null
-            if (oldPostEntries == null && this.latestPostEntries != null) {
-                return true;
-            }
+        if (tmp != null) {
+            Collections.sort(tmp);
+            tmp = BaseUtil.elimateOldPostEntries(redditUtil.getLatestStoredTimestamp(REDDIT), tmp);
+            if (tmp.size() > 0) {
+                newPostAvailable = true;
 
-            //Check by timestamp
-            if (oldPostTimestamp != null && this.latestPostTimestamp.compareTo(oldPostTimestamp) > 0) {
-                return true;
+                /**
+                 * TODO 0 oder letztes element.
+                 */
+                redditUtil.setLatestPostTimestamp(REDDIT, tmp.get(0).getDate());
+                latestPostEntries = tmp;
+                logger.info("New media found.");
+                return tmp;
             }
         }
-        return false;
-    }
 
-    /**
-     * Searches for the given keyword. The old keyword which was decleared for the subscription will stay for the search.
-     * @param keyword
-     * @return
-     */
-    @Override
-    public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        String temp = this.subscriptionKeyword;
-        this.subscriptionKeyword = keyword;
-        List<byte[]> recentMedia = this.getRecentMedia();
-        this.subscriptionKeyword = temp;
-        return recentMedia;
-    }
-
-    @Override
-    public List<byte[]> getRecentMedia() {
-
-        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, System.currentTimeMillis());
-
-        try {
-            URL url = new URL(
-                    RedditConstants.BASE +
-                            RedditConstants.SUBREDDIT_PREFIX + this.subscriptionKeyword +
-                            "/new/" +
-                            RedditConstants.AS_JSON +
-                            "?count=20");
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.GET);
-            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setDoOutput(true);
-
-            String responseString = "";
-
-            if (!this.redditUtil.hasErrorCode(con.getResponseCode())) {
-                responseString = new BufferedReader(new InputStreamReader(con.getInputStream())).lines().collect(Collectors.joining());
-                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-            } else {
-                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-                return null;
-            }
-
-            logger.info(String.valueOf(con.getURL()));
-
-            List<PostEntry> postEntries = this.redditUtil.getPosts(responseString);
-            this.setLatestPostEntries(postEntries);
-            this.setLatestPostTimestamp(this.redditUtil.getLatestTimestamp(postEntries));
-
-            List<byte[]> byteList = new ArrayList<>();
-            for (PostEntry pe : postEntries) {
-                byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
-            }
-
-            logger.info((byteList.size() + 1) + " postentries found.\nLatest entry: "
-                    + postEntries.get(postEntries.size()-1).getUrl() + " " + postEntries.get(postEntries.size()-1).getDate().toString());
-
-            return byteList;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        logger.info("Error: Could not get reccent media (reddit).");
+        logger.info("No new media found.");
+        latestPostEntries = null;
+        newPostAvailable = false;
         return null;
-    }
-
-    @Override
-    public String getSubscriptionKeyword() {
-        return subscriptionKeyword;
-    }
-
-    @Override
-    public void setSubscriptionKeyword(String subscriptionKeyword) {
-        this.subscriptionKeyword = subscriptionKeyword;
-    }
-
-    @Override
-    public List<PostEntry> getLatestPostEntries() {
-        return latestPostEntries;
-    }
-
-    @Override
-    public void setLatestPostEntries(List<PostEntry> latestPostEntries) {
-        this.latestPostEntries = latestPostEntries;
-    }
-
-    @Override
-    public MyDate getLatestPostTimestamp() {
-        return latestPostTimestamp;
-    }
-
-    @Override
-    public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
-        this.latestPostTimestamp = latestPostTimestamp;
     }
 
     @Override
@@ -192,8 +143,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         return newPostAvailable;
     }
 
-    @Override
-    public void setNewPostAvailable(boolean newPostAvailable) {
-        this.newPostAvailable = newPostAvailable;
+    public List<PostEntry> getLatestPostEntries() {
+        return this.latestPostEntries;
     }
 }

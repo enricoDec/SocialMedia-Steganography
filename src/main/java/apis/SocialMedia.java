@@ -24,7 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SocialMedia {
-    private String message;
+    private List<String> message;
+    public static final Integer DEFAULT_INTERVALL = 5;
 
     List<SocialMediaListener> socialMediaListeners = new ArrayList<SocialMediaListener>();
 

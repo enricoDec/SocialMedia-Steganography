@@ -18,14 +18,18 @@
 
 package apis.utils;
 
+import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.reddit.models.RedditGetResponse;
+import persistence.JSONPersistentManager;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BaseUtil {
 
@@ -33,24 +37,62 @@ public class BaseUtil {
         Collections.sort(postEntries);
     }
 
-    public MyDate getLatestTimestamp(List<PostEntry> postEntries){
-        if(postEntries.size() > 0){
-            return postEntries.get(postEntries.size()-1).getDate();
+    public void setLatestPostTimestamp(APINames network, MyDate latestPostTimestamp) {
+        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(network, latestPostTimestamp.getTime());
+    }
+
+    public MyDate getLatestStoredTimestamp(APINames network) {
+        MyDate oldPostTimestamp = null;
+
+        try {
+            String oldPostTimestampString = JSONPersistentManager.getInstance().getLastTimeCheckedForAPI(network);
+            oldPostTimestamp = new MyDate(new Date(Long.valueOf(oldPostTimestampString)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            oldPostTimestamp = new MyDate(new Date(0));
         }
-        return null;
+
+        return oldPostTimestamp;
+    }
+
+    public List<String> getKeywordList(APINames network, String onceUsedKeyword){
+        List<String> keywords = new ArrayList<>();
+
+        if(onceUsedKeyword != null){
+            keywords.add(onceUsedKeyword);
+        }else{
+            try {
+                keywords = JSONPersistentManager.getInstance().getKeywordListForAPI(network);
+                keywords.removeIf(String::isEmpty);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (onceUsedKeyword == null && keywords == null || keywords.size() == 0) {
+            return null;
+        }
+        return keywords;
     }
 
     public MyDate getTimestamp(String info){
-        double msDouble = Double.parseDouble(info);
-        return new MyDate(new Date((long)msDouble*1000));
+        return new MyDate(new Date(Long.valueOf(info)));
     }
 
     public static boolean hasErrorCode(int responseCode) {
-        if (100 <= responseCode && responseCode <= 399) {
+        if (199 <= responseCode && responseCode <= 299) {
             return false;
         } else {
             return true;
         }
+    }
+
+    public static List<PostEntry> elimateOldPostEntries(MyDate latestStoredTimestamp, List<PostEntry> postEntries){
+        //If current postEntry's timestamp is not newer than latestStored, filter it.
+        return postEntries
+                .stream()
+                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) != 1)
+                .collect(Collectors.toList());
     }
 
     public static String encodeUrl(String url){

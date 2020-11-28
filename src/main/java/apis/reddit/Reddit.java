@@ -24,6 +24,8 @@ import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.interceptors.BearerInterceptor;
 import apis.reddit.models.RedditPostResponse;
+import apis.utils.BaseUtil;
+import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
 import persistence.JSONPersistentManager;
@@ -34,7 +36,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
 public class Reddit extends SocialMedia {
@@ -46,23 +50,14 @@ public class Reddit extends SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
     private RedditUtil redditUtil;
-    private List<RedditPostResponse> uploadedFiles;
     private RedditSubscriptionDeamon redditSubscriptionDeamon;
     private Token token;
-    private List<MediaType> supportedMedia;
-    private String latestReponse;
-
-    private TimeUnit timeUnit;
-    private Integer interval;
+    private ScheduledExecutorService executor;
 
     public Reddit() {
         this.redditUtil = new RedditUtil();
-        this.uploadedFiles = new ArrayList<>();
-        this.loadSupportedMedias();
-    }
-
-    private void loadSupportedMedias() {
-        this.supportedMedia = new ArrayList<>();
+        this.redditSubscriptionDeamon = new RedditSubscriptionDeamon();
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -108,10 +103,9 @@ public class Reddit extends SocialMedia {
             String responseString = response.body().string();
             int respCode = response.code();
             logger.info("Response code: " + respCode);
-            if(199 < respCode && respCode < 399){
+            if(!BaseUtil.hasErrorCode(respCode)){
                 RedditPostResponse rpr = new Gson().fromJson(responseString, RedditPostResponse.class);
                 logger.info("Uploaded: " + rpr.getJson().getData().getUrl());
-                this.uploadedFiles.add(rpr);
                 return true;
             }
         } catch (Exception e) {
@@ -122,34 +116,38 @@ public class Reddit extends SocialMedia {
         return false;
     }
 
-    @Override
-    public boolean subscribeToKeyword(String keyword) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        this.redditSubscriptionDeamon = new RedditSubscriptionDeamon(keyword);
+    /**
+     * Listens for new post entries in imgur network for stored keywords.
+     *
+     * @param interval Interval in minutes
+     */
+    public void listen(Integer interval) {
+        if (!executor.isShutdown())
+            executor.shutdown();
 
-        if (this.interval == null || this.timeUnit == null) {
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 30, TimeUnit.MINUTES);
+        /**
+         * TODO wo müssen daten hin, müsste man im deamon nicht irgendwo update() vom observer aufrufen?
+         */
+
+        if (interval == null) {
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
         } else {
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, this.interval, this.timeUnit);
+            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, interval, TimeUnit.MINUTES);
         }
-
-        JSONPersistentManager.getInstance().addKeywordForAPI(REDDIT, keyword);
-
-        return true;
     }
 
-    public void changeSubscriptionInterval(TimeUnit timeUnit, Integer interval) {
-        this.timeUnit = timeUnit;
-        this.interval = interval;
+    @Override
+    public boolean subscribeToKeyword(String keyword) {
+        JSONPersistentManager.getInstance().addKeywordForAPI(REDDIT, keyword);
+        listen(DEFAULT_INTERVALL);
+        return true;
     }
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        return new RedditSubscriptionDeamon(keyword).getRecentMedia();
-    }
-
-    public boolean supportsMediaType(MediaType mediaType) {
-        return this.supportedMedia.contains(mediaType);
+        return this.redditSubscriptionDeamon.getRecentMediaForSubscribedKeywords(keyword)
+                .stream().map(entry -> BlobConverterImpl.downloadToByte(entry.getUrl()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -161,21 +159,4 @@ public class Reddit extends SocialMedia {
     public void setToken(Token token) {
         this.token = token;
     }
-
-    public List<MediaType> getSupportedMedia() {
-        return supportedMedia;
-    }
-
-    public void setSupportedMedia(List<MediaType> supportedMedia) {
-        this.supportedMedia = supportedMedia;
-    }
-
-    public String getLatestReponse() {
-        return latestReponse;
-    }
-
-    public void setLatestReponse(String latestReponse) {
-        this.latestReponse = latestReponse;
-    }
-
 }

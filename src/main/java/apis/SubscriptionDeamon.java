@@ -25,20 +25,10 @@ import java.util.List;
 
 public interface SubscriptionDeamon extends Runnable {
 
-    public boolean checkForNewPostEntries();
-    public List<byte[]> getRecentMediaForKeyword(String keyword);
-    public List<byte[]> getRecentMedia();
+    public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword);
 
     /**
      * Getter & Setter
      */
-
-    public String getSubscriptionKeyword();
-    public void setSubscriptionKeyword(String subscriptionKeyword);
-    public List<PostEntry> getLatestPostEntries();
-    public void setLatestPostEntries(List<PostEntry> latestPostEntries);
-    public MyDate getLatestPostTimestamp();
-    public void setLatestPostTimestamp(MyDate latestPostTimestamp);
     public boolean isNewPostAvailable();
-    public void setNewPostAvailable(boolean newPostAvailable);
 }
