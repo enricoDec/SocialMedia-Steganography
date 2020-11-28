@@ -128,6 +128,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
                 /**
                  * TODO 0 oder letztes element.
                  */
+
                 imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");

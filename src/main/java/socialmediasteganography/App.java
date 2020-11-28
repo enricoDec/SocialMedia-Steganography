@@ -23,13 +23,18 @@ import apis.SocialMedia;
 import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.utils.BlobConverterImpl;
+import persistence.JSONPersistentManager;
+import persistence.PersistenceDummy;
 import steganography.image.ImageSteg;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
+        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+
         //Setup
         SocialMedia socialMedia = new Imgur();
         socialMedia.setToken(new Token("db67746b464982896455ae4a79541f3f3ca16a5b", 100));
@@ -45,7 +50,7 @@ public class App {
         //Search in social media for pictures and try to decode
         List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
 
-        /*
+/*
         //Auswertung als Strings
         List<String> messages = new ArrayList<>();
         for (byte[] b : results) {
@@ -57,7 +62,7 @@ public class App {
                 System.out.println("No bytes for message type found");
             }
         }
-        */
+*/
 
         /*
          //Zum testen, ob dieses Bild korrekt runtergeladen wurde.

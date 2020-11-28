@@ -18,6 +18,7 @@
 
 package apis.utils;
 
+import apis.interceptors.BearerInterceptor;
 import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
@@ -29,9 +30,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class BaseUtil {
+    private static final Logger logger = Logger.getLogger(BaseUtil.class.getName());
 
     public void sortPostEntries(List<PostEntry> postEntries){
         Collections.sort(postEntries);
@@ -48,7 +51,7 @@ public class BaseUtil {
             String oldPostTimestampString = JSONPersistentManager.getInstance().getLastTimeCheckedForAPI(network);
             oldPostTimestamp = new MyDate(new Date(Long.valueOf(oldPostTimestampString)));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("Exception was thrown, while retrieving latest stored timestamp. Default value for latest timestamp is 'new Date(0)'.");
             oldPostTimestamp = new MyDate(new Date(0));
         }
 
@@ -91,7 +94,7 @@ public class BaseUtil {
         //If current postEntry's timestamp is not newer than latestStored, filter it.
         return postEntries
                 .stream()
-                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) != 1)
+                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) == 1)
                 .collect(Collectors.toList());
     }
 

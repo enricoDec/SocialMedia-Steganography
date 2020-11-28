@@ -77,4 +77,10 @@ public class PostEntry implements Comparable<PostEntry>{
     public int compareTo(PostEntry postEntry) {
         return this.getDate().compareTo(postEntry.getDate());
     }
+
+    @Override
+    public String toString(){
+        return "URL: " + getUrl() + "\n"
+            + "Timestamp: " + getDate().toString();
+    }
 }
