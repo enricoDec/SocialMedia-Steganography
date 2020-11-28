@@ -18,15 +18,24 @@
 
 package steganography.video.unit;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import steganography.video.Video;
 
 import java.io.File;
 
-public class DecoderTest {
-    File file = new File("src/main/resources");
+/**
+ * @author : Enrico Gamil Toros de Chadarevian
+ * Project name : steganography
+ * @version : 1.0
+ * @since : 28-11-2020
+ **/
+public class VideoEncoderTest {
+    private File ffmpegBin = new File("src/main/resources");
+    private Video video;
 
-    @Test
-    public void decoderTest(){
-
+    @BeforeEach
+    public void beforeEach() {
     }
+
+
 }
