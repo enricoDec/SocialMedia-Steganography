@@ -33,7 +33,7 @@ import java.util.Iterator;
 
 public class ImageSteg implements Steganography {
 
-    private static final int DEFAULT_SEED = 1732341558;
+    public static final int DEFAULT_SEED = 1732341558;
     private static final int HEADER_SIGNATURE = 1349075561;
 
     @Override
