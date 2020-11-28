@@ -50,7 +50,7 @@ public class VideoSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
-        VideoDecoder videoDecoder = new VideoDecoder(carrier, video, ffmpegBin, debug);
+        VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
         //List used to save the single frames decoded from the carrier
         if (debug)
             log("Decoding Video Frames to images....");
@@ -198,7 +198,7 @@ public class VideoSteg implements Steganography {
         Video video = new Video(steganographicData, ffmpegBin);
 
         //Decode Video Frames to pictures
-        VideoDecoder videoDecoder = new VideoDecoder(steganographicData, video, ffmpegBin, debug);
+        VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
         List<byte[]> imageList = videoDecoder.toPictureByteArray();
 
         return decodeUsingHenkAlgo(imageList, seed);
@@ -298,7 +298,7 @@ public class VideoSteg implements Steganography {
 
         //Decode Video to Single Frames
         Video video = new Video(data, ffmpegBin);
-        VideoDecoder videoDecoder = new VideoDecoder(data, video, ffmpegBin, debug);
+        VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
         imageList = videoDecoder.toPictureByteArray();
 
         boolean isSteganographicData = true;
@@ -348,7 +348,7 @@ public class VideoSteg implements Steganography {
      * @throws IOException if IO Exception occurs
      */
     public long getVideoCapacity(byte[] carrier, boolean subtractDefaultHeader, boolean withTransparent) throws IOException {
-        VideoDecoder videoDecoder = new VideoDecoder(carrier, new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
+        VideoDecoder videoDecoder = new VideoDecoder(new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
         List<byte[]> pictureList = videoDecoder.toPictureByteArray();
         ImageSteg imageSteg = new ImageSteg();
 

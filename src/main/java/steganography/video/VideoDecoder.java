@@ -18,6 +18,7 @@
 
 package steganography.video;
 
+import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffmpeg.*;
 
@@ -45,9 +46,9 @@ public class VideoDecoder {
     private final boolean logging;
     Video video;
 
-    public VideoDecoder(byte[] videoByteArray, Video video, File ffmpegBin, boolean logging) {
+    public VideoDecoder(Video video, File ffmpegBin, boolean logging) {
         this.ffmpegBin = ffmpegBin;
-        this.videoByteArray = videoByteArray;
+        this.videoByteArray = video.getVideoByteArray();
         this.logging = logging;
         this.video = video;
     }
@@ -66,49 +67,70 @@ public class VideoDecoder {
         File soundFile = File.createTempFile("VideoSteganography-", ".mp3");
         SeekableByteChannel sbc = Files.newByteChannel(soundFile.toPath(), StandardOpenOption.WRITE);
 
-        FFmpeg.atPath(ffmpegBin.toPath())
-                .addInput(PipeInput.pumpFrom(inputStream))
-                //Create Audio File
-                .addOutput(ChannelOutput
-                        .toChannel(soundFile.getName(), sbc)
-                        .disableStream(StreamType.VIDEO)
-                        .disableStream(StreamType.DATA)
-                )
-                .addOutput(FrameOutput
-                        .withConsumer(
-                                new FrameConsumer() {
-                                    int frameNumber = 1;
+        FrameConsumer frameConsumer = new FrameConsumer() {
+                int frameNumber = 1;
 
-                                    @Override
-                                    public void consumeStreams(List<Stream> streams) {
-                                    }
+                @Override
+                public void consumeStreams(List<Stream> streams) {
+                }
 
-                                    @Override
-                                    public void consume(Frame frame) {
-                                        // End of Stream
-                                        if (frame == null) {
-                                            return;
-                                        }
-                                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                        try {
-                                            //TODO: Make this faster
-                                            ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
-                                            ptsList.add(frame.getPts());
-                                            if (logging && frameNumber % 2 == 0)
-                                                System.out.println("Decoded Frame (" + frameNumber + "/" + video.getFrameCount() + ")");
-                                            frameNumber++;
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        imageList.add(byteArrayOutputStream.toByteArray());
-                                    }
-                                }
-                        )
-                        .disableStream(StreamType.SUBTITLE)
-                        .disableStream(StreamType.DATA)
-                        .disableStream(StreamType.AUDIO)
-                )
-                .execute();
+                @Override
+                public void consume(Frame frame) {
+                    // End of Stream
+                    if (frame == null) {
+                        return;
+                    }
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    try {
+                        //TODO: Make this faster
+                        ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
+                        ptsList.add(frame.getPts());
+                        if (logging && frameNumber % 2 == 0)
+                            System.out.println("Decoded Frame (" + frameNumber + "/" + video.getFrameCount() + ")");
+                        frameNumber++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    imageList.add(byteArrayOutputStream.toByteArray());
+                }
+            };
+
+
+        if (video.hasAudioStream()) {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(PipeInput.pumpFrom(inputStream))
+                    //Create Audio File
+                    .addOutput(ChannelOutput
+                            .toChannel(soundFile.getName(), sbc)
+                            .disableStream(StreamType.VIDEO)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.SUBTITLE)
+                    )
+                    .addOutput(FrameOutput
+                            // TODO: Check if all params are needed
+                            .withConsumer(frameConsumer)
+                            .setFrameCount(StreamType.VIDEO, video.getFrameCount())
+                            .setFrameRate(video.getFrameRate())
+                            .disableStream(StreamType.SUBTITLE)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.AUDIO)
+                    )
+                    .setOverwriteOutput(true)
+                    .execute();
+        }else {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(PipeInput.pumpFrom(inputStream))
+                    .addOutput(FrameOutput
+                            .withConsumer(frameConsumer)
+                            .setFrameCount(StreamType.VIDEO, video.getFrameCount())
+                            .setFrameRate(video.getFrameRate())
+                            .disableStream(StreamType.SUBTITLE)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.AUDIO)
+                    )
+                    .setOverwriteOutput(true)
+                    .execute();
+        }
 
         video.setAudioFile(soundFile);
         return imageList;
