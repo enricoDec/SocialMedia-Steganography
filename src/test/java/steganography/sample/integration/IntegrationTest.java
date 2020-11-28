@@ -16,15 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package apis.junit.unit;
+package steganography.sample.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class UnitTest {
-
+public class IntegrationTest {
     @Test
-    void unitTest() {
+    void integrationTest() {
         Assertions.assertTrue(true);
     }
 }
