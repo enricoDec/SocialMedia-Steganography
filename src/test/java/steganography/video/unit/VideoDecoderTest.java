@@ -46,7 +46,7 @@ public class VideoDecoderTest {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));
             this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray().size());
+            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
         } catch (IOException e) {
             Assertions.fail("Couldn't decode Video");
         }
@@ -61,7 +61,7 @@ public class VideoDecoderTest {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video2.MP4"));
             this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray().size());
+            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
         } catch (IOException e) {
             e.printStackTrace();
             Assertions.fail("Couldn't decode Video");
@@ -90,7 +90,8 @@ public class VideoDecoderTest {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));
             this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            List<byte[]> imageList = decoder.toPictureByteArray();
+            ImageIO.setUseCache(false);
+            List<byte[]> imageList = decoder.toPictureByteArray(4);
 
             for (byte[] image: imageList) {
                 BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(image));
