@@ -54,7 +54,7 @@ public class VideoEncoder {
      * @param stegImages list of images to be encoded
      * @param ptsList    list of pts of each frame
      * @return video
-     * @throws IOException
+     * @throws IOException IOException
      */
     public byte[] imagesToVideo(List<byte[]> stegImages, List<Long> ptsList) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");
@@ -80,7 +80,7 @@ public class VideoEncoder {
                     return null;
                 }
                 if (logging)
-                    System.out.println("Encoded Frame (" + frameCounter + "/" + stegImages.size() + ")");
+                    System.out.println("(Pictures -> Video): (" + frameCounter + "/" + stegImages.size() + ")");
 
                 Frame videoFrame = null;
                 try {
