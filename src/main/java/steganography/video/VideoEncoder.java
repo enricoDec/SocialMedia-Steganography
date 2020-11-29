@@ -48,56 +48,70 @@ public class VideoEncoder {
         this.video = video;
     }
 
+    /**
+     * Encode a list of images to a video
+     *
+     * @param stegImages list of images to be encoded
+     * @param ptsList    list of pts of each frame
+     * @return video
+     * @throws IOException IOException
+     */
     public byte[] imagesToVideo(List<byte[]> stegImages, List<Long> ptsList) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");
         tempFile.deleteOnExit();
         SeekableByteChannel sbc = Files.newByteChannel(tempFile.toPath(), StandardOpenOption.WRITE);
 
-        FFmpeg.atPath(ffmpegBin.toPath())
-                .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
-                .addInput(
-                        FrameInput.withProducer(
-                                new FrameProducer() {
-                                    int frameCounter = 0;
+        FrameProducer frameProducer = new FrameProducer() {
+            int frameCounter = 0;
 
-                                    @Override
-                                    public List<Stream> produceStreams() {
-                                        return Collections.singletonList(new Stream()
-                                                .setType(Stream.Type.VIDEO)
-                                                .setTimebase(video.getTimebase())
-                                                .setResolution(video.getFrameWidth(), video.getFrameHeight())
-                                        );
-                                    }
+            @Override
+            public List<Stream> produceStreams() {
+                return Collections.singletonList(new Stream()
+                        .setType(Stream.Type.VIDEO)
+                        .setTimebase(video.getTimebase())
+                        .setResolution(video.getFrameWidth(), video.getFrameHeight())
+                );
+            }
 
-                                    @Override
-                                    public Frame produce() {
-                                        if (frameCounter + 1 > stegImages.size()) {
-                                            //All frames consumed
-                                            return null;
-                                        }
-                                        if (logging)
-                                            System.out.println("Encoded Frame (" + frameCounter + "/" + stegImages.size() + ")");
+            @Override
+            public Frame produce() {
+                if (frameCounter + 1 > stegImages.size()) {
+                    //All frames consumed
+                    return null;
+                }
+                if (logging)
+                    System.out.println("(Pictures -> Video): (" + frameCounter + "/" + stegImages.size() + ")");
 
-                                        Frame videoFrame = null;
-                                        try {
-                                            videoFrame = new Frame(0, ptsList.get(frameCounter), ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        frameCounter++;
+                Frame videoFrame = null;
+                try {
+                    videoFrame = new Frame(0, ptsList.get(frameCounter), ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                frameCounter++;
 
-                                        return videoFrame;
-                                    }
-                                }
-                        )
-                                .setFrameRate(video.getFrameRate())
-                )
-                .setOverwriteOutput(true)
-                .addOutput(
-                        ChannelOutput.toChannel(tempFile.getName(), sbc)
-                )
-                .addArguments("-vcodec", "png")
-                .execute();
+                return videoFrame;
+            }
+        };
+
+        if (video.hasAudioStream()) {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
+                    .addInput(FrameInput.withProducer(frameProducer)
+                            .setFrameRate(video.getFrameRate()))
+                    .setOverwriteOutput(true)
+                    .addOutput(ChannelOutput.toChannel(tempFile.getName(), sbc))
+                    .addArguments("-vcodec", "png")
+                    .execute();
+        } else {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(FrameInput.withProducer(frameProducer)
+                            .setFrameRate(video.getFrameRate()))
+                    .setOverwriteOutput(true)
+                    .addOutput(ChannelOutput.toChannel(tempFile.getName(), sbc))
+                    .addArguments("-vcodec", "png")
+                    .execute();
+        }
 
         return new FileInputStream(tempFile).readAllBytes();
     }

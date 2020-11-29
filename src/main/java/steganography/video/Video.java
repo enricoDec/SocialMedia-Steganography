@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Enrico de Chadarevian
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,12 @@ package steganography.video;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
+import com.github.kokorin.jaffree.ffprobe.Stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author : Enrico Gamil Toros de Chadarevian
@@ -35,17 +37,24 @@ import java.io.InputStream;
 public class Video {
     private final File ffmpegBin;
     private float frameRate;
-    private int frameCount;
+    private long frameCount;
     private int frameWidth;
     private int frameHeight;
     private Long timebase;
     private final byte[] videoByteArray;
     private File audioFile;
+    private String pixelformat;
+    private String codec;
+    private boolean hasAudioStream = false;
 
-    public Video(byte[] videoByteArray, File ffmpegBin) {
+    public Video(byte[] videoByteArray, File ffmpegBin) throws UnsupportedEncodingException {
         this.videoByteArray = videoByteArray;
         this.ffmpegBin = ffmpegBin;
         //analyse the data (check if data has Video)
+        if (videoByteArray == null || videoByteArray.length < 10)
+            throw new IllegalArgumentException("videoByteArray can't be empty");
+        if (!ffmpegBin.exists())
+            throw new IllegalArgumentException("FFmpegBin is invalid");
         analyseVideo();
     }
 
@@ -54,7 +63,7 @@ public class Video {
      * Checks if given data is a Video and has a Video Stream
      * Sets the frame rate and frame count
      */
-    private void analyseVideo() {
+    private void analyseVideo() throws UnsupportedEncodingException {
         InputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
         FFprobe ffprobe;
@@ -63,22 +72,29 @@ public class Video {
         FFprobeResult result = ffprobe
                 .setInput(inputStream)
                 .setShowStreams(true)
-                .setSelectStreams(StreamType.VIDEO)
                 .execute();
 
-
         //Check if given Video has a Video Stream or more then one
-        if (result.getStreams().isEmpty() || result.getStreams().get(0).getCodecType() != StreamType.VIDEO)
-            throw new IllegalArgumentException("No Video Stream in given Video");
-        if (result.getStreams().size() != 1)
-            throw new IllegalArgumentException("Multiple Video Streams in given Video");
+        if (result.getStreams().isEmpty())
+            throw new UnsupportedEncodingException("Video has no streams");
+
+        boolean hasVideoStream = false;
+        for (Stream stream : result.getStreams()) {
+            if (stream.getCodecType() == StreamType.VIDEO)
+                hasVideoStream = true;
+            if (stream.getCodecType() == StreamType.AUDIO)
+                hasAudioStream = true;
+        }
+        if (!hasVideoStream)
+            throw new UnsupportedEncodingException("No Video Stream in given Video");
 
         //Saving some info on frames
         this.frameCount = result.getStreams().get(0).getNbFrames();
-        // Some people just hate OOP I guess
         this.frameRate = (result.getStreams().get(0).getAvgFrameRate()).floatValue();
         this.frameWidth = result.getStreams().get(0).getWidth();
         this.frameHeight = result.getStreams().get(0).getHeight();
+        this.codec = result.getStreams().get(0).getCodecName();
+        this.pixelformat = result.getStreams().get(0).getPixFmt();
         //Time base for some reason is returned as String
         String[] strings = (result.getStreams().get(0).getTimeBase()).split("/");
         this.timebase = Long.valueOf(strings[1]);
@@ -88,7 +104,7 @@ public class Video {
         return frameRate;
     }
 
-    public int getFrameCount() {
+    public long getFrameCount() {
         return frameCount;
     }
 
@@ -108,7 +124,38 @@ public class Video {
         return audioFile;
     }
 
+    public byte[] getVideoByteArray() {
+        return videoByteArray;
+    }
+
     public void setAudioFile(File audioFile) {
         this.audioFile = audioFile;
+    }
+
+    public String getCodec() {
+        return codec;
+    }
+
+    public String getPixelformat() {
+        return pixelformat;
+    }
+
+    public boolean hasAudioStream() {
+        return hasAudioStream;
+    }
+
+    @Override
+    public String toString() {
+        return "Video{" +
+                "ffmpegBin=" + ffmpegBin +
+                ", frame rate=" + frameRate +
+                ", frame count=" + frameCount +
+                ", frame width=" + frameWidth +
+                ", frame height=" + frameHeight +
+                ", timebase=" + timebase +
+                ", pixel format='" + pixelformat + '\'' +
+                ", codec='" + codec + '\'' +
+                ", has Audio Stream=" + hasAudioStream +
+                '}';
     }
 }

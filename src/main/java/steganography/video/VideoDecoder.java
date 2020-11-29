@@ -22,15 +22,14 @@ import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffmpeg.*;
 
 import javax.imageio.ImageIO;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * @author : Enrico Gamil Toros de Chadarevian
@@ -45,66 +44,130 @@ public class VideoDecoder {
     private final boolean logging;
     Video video;
 
-    public VideoDecoder(byte[] videoByteArray, Video video, File ffmpegBin, boolean logging) {
+    public VideoDecoder(Video video, File ffmpegBin, boolean logging) {
         this.ffmpegBin = ffmpegBin;
-        this.videoByteArray = videoByteArray;
+        this.videoByteArray = video.getVideoByteArray();
         this.logging = logging;
         this.video = video;
     }
 
-    public List<byte[]> toPictureByteArray() throws IllegalArgumentException, IOException {
-        List<byte[]> imageList = new ArrayList<>();
+    /**
+     * Decode a Video into a list of single Pictures
+     *
+     * @return list of pictures
+     * @throws IllegalArgumentException IllegalArgumentException
+     * @throws IOException              IOException
+     */
+    public List<byte[]> toPictureByteArray(int nThread) throws IllegalArgumentException, IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
+        //Temp file to save muxed audio channel
         File soundFile = File.createTempFile("VideoSteganography-", ".mp3");
         SeekableByteChannel sbc = Files.newByteChannel(soundFile.toPath(), StandardOpenOption.WRITE);
 
-        FFmpeg.atPath(ffmpegBin.toPath())
-                .addInput(PipeInput.pumpFrom(inputStream))
-                //Create Audio File
-                .addOutput(ChannelOutput
-                        .toChannel(soundFile.getName(), sbc)
-                        .disableStream(StreamType.VIDEO)
-                        .disableStream(StreamType.DATA)
-                )
-                .addOutput(FrameOutput
-                        .withConsumer(
-                                new FrameConsumer() {
-                                    int frameNumber = 1;
+        //Executor service that will run FrameConsume consume()
+        ExecutorService taskExecutor = Executors.newFixedThreadPool(nThread);
+        //List of callable objects that will return a map of byte[] of the list
+        List<Callable<Map<byte[], Long>>> taskList = new ArrayList<>();
 
-                                    @Override
-                                    public void consumeStreams(List<Stream> streams) {
-                                    }
+        // for each frame FrameConsumer calls consume(), we create a callable Object each time
+        FrameConsumer frameConsumer = new FrameConsumer() {
+            int frameNumber = 1;
 
-                                    @Override
-                                    public void consume(Frame frame) {
-                                        // End of Stream
-                                        if (frame == null) {
-                                            return;
-                                        }
-                                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                        try {
-                                            //TODO: Make this faster
-                                            ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
-                                            ptsList.add(frame.getPts());
-                                            if (logging && frameNumber % 2 == 0)
-                                                System.out.println("Decoded Frame (" + frameNumber + "/" + video.getFrameCount() + ")");
-                                            frameNumber++;
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        imageList.add(byteArrayOutputStream.toByteArray());
-                                    }
+            @Override
+            public void consumeStreams(List<Stream> streams) {
+            }
+
+            @Override
+            public void consume(Frame frame) {
+                taskList.add(() -> {
+                            Map<byte[], Long> map = null;
+                            // End of Stream
+                            if (frame == null) {
+                                return map = Map.of(
+                                        new byte[0], 0L
+                                );
+                            }
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            try {
+                                ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
+                                map = Map.of(
+                                        byteArrayOutputStream.toByteArray(), frame.getPts()
+                                );
+                                if (logging && frameNumber % 2 == 0) {
+                                    System.out.println("(Video -> Picture): (" + frameNumber + "/" + video.getFrameCount() + ")");
                                 }
-                        )
-                        .disableStream(StreamType.SUBTITLE)
-                        .disableStream(StreamType.DATA)
-                        .disableStream(StreamType.AUDIO)
-                )
-                .execute();
+                                frameNumber++;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return map;
+                        }
+                );
+            }
 
+        };
+
+
+        if (video.hasAudioStream()) {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(PipeInput.pumpFrom(inputStream))
+                    //Create Audio File
+                    .addOutput(ChannelOutput
+                            .toChannel(soundFile.getName(), sbc)
+                            .disableStream(StreamType.VIDEO)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.SUBTITLE)
+                    )
+                    .addOutput(FrameOutput
+                            // TODO: Check if all params are needed
+                            .withConsumer(frameConsumer)
+                            .setFrameCount(StreamType.VIDEO, video.getFrameCount())
+                            .setFrameRate(video.getFrameRate())
+                            .disableStream(StreamType.SUBTITLE)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.AUDIO)
+                    )
+                    .setOverwriteOutput(true)
+                    .execute();
+        } else {
+            FFmpeg.atPath(ffmpegBin.toPath())
+                    .addInput(PipeInput.pumpFrom(inputStream))
+                    .addOutput(FrameOutput
+                            .withConsumer(frameConsumer)
+                            .setFrameCount(StreamType.VIDEO, video.getFrameCount())
+                            .setFrameRate(video.getFrameRate())
+                            .disableStream(StreamType.SUBTITLE)
+                            .disableStream(StreamType.DATA)
+                            .disableStream(StreamType.AUDIO)
+                    )
+                    .setOverwriteOutput(true)
+                    .execute();
+        }
+
+        //Execute all tasks
+        List<byte[]> decodedImages = new ArrayList<>();
+        List<Future<Map<byte[], Long>>> futureList;
+        try {
+            futureList = taskExecutor.invokeAll(taskList);
+            //Wait for all results
+            for (Future<Map<byte[], Long>> result : futureList) {
+                result.get().forEach(
+                        (k, v) -> {
+                            if (k.length == 0)
+                                return;
+                            decodedImages.add(k);
+                            ptsList.add(v);
+                        }
+                );
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            taskExecutor.shutdown();
+        }
         video.setAudioFile(soundFile);
-        return imageList;
+        return decodedImages;
     }
 
     public List<Long> getPtsList() {
