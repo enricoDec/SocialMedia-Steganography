@@ -1,0 +1,416 @@
+/*
+ * Copyright (c) 2020
+ * Contributed by Richard Rudek
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package steganography.audio.mp3;
+
+import steganography.audio.util.Converter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+/**
+ * This class represents an MP3 file.
+ * @author Richard Rudek
+ */
+public class MP3File {
+    /**
+     * Bytes of an MP3 file
+     */
+    private final byte[] mp3Bytes;
+
+    /**
+     * Number of frames
+     */
+    private int frameCount = -1;
+
+    /**
+     * List of every Frame in this MP3File
+     */
+    private List<Frame> frames = null;
+
+
+    /**
+     * This constructs an MP3File object with the given bytes.
+     * @param mp3Bytes the byte array containing the bytes of an MP3 file
+     */
+    public MP3File(byte[] mp3Bytes) {
+        this.mp3Bytes = mp3Bytes;
+    }
+
+    /**
+     * Returns the byte array this class was given.
+     */
+    public byte[] getMP3Bytes() {
+        return this.mp3Bytes;
+    }
+
+    /**
+     * Returns the number of frames in this MP3 file.
+     * @return int - Number of frames,<br/>
+     *         -1 if there was no prior search for headers
+     */
+    public int getFrameCount() {
+        return frameCount;
+    }
+
+    /**
+     * Returns the information of every frame in this MP3 file. The header is included in each frame.
+     * @return - null, if findAllFrames() has not been called or there are no frames<br/>
+     *         - List containing Frames
+     */
+    public List<Frame> getFrames() {
+        return this.frames;
+    }
+
+    /**
+     * Returns the positions of bytes that are safe to modify.
+     * @return List of Integers - all modifiable bytes in this MP3 file
+     */
+    public List<Integer> getModifiablePositions() {
+        List<Integer> result = new ArrayList<>();
+
+        int frameCounter = 0;
+        Frame currentFrame;
+        // loop through mp3 bytes starting at first frame to find data bytes
+        // TODO test if this really skip the headers and checksums
+        for (int i = this.frames.get(0).getStartingByte() + Frame.HEADER_LENGTH; i < this.mp3Bytes.length; i++) {
+            // get the next frame
+            currentFrame = this.frames.get(frameCounter);
+
+            // if the header of the frame is crc protected, skip the next two bytes (crc checksum)
+            if (currentFrame.isCrcProtected())
+                i += 2;
+
+            // add the data byte to the list of modifiable bytes
+            if (i < (currentFrame.getStartingByte() + currentFrame.getLength()))
+                result.add(i);
+
+            // look at the next frame when loop has gone through every data byte of the current frame
+            if (i > (currentFrame.getStartingByte() + currentFrame.getLength()))
+                frameCounter++;
+
+            if (frameCounter >= this.frameCount)
+                break;
+        }
+        return result;
+    }
+
+    /**
+     * Attempts to find {@link Frame frames} by searching for MP3 frame headers and
+     * saves their information in this MP3File.
+     * @return true, if frames have been found<br/>
+     *         false, if there are none
+     */
+    public boolean findAllFrames() {
+        if (this.frames == null) {
+            this.frames = new ArrayList<>();
+            this.frameCount = findFrames();
+        }
+
+        if (this.frameCount == 0) {
+            this.frames = null;
+        }
+
+        return this.frames != null;
+    }
+
+    /**
+     * Searches the MP3 byte array for its headers and saves them.
+     * @return int - Number of headers found
+     */
+    private int findFrames() {
+        int lastPosition = 0;
+        int framesFound = 0;
+        System.out.println("Starting the search for the frames in the MP3 byte Array.");
+        while (lastPosition != -1) {
+            try {
+                // find the next frame
+                Frame frame = findNextFrame(lastPosition);
+                // if there is another frame, save the last (since length is needed)
+                this.frames.add(frame);
+
+                // set counting variables accordingly
+                framesFound++;
+                lastPosition += frame.getLength();
+            } catch (NoSuchElementException e) {
+                // set counting variables accordingly
+                lastPosition = -1;
+            }
+        }
+        System.out.println("All frames found.");
+        return framesFound;
+    }
+
+    /**
+     * Find the next frame starting at byte searchStart.
+     * @param searchStart Position in the byte array from which the next frame is searched
+     * @return {@link Frame} - Object containing information about the header and frame
+     * @throws NoSuchElementException if there is no header after searchStart
+     */
+    private Frame findNextFrame(int searchStart) throws NoSuchElementException {
+        Frame frame = new Frame();
+
+        for (int i = searchStart; i < this.mp3Bytes.length; i++) {
+            // find a byte were all bits are set to 1
+            // in java: 1111 1111 = -1
+            if (this.mp3Bytes[i] != -1) {
+                continue;
+            }
+
+            // frame candidate found, check next bits
+            byte[] bitsOfNextByte = Converter.byteToBits(this.mp3Bytes[i+1]);
+            if (bitsOfNextByte[0] == 0 || bitsOfNextByte[1] == 0 || bitsOfNextByte[2] == 0) {
+                // this and next bytes are no frame, so skip loop
+                i++;
+                continue;
+            }
+
+            // frame (probably) found
+            if (frame.getStartingByte() == -1) {
+                // starting position is not set --> set it
+                frame.setStartingByte(i);
+                continue;
+            } else {
+                // starting position has been set --> set length
+                frame.setLength(i - frame.getStartingByte());
+            }
+
+            try {
+                if (!validateFrame(frame).isValid()) {
+                    throw new IllegalArgumentException("Not valid");
+                }
+                // frame found, break loop
+                break;
+            } catch (IllegalArgumentException e) {
+                // frame is not valid, reset starting position
+                frame.setStartingByte(i);
+            }
+        }
+
+        if (frame.getStartingByte() == -1 || frame.getLength() == -1) {
+            // no frame found --> throw exception
+            throw new NoSuchElementException("Could not find a frame after position " + searchStart);
+        }
+        return frame;
+    }
+
+    /**
+     * Checks if the given frame is valid.
+     * If it is, this method corrects the frames fields
+     * @param frame MP3 frame to validate
+     * @return {@link Frame} - The given Frame with its fields adjusted
+     * @throws IllegalArgumentException if the frame is not supported or invalid
+     */
+    private Frame validateFrame(Frame frame) throws IllegalArgumentException {
+        frame.setValid(true);
+        // get the bits, that have to be checked
+        byte[] bytesToValidate = new byte[6];
+        System.arraycopy(this.mp3Bytes, frame.getStartingByte(), bytesToValidate, 0, 6);
+        byte[][] bitsToValidate = Converter.byteToBits(bytesToValidate);
+
+        // --------------------------------------------------------------------------------------------------------- \\
+        // ------------------------------------------- VALIDATING HEADER ------------------------------------------- \\
+        // --------------------------------------------------------------------------------------------------------- \\
+
+        // check for frame synchronizer
+        // 11111111 111***** ******** ********
+        // 11x 1 --> first byte = -1 and first 3 bits of second byte are 1
+        if (bytesToValidate[0] != -1 || bitsToValidate[1][0] != 1 ||
+                bitsToValidate[1][1] != 1 || bitsToValidate[1][2] != 1) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("Frame sync invalid");
+        }
+
+        // MPEG version id
+        // ******** ***##*** ******** ********
+        // 00 = v2.5
+        // 01 = reserved/invalid
+        // 10 = v2
+        // 11 = v1
+        if (bitsToValidate[1][3] == 0 && bitsToValidate[1][4] == 1) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("MPEG version is invalid");
+        }
+        float mpegVersion = -1f;
+        if (bitsToValidate[1][3] == 0 && bitsToValidate[1][4] == 0) {
+            mpegVersion = 2.5f;
+        }
+        if (bitsToValidate[1][3] == 1 && bitsToValidate[1][4] == 0) {
+            mpegVersion = 2f;
+        }
+        if (bitsToValidate[1][3] == 1 && bitsToValidate[1][4] == 1) {
+            mpegVersion = 1f;
+        }
+
+        // Layer
+        // ******** *****##* ******** ********
+        // 00 = reserved/invalid
+        // 01 = Layer III
+        // 10 = Layer II
+        // 11 = Layer I
+        if (bitsToValidate[1][5] == 0 && bitsToValidate[1][6] == 0) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("Layer is invalid");
+        }
+        int layer = -1;
+        if (bitsToValidate[1][5] == 0 && bitsToValidate[1][6] == 1) {
+            layer = 3;
+        }
+        if (bitsToValidate[1][5] == 1 && bitsToValidate[1][6] == 0) {
+            layer = 2;
+        }
+        if (bitsToValidate[1][5] == 1 && bitsToValidate[1][6] == 1) {
+            layer = 1;
+        }
+
+        // CRC
+        // ******** *******# ******** ********
+        // 0 = protected by CRC
+        // 1 = not protected
+        frame.setCrcProtected(bitsToValidate[1][7] == 0);
+        if (frame.isCrcProtected()) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("CRC16 is not (yet) supported");
+        }
+
+        // bitrate
+        // ******** ******** ####**** ********
+        // 0000 = free
+        // 0001 = 32 kbps
+        // 0010 = 40 kbps
+        // 0011 = 48 kbps
+        // 0100 = 56 kbps
+        // 0101 = 64 kbps
+        // 0110 = 80 kbps
+        // 0111 = 96 kbps
+        // 1000 = 112 kbps
+        // 1001 = 128 kbps
+        // 1010 = 160 kbps
+        // 1011 = 192 kbps
+        // 1100 = 224 kbps
+        // 1101 = 256 kbps
+        // 1110 = 320 kbps
+        // 1111 = bad/invalid
+        int bitrateValue = Converter.bitsToByte(
+                new byte[] {
+                        0, 0, 0, 0,
+                        bitsToValidate[2][0], bitsToValidate[2][1], bitsToValidate[2][2], bitsToValidate[2][3]
+                }
+        );
+
+        // sampling rate
+        // ******** ******** ****##** ********
+        // 00 = 44100 Hz
+        // 01 = 48000 Hz
+        // 10 = 32000 Hz
+        // 11 = reserved/invalid
+        int samplingRateValue = Converter.bitsToByte(
+                new byte[] {
+                        0, 0, 0, 0, 0, 0, bitsToValidate[2][4], bitsToValidate[2][5]
+                }
+        );
+
+        // padding
+        // ******** ******** ******#* ********
+        // 0 = frame is not padded
+        // 1 = frame is padded
+        frame.setPadded(bitsToValidate[2][6] == 1);
+
+        // private bit
+        // ******** ******** *******# ********
+        // can be used freely - can be safely ignored
+
+        // channel
+        // ******** ******** ******** ##******
+        // 00 = stereo
+        // 01 = joint stereo
+        // 10 = dual
+        // 11 = mono
+        // can be safely ignored
+
+        // mode extension
+        // ******** ******** ******** **##****
+        // if joint stereo is set
+        // bits = Intensity Stereo  - MS Stereo
+        // 00   = off               - off
+        // 01   = on                - off
+        // 10   = off               - on
+        // 11   = on                - on
+        // can be safely ignored
+
+        // copyright
+        // ******** ******** ******** ****#***
+        // 0 = audio is not copyrighted
+        // 1 = audio is copyrighted
+        // can be safely ignored
+
+        // original
+        // ******** ******** ******** *****#**
+        // 0 = copy
+        // 1 = original media
+        // can be safely ignored
+
+        // emphasis
+        // ******** ******** ******** ******##
+        // 00 = none
+        // 01 = 50/15
+        // 10 = reserved/invalid
+        // 11 = ccit j.17
+        if (bitsToValidate[3][6] == 1 && bitsToValidate[3][7] == 1) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("Emphasis is invalid");
+        }
+
+        // ---------------------------------------------------------------------------------------------------------- \\
+        // --------------------------------------------- LOOK UP VALUES --------------------------------------------- \\
+        // ---------------------------------------------------------------------------------------------------------- \\
+
+        // Bitrate
+        try {
+            // cast float to int for convenience (2f and 2.5f will cast to 2)
+            // and look up bitrate
+            frame.setBitrate(BitRateLookUp.getValueForBitrate((int) mpegVersion, layer, bitrateValue));
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        // Sampling rate
+        try {
+            frame.setSamplingRate(SamplingRateLookUp.getValueForSamplingRate(mpegVersion, samplingRateValue));
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        // --------------------------------------------------------------------------------------------------------- \\
+        // ---------------------------------------- VALIDATING FRAME LENGTH ---------------------------------------- \\
+        // --------------------------------------------------------------------------------------------------------- \\
+
+        // length = (12 * (bitrate * 1000) / samplingRate + padding) * 4     // includes header
+        // bitrate * 1000 because the formula requires bits per ms
+        if (layer == 1) {
+            frame.setLength((12 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 4 : 0)) * 4);
+        }
+
+        // length = (144 * (bitrate * 1000) / samplingRate ) + padding       // includes header
+        if (layer == 2 || layer == 3) {
+            frame.setLength(144 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 1 : 0));
+        }
+        return frame;
+    }
+}
