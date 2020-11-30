@@ -27,27 +27,32 @@ import java.util.List;
 import java.util.Random;
 
 public class PixelBit extends BuffImgEncoder {
-    private int numOfChannels;
+    private int numOfChannels = 3;
 
     public PixelBit(BufferedImageCoordinateOverlay overlay) throws IllegalArgumentException{
         super(overlay);
+    }
 
-        // accept or reject bit depth
-        int pixelSize = overlay.getBufferedImage().getColorModel().getPixelSize();
+    /**
+     * Returns the number of color channels this algorithm is currently choosing random from
+     * to encode data.
+     * @return the number of color channels currently used
+     */
+    public int getNumberOfChannels() {
+        return this.numOfChannels;
+    }
 
-        if (pixelSize != 24 && pixelSize != 32)
-            throw new IllegalArgumentException("Bit depth must be either 24 or 32, but is " + pixelSize);
-
-        this.numOfChannels = pixelSize / 8;
+    public void setNumberOfChannels(int numberOfChannels) {
+        this.numOfChannels = numberOfChannels;
     }
 
     @Override
     public void encode(byte[] payload) {
         if ((payload.length * 8) > overlay.available()) {
-            StringBuilder sb = new StringBuilder("More Bits of payload (");
-            sb.append(payload.length * 8);
-            sb.append(") than pixels available (");
-            sb.append(this.overlay.available()).append(")");
+            StringBuilder sb = new StringBuilder("More Bits of payload (")
+                .append(payload.length * 8)
+                .append(") than pixels available (")
+                .append(this.overlay.available()).append(")");
             throw new IndexOutOfBoundsException(sb.toString());
         }
 
@@ -87,7 +92,6 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     public byte[] decodeEverything() {
-        // true = 1; false = 0;
         List<Boolean> pixelBitList = new ArrayList<>();
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         while (overlay.available() >= 8) {

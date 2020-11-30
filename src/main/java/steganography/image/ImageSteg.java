@@ -35,6 +35,13 @@ public class ImageSteg implements Steganography {
 
     public static final int DEFAULT_SEED = 1732341558;
     private static final int HEADER_SIGNATURE = 1349075561;
+    private boolean useDefaultHeader = true;
+
+    // @Override
+    // public void useDefaultHeader(boolean useDefaultHeader) {
+    //     // TODO: Might be problematic decoding, length has to be given from user
+    //     // this.useDefaultHeader = useDefaultHeader;
+    // }
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
@@ -45,10 +52,15 @@ public class ImageSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
-        BufferedImageCoordinateOverlay overlay = new RemoveTransparentShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
+        int type = buffImgAndFormat.getBufferedImage().getType();
+
+        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
-        encoder.encode(int2bytes(HEADER_SIGNATURE));
-        encoder.encode(int2bytes(payload.length));
+
+        if (this.useDefaultHeader) {
+            encoder.encode(int2bytes(HEADER_SIGNATURE));
+            encoder.encode(int2bytes(payload.length));
+        }
         encoder.encode(payload);
 
         return bufferedImage2byteArray(overlay.getBufferedImage(), buffImgAndFormat.getFormat());
@@ -63,9 +75,10 @@ public class ImageSteg implements Steganography {
     public byte[] decode(byte[] steganographicData, long seed) throws IOException {
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
 
-        BufferedImageCoordinateOverlay overlay = new RemoveTransparentShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
+        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
 
+        // TODO: only do this if useDefaultHeader == true, but length has to be given from user
         // decode 4 bytes and compare them to header signature
         if (bytesToInt(encoder.decode(4)) != HEADER_SIGNATURE) {
             // TODO: Specialized Exception
@@ -123,9 +136,29 @@ public class ImageSteg implements Steganography {
     }
 
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////
     //                                       UTIL
     ////////////////////////////////////////////////////////////////////////////////////////////
+
+    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedEncodingException {
+        int type = bufferedImage.getType();
+        switch (type) {
+            case BufferedImage.TYPE_INT_ARGB:
+            case BufferedImage.TYPE_4BYTE_ABGR:
+            case BufferedImage.TYPE_INT_RGB:
+            case BufferedImage.TYPE_INT_BGR:
+                return new ShuffleOverlay(bufferedImage, seed);
+            case BufferedImage.TYPE_BYTE_INDEXED:
+                // TODO: Put 8 Bit algorithm here
+                throw new UnsupportedEncodingException("8 Bit / Type BYTE_INDEXED not yet implemented");
+                // overlay = null;
+                // encoder = null;
+                // break;
+            default:
+                throw new UnsupportedEncodingException("Image type is not supported");
+        }
+    }
 
     private BuffImgAndFormat carrier2BufferedImage(byte[] carrier) throws IOException {
         BuffImgAndFormat buffImgAndFormat;
@@ -173,8 +206,7 @@ public class ImageSteg implements Steganography {
         };
     }
 
-    private int bytesToInt(byte[] b)
-    {
+    private int bytesToInt(byte[] b) {
         return   b[3] & 0xFF |
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |

@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 
 public interface Steganography {
 
+    // void useDefaultHeader(boolean useDefaultHeader);
+
     /**
      * Takes some data and conceals it in a carrier (container used to hide data).
      *
