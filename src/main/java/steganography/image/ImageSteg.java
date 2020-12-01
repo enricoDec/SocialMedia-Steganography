@@ -152,9 +152,7 @@ public class ImageSteg implements Steganography {
             case BufferedImage.TYPE_BYTE_INDEXED:
                 // TODO: Put 8 Bit algorithm here
                 throw new UnsupportedEncodingException("8 Bit / Type BYTE_INDEXED not yet implemented");
-                // overlay = null;
-                // encoder = null;
-                // break;
+                // return overlay8Bit
             default:
                 throw new UnsupportedEncodingException("Image type is not supported");
         }

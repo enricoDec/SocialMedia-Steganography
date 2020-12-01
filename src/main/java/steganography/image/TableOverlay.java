@@ -37,7 +37,6 @@ public class TableOverlay extends ShuffleOverlay {
         this.colorCouple = colorCouple;
         this.colorTable = colorTable;
         createOverlay();
-        Collections.shuffle(this.pixelOrder, new Random(seed));
     }
 
     /**
@@ -49,8 +48,6 @@ public class TableOverlay extends ShuffleOverlay {
         List<Integer> color = this.colorCouple.get(this.bufferedImage.getRGB(this.currentX, this.currentY));
             int index = position.nextInt(color.size());
             this.bufferedImage.setRGB(this.currentX, this.currentY, color.get(index));
-
-
     }
 
     @Override
@@ -63,5 +60,7 @@ public class TableOverlay extends ShuffleOverlay {
                     this.pixelOrder.add(x + (y * this.bufferedImage.getWidth()));
             }
         }
+
+        Collections.shuffle(this.pixelOrder, position);
     }
 }

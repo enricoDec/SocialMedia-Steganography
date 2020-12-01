@@ -148,7 +148,7 @@ public class PixelBit extends BuffImgEncoder {
      * @param pixelARGB pixel that represents a bit.
      * @return true if the given pixel represents a 1 bit.
      */
-    private boolean pixelIsOne(int pixelARGB) {
+    public static boolean pixelIsOne(int pixelARGB) {
         return (
                 (pixelARGB & 1) ^
                 (pixelARGB >> 8 & 1) ^
@@ -164,7 +164,7 @@ public class PixelBit extends BuffImgEncoder {
      * (By changing the outcome of (A+R+G+B) & 1 == 0)
      * @param pixelARGB the pixelValue to change
      */
-    private int changePixelValue(int pixelARGB) {
+    protected int changePixelValue(int pixelARGB) {
         Random rng = new Random();
 
         // pick random channel
