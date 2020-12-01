@@ -105,7 +105,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
             }
         }
 
-        logger.info((resultList.size() + 1) + " postentries found.");
+        logger.info((resultList.size()) + " postentries found.");
         return resultList;
     }
 

@@ -156,7 +156,7 @@ public class Imgur extends SocialMedia {
 
             Request request = new Request.Builder()
                     .addHeader("User-Agent", "Sharksystems Steganography by Anon-User")
-                    .headers(Headers.of("Authorization", ("Client-ID " + ImgurConstants.CLIENT_ID)))
+                    .headers(Headers.of("Authorization", ("Client-ID abc" + ImgurConstants.CLIENT_ID)))
                     .url(ImgurConstants.UPLOAD_URL + ".json")
                     .post(body)
                     .build();
