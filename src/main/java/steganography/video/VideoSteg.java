@@ -74,6 +74,13 @@ public class VideoSteg implements Steganography {
         if (debug)
             log("All " + stegImagesList.size() + " images encoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
 
+//        //TEMP
+//        int i = 0;
+//        for (byte[] image : imageList) {
+//            new FileOutputStream(new File("src/main/resources/Frames/Steg/" + "frame" + i + ".png")).write(image);
+//            i++;
+//        }
+
         //Re-Encode Images to Video
         VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
         return videoEncoder.imagesToVideo(stegImagesList);

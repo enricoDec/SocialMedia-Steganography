@@ -37,7 +37,7 @@ import java.util.List;
  * @version : 1.0
  * @since : 23-11-2020
  **/
-public class VideoEncoder implements IEncoder{
+public class VideoEncoder implements IEncoder {
     private final File ffmpegBin;
     private final boolean logging;
     Video video;
@@ -52,7 +52,7 @@ public class VideoEncoder implements IEncoder{
      * Encode a list of images to a video
      *
      * @param stegImages list of images to be encoded
-     * @return Encoded Video
+     * @return Encoded Video as .avi
      * @throws IOException IOException
      */
     public byte[] imagesToVideo(List<byte[]> stegImages) throws IOException {
@@ -83,7 +83,8 @@ public class VideoEncoder implements IEncoder{
 
                 Frame videoFrame = null;
                 try {
-                    videoFrame = new Frame(0, video.getPtsList().get(frameCounter), ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
+                    videoFrame = new Frame(0, video.getPtsList().get(frameCounter),
+                            ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -96,12 +97,13 @@ public class VideoEncoder implements IEncoder{
         //Create Video with Audio if available
         if (video.hasAudioStream()) {
             FFmpeg.atPath(ffmpegBin.toPath())
-                    .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
                     .addInput(FrameInput.withProducer(frameProducer)
                             .setFrameRate(video.getFrameRate()))
+                    //Audio Stream
+                    .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
                     .setOverwriteOutput(true)
                     .addOutput(ChannelOutput.toChannel(tempFile.getName(), sbc))
-                    .addArguments("-vcodec", "png")
+                    .addArguments("-c:v", "png")
                     .execute();
         } else {
             //Create Video with no Audio
@@ -110,7 +112,7 @@ public class VideoEncoder implements IEncoder{
                             .setFrameRate(video.getFrameRate()))
                     .setOverwriteOutput(true)
                     .addOutput(ChannelOutput.toChannel(tempFile.getName(), sbc))
-                    .addArguments("-vcodec", "png")
+                    .addArguments("-c:v", "png")
                     .execute();
         }
 

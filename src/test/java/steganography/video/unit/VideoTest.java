@@ -32,16 +32,16 @@ import java.io.*;
  * @since : 28-11-2020
  **/
 public class VideoTest {
-    private File ffmpegBin = new File("src/main/resources");
+    private final File ffmpegBin = new File("src/main/resources");
 
     @BeforeEach
     public void beforeEach() {
     }
 
-    @Test
     /**
      * Check if Video data is read correctly
      */
+    @Test
     public void decodeToPictureMetadata() {
         try {
             Video video = new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4")).readAllBytes(), ffmpegBin);
@@ -59,10 +59,10 @@ public class VideoTest {
         }
     }
 
-    @Test
     /**
      * Try to pass invalid data
      */
+    @Test
     public void decodeToPictureWrongData() {
         try {
             new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3")).readAllBytes(), ffmpegBin);
@@ -73,10 +73,10 @@ public class VideoTest {
         }
     }
 
-    @Test
     /**
      * Try to pass empty data
      */
+    @Test
     public void decodeToPictureEmptyData() {
         try {
             new Video(new byte[0], ffmpegBin);
@@ -88,10 +88,10 @@ public class VideoTest {
         }
     }
 
-    @Test
     /**
      * Try to pass invalid Path
      */
+    @Test
     public void decodeToPictureInvalidFFmpegPath() {
         try {
             new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3")).readAllBytes(), new File(""));
