@@ -45,14 +45,11 @@ public class RedditUtil extends BaseUtil {
         return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
     }
 
-    public MyDate getTimestamp(RedditGetResponse.ResponseChildData data, boolean inUTC){
-        String info;
-        if(inUTC){
+    public MyDate getTimestamp(RedditGetResponse.ResponseChildData data){
+        String info = data.getData().getCreated();
+        if(info == null || info.isEmpty()){
             info = data.getData().getCreated_utc();
-        }else{
-            info = data.getData().getCreated();
         }
-
         return this.getTimestamp(info);
     }
 
@@ -63,16 +60,16 @@ public class RedditUtil extends BaseUtil {
      */
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
-
-        System.out.println("REDDIT JSON RESPONSE: " + responseString);
         try{
             RedditGetResponse responseArray = new Gson().fromJson(responseString, RedditGetResponse.class);
+
         for(RedditGetResponse.ResponseChildData child : responseArray.getData().getChildren()){
             if(child != null && !this.hasNullObjects(child)){
-                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child, false), ".png"));
+                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child), ".png"));
             }
         }
 
+        //postEntries.stream().forEach(postEntry -> System.out.println(postEntry.toString()));
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -81,10 +78,21 @@ public class RedditUtil extends BaseUtil {
     }
 
     public boolean hasNullObjects(RedditGetResponse.ResponseChildData responseChildData){
+        MyDate myDate = null;
+        String url = null;
         try{
-            this.getTimestamp(responseChildData, false);
-            this.getUrl(responseChildData);
+            myDate = this.getTimestamp(responseChildData);
+            url = this.getUrl(responseChildData);
         }catch (Exception e){
+            /*
+            logger.info("Post entry has null object.");
+            if(myDate == null && url != null)
+                logger.info("Date was null. URL: " + url);
+            if(myDate != null && url == null)
+                logger.info("URL was null. No media found. This happens, when this entry was is not a picture but for an example a comment. Date: " + myDate.getTime());
+            if(myDate == null && url == null)
+                logger.info("URL and Date are null.");
+              */
             return true;
         }
         return false;

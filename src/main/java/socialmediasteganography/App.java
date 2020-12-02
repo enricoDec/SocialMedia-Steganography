@@ -22,6 +22,7 @@ package socialmediasteganography;
 import apis.SocialMedia;
 import apis.models.Token;
 import apis.imgur.Imgur;
+import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
@@ -37,7 +38,7 @@ public class App {
 
         //Setup
         SocialMedia socialMedia = new Imgur();
-        socialMedia.setToken(new Token("f4ba2fde2120cbb192e40b893ac71a6e633d2f13", 100));
+        socialMedia.setToken(new Token("677cfdc1835e8be427f723fd0819e568230f32d9", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload

@@ -18,14 +18,11 @@
 
 package apis.utils;
 
-import apis.interceptors.BearerInterceptor;
 import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
-import apis.reddit.models.RedditGetResponse;
 import persistence.JSONPersistentManager;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -41,6 +38,7 @@ public class BaseUtil {
     }
 
     public void setLatestPostTimestamp(APINames network, MyDate latestPostTimestamp) {
+        logger.info("Set timestamp in ms: " + latestPostTimestamp.getTime());
         JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(network, latestPostTimestamp.getTime());
     }
 
@@ -79,7 +77,7 @@ public class BaseUtil {
     }
 
     public MyDate getTimestamp(String info){
-        return new MyDate(new Date(Long.valueOf(info)));
+        return new MyDate(new Date(Long.valueOf(info.substring(0, info.length()-2))));
     }
 
     public static boolean hasErrorCode(int responseCode) {
@@ -94,7 +92,7 @@ public class BaseUtil {
         //If current postEntry's timestamp is not newer than latestStored, filter it.
         return postEntries
                 .stream()
-                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) == 1)
+                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) < 0)
                 .collect(Collectors.toList());
     }
 

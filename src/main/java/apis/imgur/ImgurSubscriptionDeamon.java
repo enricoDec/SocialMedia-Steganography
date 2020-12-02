@@ -101,7 +101,8 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
             }
         }
 
-        logger.info((resultList.size()) + " postentries found.");
+        //logger.info((resultList.size()) + " postentries found.");
+        //resultList.stream().forEach(postEntry -> logger.info(postEntry.toString()));
         return resultList;
     }
 
@@ -120,16 +121,17 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         List<PostEntry> tmp = this.getRecentMedia(keyword);
 
         if (tmp != null) {
-            Collections.sort(tmp);
+            Collections.sort(tmp, Collections.reverseOrder());
             tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
             if (tmp.size() > 0) {
                 newPostAvailable = true;
+                tmp.stream().forEach(postEntry -> System.out.println(postEntry.getUrl()));
 
                 /**
                  * TODO 0 oder letztes element.
                  */
 
-                imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
+                //imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
                 return tmp;

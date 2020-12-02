@@ -29,7 +29,7 @@ public class MyDate implements Comparable<MyDate>{
     private Date date;
 
     public MyDate(Date date) {
-        this.date = date;
+        this.date = new Date(date.getTime() * 1000);
     }
 
     public long getTime(){
@@ -48,6 +48,6 @@ public class MyDate implements Comparable<MyDate>{
      */
     @Override
     public int compareTo(MyDate opposite) {
-        return Long.valueOf(this.getTime()).compareTo(Long.valueOf(opposite.getTime()));
+        return Long.valueOf(this.getTime()).compareTo(opposite.getTime());
     }
 }

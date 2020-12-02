@@ -105,7 +105,8 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
             }
         }
 
-        logger.info((resultList.size()) + " postentries found.");
+        //logger.info((resultList.size()) + " postentries found.");
+        //resultList.stream().forEach(postEntry -> logger.info(postEntry.toString()));
         return resultList;
     }
 
@@ -117,8 +118,10 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         List<PostEntry> tmp = this.getRecentMedia(keyword);
 
         if (tmp != null) {
-            Collections.sort(tmp);
+            Collections.sort(tmp, Collections.reverseOrder());
             tmp = BaseUtil.elimateOldPostEntries(redditUtil.getLatestStoredTimestamp(REDDIT), tmp);
+            logger.info((tmp.size()) + " postentries found after eliminate old entries.");
+
             if (tmp.size() > 0) {
                 newPostAvailable = true;
 

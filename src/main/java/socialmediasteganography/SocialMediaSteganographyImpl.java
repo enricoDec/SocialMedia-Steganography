@@ -77,8 +77,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
                     System.out.println("Hidden message was: " + new String(bDecoded));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                logger.info("Decoding failed for entry on index " + i + ".");
+                logger.info("Decoding failed for entry on index " + i + " with an " + e.getClass().getSimpleName() + ".");
             }
         }
         return decodedMedias;

@@ -18,17 +18,27 @@
 
 package persistence;
 
+import apis.reddit.Reddit;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 public class PersistenceDummy implements JSONPersistentHelper{
+    private static final Logger logger = Logger.getLogger(PersistenceDummy.class.getName());
     private String pathname = "jsonTest3.json";
 
     @Override
     public void writeToJsonFile(String jsonString) throws IOException {
         File file = new File(pathname);
+        if(!file.exists()){
+            if(file.createNewFile()){
+                logger.info("Persistence file created.");
+            }
+        }
+
         FileUtils.writeStringToFile(file, jsonString, "UTF-8");
     }
 

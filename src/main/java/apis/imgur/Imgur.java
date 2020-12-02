@@ -31,7 +31,9 @@ import persistence.JSONPersistentManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -157,15 +159,22 @@ public class Imgur extends SocialMedia {
             Request request = new Request.Builder()
                     .addHeader("User-Agent", "Sharksystems Steganography by Anon-User")
                     .headers(Headers.of("Authorization", ("Client-ID abc" + ImgurConstants.CLIENT_ID)))
-                    .url(ImgurConstants.UPLOAD_URL + ".json")
+                    .url(ImgurConstants.UPLOAD_URL)
                     .post(body)
                     .build();
 
             Response response = client.newCall(request).execute();
             Gson gson = new Gson();
-            ImgurPostResponse ipr = gson.fromJson(response.body().string(), ImgurPostResponse.class);
+            String res = response.body().string();
+            ImgurPostResponse ipr = gson.fromJson(res, ImgurPostResponse.class);
 
-            logger.info("Successfull uploaded anonymously.\nURL: " + ipr.data.link);
+            if (ipr != null || ipr.data != null || ipr.data.link != null || BaseUtil.hasErrorCode(ipr.status)) {
+                logger.info("Unsuccessfull uploaded!");
+                logger.info("Request was: " + request.toString());
+                logger.info("Response String was: " + res);
+            }else{
+                logger.info("Successfull uploaded anonymously.\nURL: " + ipr.data.link);
+            }
             return ipr;
         } catch (IOException e) {
             e.printStackTrace();
@@ -203,8 +212,10 @@ public class Imgur extends SocialMedia {
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        return this.imgurSubscriptionDeamon.getRecentMediaForSubscribedKeywords(keyword)
-                .stream().map(entry -> BlobConverterImpl.downloadToByte(entry.getUrl()))
+        return Optional.ofNullable(this.imgurSubscriptionDeamon.getRecentMediaForSubscribedKeywords(keyword))
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .map(entry -> BlobConverterImpl.downloadToByte(entry.getUrl()))
                 .collect(Collectors.toList());
     }
 

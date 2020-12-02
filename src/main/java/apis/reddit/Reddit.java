@@ -31,7 +31,9 @@ import okhttp3.*;
 import persistence.JSONPersistentManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -78,6 +80,9 @@ public class Reddit extends SocialMedia {
         try {
 
             String url = Imgur.uploadPicture(media, hashtag).data.link;
+
+            if(url == null || url.isEmpty())
+                return false;
 
             mBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -145,8 +150,10 @@ public class Reddit extends SocialMedia {
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        return this.redditSubscriptionDeamon.getRecentMediaForSubscribedKeywords(keyword)
-                .stream().map(entry -> BlobConverterImpl.downloadToByte(entry.getUrl()))
+        return Optional.ofNullable(this.redditSubscriptionDeamon.getRecentMediaForSubscribedKeywords(keyword))
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .map(entry -> BlobConverterImpl.downloadToByte(entry.getUrl()))
                 .collect(Collectors.toList());
     }
 
