@@ -30,17 +30,17 @@ import java.io.*;
 import java.util.List;
 
 public class VideoDecoderTest {
-    private File ffmpegBin = new File("src/main/resources");
+    private final File ffmpegBin = new File("src/main/resources");
     private Video video;
 
     @BeforeEach
     public void beforeEach() {
     }
 
-    @Test
     /**
      * Try to decode valid Video and check frame count
      */
+    @Test
     public void decodeToPictureFrameCount(){
         try {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));
@@ -52,10 +52,10 @@ public class VideoDecoderTest {
         }
     }
 
-    @Test
     /**
      * Try to decode valid Video with no Audio Stream
      */
+    @Test
     public void decodeToPictureNoAudio(){
         try {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video2.MP4"));
@@ -68,10 +68,10 @@ public class VideoDecoderTest {
         }
     }
 
-    @Test
     /**
      * Try to decode audio
      */
+    @Test
     public void decodeAudioToPicture(){
         try {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3"));
@@ -81,10 +81,10 @@ public class VideoDecoderTest {
         }
     }
 
-    @Test
     /**
      * Check if Video is decoded to valid buff images
      */
+    @Test
     public void decodeToPictureValidBufferedImage(){
         try {
             FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));

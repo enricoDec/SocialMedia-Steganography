@@ -37,7 +37,7 @@ import java.util.List;
  * @version : 1.0
  * @since : 23-11-2020
  **/
-public class VideoEncoder {
+public class VideoEncoder implements IEncoder{
     private final File ffmpegBin;
     private final boolean logging;
     Video video;
@@ -52,11 +52,10 @@ public class VideoEncoder {
      * Encode a list of images to a video
      *
      * @param stegImages list of images to be encoded
-     * @param ptsList    list of pts of each frame
-     * @return video
+     * @return Encoded Video
      * @throws IOException IOException
      */
-    public byte[] imagesToVideo(List<byte[]> stegImages, List<Long> ptsList) throws IOException {
+    public byte[] imagesToVideo(List<byte[]> stegImages) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");
         tempFile.deleteOnExit();
         SeekableByteChannel sbc = Files.newByteChannel(tempFile.toPath(), StandardOpenOption.WRITE);
@@ -84,7 +83,7 @@ public class VideoEncoder {
 
                 Frame videoFrame = null;
                 try {
-                    videoFrame = new Frame(0, ptsList.get(frameCounter), ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
+                    videoFrame = new Frame(0, video.getPtsList().get(frameCounter), ImageIO.read(new ByteArrayInputStream(stegImages.get(frameCounter))));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,6 +93,7 @@ public class VideoEncoder {
             }
         };
 
+        //Create Video with Audio if available
         if (video.hasAudioStream()) {
             FFmpeg.atPath(ffmpegBin.toPath())
                     .addInput(PipeInput.pumpFrom(new FileInputStream(video.getAudioFile())))
@@ -104,6 +104,7 @@ public class VideoEncoder {
                     .addArguments("-vcodec", "png")
                     .execute();
         } else {
+            //Create Video with no Audio
             FFmpeg.atPath(ffmpegBin.toPath())
                     .addInput(FrameInput.withProducer(frameProducer)
                             .setFrameRate(video.getFrameRate()))

@@ -76,7 +76,7 @@ public class VideoSteg implements Steganography {
 
         //Re-Encode Images to Video
         VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
-        return videoEncoder.imagesToVideo(stegImagesList, videoDecoder.getPtsList());
+        return videoEncoder.imagesToVideo(stegImagesList);
     }
 
     /**
