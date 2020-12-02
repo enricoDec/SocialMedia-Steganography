@@ -37,7 +37,7 @@ import java.util.concurrent.*;
  * @version : 1.0
  * @since : 23-11-2020
  **/
-public class VideoDecoder {
+public class VideoDecoder implements IDecoder{
     private final File ffmpegBin;
     private final byte[] videoByteArray;
     private final List<Long> ptsList = new ArrayList<>();
@@ -63,6 +63,7 @@ public class VideoDecoder {
 
         //Temp file to save muxed audio channel
         File soundFile = File.createTempFile("VideoSteganography-", ".mp3");
+        soundFile.deleteOnExit();
         SeekableByteChannel sbc = Files.newByteChannel(soundFile.toPath(), StandardOpenOption.WRITE);
 
         //Executor service that will run FrameConsume consume()
@@ -109,6 +110,7 @@ public class VideoDecoder {
         };
 
 
+        // Video with Audio Stream
         if (video.hasAudioStream()) {
             FFmpeg.atPath(ffmpegBin.toPath())
                     .addInput(PipeInput.pumpFrom(inputStream))
@@ -131,6 +133,7 @@ public class VideoDecoder {
                     .setOverwriteOutput(true)
                     .execute();
         } else {
+            //Video with no Audio Stream
             FFmpeg.atPath(ffmpegBin.toPath())
                     .addInput(PipeInput.pumpFrom(inputStream))
                     .addOutput(FrameOutput
@@ -167,10 +170,8 @@ public class VideoDecoder {
             taskExecutor.shutdown();
         }
         video.setAudioFile(soundFile);
-        return decodedImages;
-    }
+        video.setPtsList(this.ptsList);
 
-    public List<Long> getPtsList() {
-        return ptsList;
+        return decodedImages;
     }
 }

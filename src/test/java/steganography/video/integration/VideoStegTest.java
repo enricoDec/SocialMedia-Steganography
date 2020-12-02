@@ -35,8 +35,6 @@ import java.util.Arrays;
  * @since : 28-11-2020
  **/
 public class VideoStegTest {
-    private final File ffmpegBin = new File("src/main/resources");
-
 
     /**
      * Multi Thread Test
@@ -286,10 +284,8 @@ public class VideoStegTest {
         ImageIO.setUseCache(false);
         videoSteg.setMaxEncodingThreads(4);
         videoSteg.setMaxDecodingThreads(4);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-                    videoSteg.encode(new FileInputStream(new File("src/test/java/steganography/video/resources/video1.MP4")).readAllBytes(),
-                            new FileInputStream(new File("src/test/java/steganography/video/resources/video4.MP4")).readAllBytes(), 0);
-                }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> videoSteg.encode(new FileInputStream(new File("src/test/java/steganography/video/resources/video1.MP4")).readAllBytes(),
+                new FileInputStream(new File("src/test/java/steganography/video/resources/video4.MP4")).readAllBytes(), 0)
         );
     }
 }

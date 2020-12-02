@@ -27,12 +27,15 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * @author : Enrico Gamil Toros de Chadarevian
  * Project name : ProjektStudiumSteganography
  * @version : 1.0
  * @since : 24-11-2020
+ *
+ * This class represents a Video
  **/
 public class Video {
     private final File ffmpegBin;
@@ -46,6 +49,7 @@ public class Video {
     private String pixelformat;
     private String codec;
     private boolean hasAudioStream = false;
+    private List<Long> ptsList = null;
 
     public Video(byte[] videoByteArray, File ffmpegBin) throws UnsupportedEncodingException {
         this.videoByteArray = videoByteArray;
@@ -60,8 +64,7 @@ public class Video {
 
 
     /**
-     * Checks if given data is a Video and has a Video Stream
-     * Sets the frame rate and frame count
+     * Uses FFProbe to read information about a Video and saves them as attributes
      */
     private void analyseVideo() throws UnsupportedEncodingException {
         InputStream inputStream = new ByteArrayInputStream(videoByteArray);
@@ -74,10 +77,11 @@ public class Video {
                 .setShowStreams(true)
                 .execute();
 
-        //Check if given Video has a Video Stream or more then one
+        //Check if given Video has no Streams
         if (result.getStreams().isEmpty())
             throw new UnsupportedEncodingException("Video has no streams");
 
+        //Check if Video stream is present
         boolean hasVideoStream = false;
         for (Stream stream : result.getStreams()) {
             if (stream.getCodecType() == StreamType.VIDEO)
@@ -95,7 +99,6 @@ public class Video {
         this.frameHeight = result.getStreams().get(0).getHeight();
         this.codec = result.getStreams().get(0).getCodecName();
         this.pixelformat = result.getStreams().get(0).getPixFmt();
-        //Time base for some reason is returned as String
         String[] strings = (result.getStreams().get(0).getTimeBase()).split("/");
         this.timebase = Long.valueOf(strings[1]);
     }
@@ -124,12 +127,12 @@ public class Video {
         return audioFile;
     }
 
-    public byte[] getVideoByteArray() {
-        return videoByteArray;
-    }
-
     public void setAudioFile(File audioFile) {
         this.audioFile = audioFile;
+    }
+
+    public byte[] getVideoByteArray() {
+        return videoByteArray;
     }
 
     public String getCodec() {
@@ -142,6 +145,14 @@ public class Video {
 
     public boolean hasAudioStream() {
         return hasAudioStream;
+    }
+
+    public List<Long> getPtsList() {
+        return ptsList;
+    }
+
+    public void setPtsList(List<Long> ptsList) {
+        this.ptsList = ptsList;
     }
 
     @Override
