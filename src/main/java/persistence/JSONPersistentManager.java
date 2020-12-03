@@ -111,7 +111,6 @@ public class JSONPersistentManager {
         } catch (NullPointerException ne){
             ne.printStackTrace();
             throw new Exception("No entry for API: "+apiName.getValue(),ne);
-
         }
     }
 

@@ -34,8 +34,13 @@ public class BlobConverterImpl {
      * @return Bytearray which represents the media
      * @throws IOException
      */
-    public static byte[] downloadToByte(String downloadLink) throws IOException {
-        return IOUtils.toByteArray(new URL(downloadLink).openStream());
+    public static byte[] downloadToByte(String downloadLink) {
+        try {
+            return IOUtils.toByteArray(new URL(downloadLink).openStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

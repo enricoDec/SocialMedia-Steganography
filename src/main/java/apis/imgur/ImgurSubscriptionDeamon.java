@@ -19,10 +19,11 @@
 package apis.imgur;
 
 import apis.SubscriptionDeamon;
+import apis.models.APINames;
 import apis.reddit.RedditConstants;
 import apis.models.MyDate;
 import apis.models.PostEntry;
-import apis.utils.BlobConverterImpl;
+import apis.utils.BaseUtil;
 import persistence.JSONPersistentManager;
 
 import java.io.BufferedReader;
@@ -31,15 +32,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
 import java.util.stream.Collectors;
 
 import static apis.models.APINames.IMGUR;
-import static apis.models.APINames.REDDIT;
 
 public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
@@ -49,144 +46,110 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
     private final String BASE_URI = "https://api.imgur.com/3/";
     private final String SEARCH_URI = "gallery/search/time?q=";
 
-    private String subscriptionKeyword;
-    private List<PostEntry> latestPostEntries;
-    private MyDate latestPostTimestamp;
     private boolean newPostAvailable;
+    private List<PostEntry> latestPostEntries;
 
-    public ImgurSubscriptionDeamon(String subscriptionKeyword){
-        this.subscriptionKeyword = subscriptionKeyword;
+    public ImgurSubscriptionDeamon() {
         this.imgurUtil = new ImgurUtil();
     }
 
     @Override
-    public List<byte[]> getRecentMedia() {
-        if(this.subscriptionKeyword == null || this.subscriptionKeyword.equals("")){
-            logger.info("No subscription keyword was set.");
+    public void run() {
+        //bool newPostAvailable will be setted in getRecentMediaForSubscribedKeywords()
+        this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
+    }
+
+    private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
+        List<String> keywords = imgurUtil.getKeywordList(IMGUR, onceUsedKeyword);
+
+        if (keywords == null || keywords.size() == 0) {
+            logger.info("No keyword(s) were set.");
             return null;
         }
 
-        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, System.currentTimeMillis());
+        List<PostEntry> resultList = new ArrayList<>();
 
-        try {
-            URL url = new URL(
-                    BASE_URI + SEARCH_URI + this.subscriptionKeyword);
+        for (String keyword : keywords) {
+            logger.info("Check for new post entries for keyword '" + keyword + "' ...");
 
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod(RedditConstants.GET);
-            con.setRequestProperty("User-agent", RedditConstants.APP_NAME);
-            con.setRequestProperty("Authorization", "Client-ID " + ImgurConstants.CLIENT_ID);
-            con.setDoOutput(true);
+            try {
+                URL url = new URL(
+                        BASE_URI + SEARCH_URI + keyword);
 
-            String responseString = "";
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod(RedditConstants.GET);
+                con.setRequestProperty("User-agent", ImgurConstants.APP_NAME);
+                con.setRequestProperty("Authorization", "Client-ID " + ImgurConstants.CLIENT_ID);
+                con.setDoOutput(true);
 
-            if (!this.imgurUtil.hasErrorCode(con.getResponseCode())) {
-                responseString = new BufferedReader(new InputStreamReader(con.getInputStream())).lines().collect(Collectors.joining());
-                logger.info("Response Code: " + con.getResponseCode() + ". No error.");
-            } else {
-                logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
-                return null;
+                String responseString = "";
+
+                if (!BaseUtil.hasErrorCode(con.getResponseCode())) {
+                    responseString = new BufferedReader(new InputStreamReader(con.getInputStream())).lines().collect(Collectors.joining());
+                    logger.info("Response Code: " + con.getResponseCode() + ". No error.");
+                } else {
+                    logger.info("Response Code: " + con.getResponseCode() + ". Has error.");
+                    return null;
+                }
+
+                logger.info(String.valueOf(con.getURL()));
+                resultList.addAll(this.imgurUtil.getPosts(responseString));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            logger.info(String.valueOf(con.getURL()));
-            List<PostEntry> postEntries = this.imgurUtil.getPosts(responseString);
-            this.setLatestPostEntries(postEntries);
-            this.setLatestPostTimestamp(this.imgurUtil.getLatestTimestamp(postEntries));
-
-            List<byte[]> byteList = new ArrayList<>();
-            for (PostEntry pe : postEntries) {
-                byteList.add(BlobConverterImpl.downloadToByte(pe.getUrl()));
-            }
-
-            logger.info((byteList.size() + 1) + " postentries found.\nLatest entry: "
-                    + postEntries.get(postEntries.size()-1).getUrl() + " " + postEntries.get(postEntries.size()-1).getDate().toString());
-
-            return byteList;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        return null;
+        //logger.info((resultList.size()) + " postentries found.");
+        //resultList.stream().forEach(postEntry -> logger.info(postEntry.toString()));
+        return resultList;
     }
 
+    /**
+     * TODO in reddit übernehmen
+     */
+
+    /**
+     * Searches for new post entries for a specific keyword, or for all stored keywords.
+     *
+     * @param keyword If onceUsedKeyword is null, every stored keyword will be processed.
+     * @return
+     */
     @Override
-    public boolean checkForNewPostEntries() {
-        logger.info("Check for new post entries for keyword '" + this.subscriptionKeyword + "' ...");
-        List<PostEntry> oldPostEntries = this.latestPostEntries;
-        MyDate oldPostTimestamp = this.latestPostTimestamp;
+    public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
+        List<PostEntry> tmp = this.getRecentMedia(keyword);
 
-        //Pull
-        if(this.getRecentMedia() != null) {
-            //Check by null
-            if (oldPostEntries == null && this.latestPostEntries != null) {
-                logger.info("New media found.");
-                return true;
-            }
+        if (tmp != null) {
+            Collections.sort(tmp, Collections.reverseOrder());
+            tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
+            if (tmp.size() > 0) {
+                newPostAvailable = true;
 
-            //Check by timestamp
-            if (oldPostTimestamp != null && this.latestPostTimestamp.compareTo(oldPostTimestamp) > 0) {
+                /**
+                 * TODO 0 oder letztes element.
+                 */
+
+                imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
+                latestPostEntries = tmp;
                 logger.info("New media found.");
-                return true;
+                return tmp;
             }
         }
 
         logger.info("No new media found.");
-        return false;
+        latestPostEntries = null;
+        newPostAvailable = false;
+        return null;
     }
 
-    @Override
-    public List<byte[]> getRecentMediaForKeyword(String keyword) {
-        String temp = this.subscriptionKeyword;
-        this.subscriptionKeyword = keyword;
-        List<byte[]> recentMedia = this.getRecentMedia();
-        this.subscriptionKeyword = temp;
-        return recentMedia;
-    }
-
-    @Override
-    public String getSubscriptionKeyword() {
-        return this.subscriptionKeyword;
-    }
-
-    @Override
-    public void setSubscriptionKeyword(String subscriptionKeyword) {
-        this.subscriptionKeyword = subscriptionKeyword;
-    }
-
-    @Override
-    public List<PostEntry> getLatestPostEntries() {
-        return this.latestPostEntries;
-    }
-
-    @Override
-    public void setLatestPostEntries(List<PostEntry> latestPostEntries) {
-        this.latestPostEntries = latestPostEntries;
-    }
-
-    @Override
-    public MyDate getLatestPostTimestamp() {
-        return this.latestPostTimestamp;
-    }
-
-    @Override
-    public void setLatestPostTimestamp(MyDate latestPostTimestamp) {
-        this.latestPostTimestamp = latestPostTimestamp;
-    }
 
     @Override
     public boolean isNewPostAvailable() {
         return this.newPostAvailable;
     }
 
-    @Override
-    public void setNewPostAvailable(boolean newPostAvailable) {
-        this.newPostAvailable = newPostAvailable;
-    }
-
-    @Override
-    public void run() {
-        this.newPostAvailable = this.checkForNewPostEntries();
+    public List<PostEntry> getLatestPostEntries() {
+        return this.latestPostEntries;
     }
 }

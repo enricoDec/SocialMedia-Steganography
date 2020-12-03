@@ -22,30 +22,36 @@ package socialmediasteganography;
 import apis.SocialMedia;
 import apis.models.Token;
 import apis.imgur.Imgur;
+import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
+import persistence.JSONPersistentManager;
+import persistence.PersistenceDummy;
 import steganography.image.ImageSteg;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
+        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+
         //Setup
-        SocialMedia socialMedia = new Imgur();
-        socialMedia.setToken(new Token("db67746b464982896455ae4a79541f3f3ca16a5b", 100));
+        SocialMedia socialMedia = new Reddit();
+        socialMedia.setToken(new Token("668533834712-z1ehiaimW5LV7SKT8jlhgDtWl0IqWA", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload
         byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
-        String payload = "HelloWorld";
+        String payload = "This is a secret message which was built by ProjectStudiumSteganography";
 
         //Encode and Post
-        sms.encodeAndPost(socialMedia, byts, payload.getBytes());
+        //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
 
         //Search in social media for pictures and try to decode
         List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
 
-        /*
+/*
         //Auswertung als Strings
         List<String> messages = new ArrayList<>();
         for (byte[] b : results) {
@@ -57,7 +63,7 @@ public class App {
                 System.out.println("No bytes for message type found");
             }
         }
-        */
+*/
 
         /*
          //Zum testen, ob dieses Bild korrekt runtergeladen wurde.

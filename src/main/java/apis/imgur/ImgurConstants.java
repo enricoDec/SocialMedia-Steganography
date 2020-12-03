@@ -23,7 +23,7 @@ package apis.imgur;
  */
 
 public interface ImgurConstants {
-
-    String UPLOAD_URL = "https://api.imgur.com/3/image";
+    String APP_NAME = "SharksystemsStega";
+    String UPLOAD_URL = "https://api.imgur.com/3/upload";
     String CLIENT_ID = "6d628f37c5f9729";
 }

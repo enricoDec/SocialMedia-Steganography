@@ -20,73 +20,10 @@ package apis.reddit;
 
 public interface RedditConstants {
     String APP_NAME = "SharksystemsStega";
-    String APP_KEY = "Eo97Fa1dmOfZhQ";
-    String APP_SECRET = "Cbv2mblDgF6LiKQNXcZI7BaICC4";
-
-    //********* KEY - VALUE * LOGIN ***************************************
-
-    String KEY_CLIENT_ID = "client_id=";
-    String VAL_CLIENT_ID = "Cbv2mblDgF6LiKQNXcZI7BaICC4";
-
-    String KEY_RESPONSE_TYPE = "response_type=";
-    String VAL_RESPONSE_TYPE = "code";
-
-    String KEY_STATE = "state=";
-    String VAL_STATE = "randomString";
-
-    String KEY_REDIRECT_URI = "redirect_uri=";
-    String VAL_REDIRECT_URI = "http://www.sharksystem.net/";
-
-    String KEY_DURATION = "duration=";
-    String VAL_DURATION_TEMP = "temporary"; //for up- and downloading
-    String VAL_DURATION_PERM = "permanent"; //for register for a hashtag
-
-    String KEY_SCOPE = "scope=";
-    String VAL_SCOPE_GET = "read";
-    String VAL_SCOPE_POST = "";
-
-    String KEY_RAW_JSON = "raw_json=";
-    String VAL_RAW_JSON_TRUE = "1";
-
-    String KEY_SORT = "sort=";
-    String VAL_DATE = "date";
-
-
-    //********* PATH COMPONENTS *******************************************
-
     String BASE = "https://www.reddit.com";
     String OAUTH_BASE = "https://oauth.reddit.com";
-    String API = "/api";
-    String ME = "/v1/me";
-    String AUTH = "/v1/authorize";
-    String LOGIN = "/login";
-
     String SUBREDDIT_PREFIX = "/r/";
-
     String UPLOAD_PATH = "/api/submit";
-
-    String GET_PATH = "/...";
-
-
-
-    //************ HTTP METHODS ****************************************
-
-    String POST = "POST";
     String GET = "GET";
-
-
-    //********* KEY - VALUE * POST ***************************************
-
-    String KEY_FILE = "file";
-    String KEY_FORMID = "formid";
-    String KEY_HEADER = "header";
-    String KEY_IMG_TYPE = "img_type";
-    String VAL_IMG_TYPE = "jpg";
-    String KEY_NAME = "name";
-    String KEY_UPLOAD_TYPE = "upload_type";
-    String VAL_UPLOAD_TYPE = "img";
-    String KEY_UH = "uh=";
     String AS_JSON = ".json";
-    String KEY_USERNAME = "username=";
-    String KEY_PASSWORD = "password=";
 }

@@ -63,6 +63,11 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
         List<byte[]> recentMedias = socialMedia.getRecentMediaForKeyword(keyword);
         List<byte[]> decodedMedias = new ArrayList<>();
 
+        if(recentMedias == null){
+            logger.info("No media with class " + socialMedia.getClass() + " for keyword '" + keyword + "' was found.") ;
+            return null;
+        }
+
         for(int i = 0; i < recentMedias.size(); i++){
             try {
                 byte[] bDecoded = steganography.decode(recentMedias.get(i));
@@ -72,8 +77,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
                     System.out.println("Hidden message was: " + new String(bDecoded));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                logger.info("Decoding failed for entry on index " + i + ".");
+                logger.info("Decoding failed for entry on index " + i + " with an " + e.getClass().getSimpleName() + ".");
             }
         }
         return decodedMedias;
