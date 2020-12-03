@@ -36,7 +36,7 @@ class SamplingRateLookUp {
      * @throws IllegalArgumentException if any of the parameters are invalid
      * @throws NoSuchElementException if there is no value for the given parameters
      */
-    public static int getValueForSamplingRate(float mpegVersion, int index)
+    static int getValueForSamplingRate(float mpegVersion, int index)
             throws IllegalArgumentException, NoSuchElementException {
         if (mpegVersion != 1f && mpegVersion != 2f && mpegVersion != 2.5f)
             throw new IllegalArgumentException("MPEG version " + mpegVersion + " not supported");

@@ -39,7 +39,7 @@ class BitRateLookUp {
      * @throws IllegalArgumentException if any of the parameters are invalid
      * @throws NoSuchElementException if there is no value for the given parameters
      */
-    public static int getValueForBitrate(int mpegVersion, int layer, int index)
+    static int getValueForBitrate(int mpegVersion, int layer, int index)
             throws IllegalArgumentException, NoSuchElementException {
         if (mpegVersion < 1 || mpegVersion > 2)
             throw new IllegalArgumentException("MPEG version " + mpegVersion + " not supported");

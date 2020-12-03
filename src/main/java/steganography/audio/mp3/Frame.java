@@ -53,7 +53,7 @@ class Frame {
     }
 
 
-    public int getStartingByte() {
+    int getStartingByte() {
         return startingByte;
     }
 
@@ -61,7 +61,7 @@ class Frame {
         this.startingByte = startingByte;
     }
 
-    public int getLength() {
+    int getLength() {
         return length;
     }
 
@@ -69,7 +69,7 @@ class Frame {
         this.length = length;
     }
 
-    public boolean isCrcProtected() {
+    boolean isCrcProtected() {
         return crcProtected;
     }
 
@@ -77,7 +77,7 @@ class Frame {
         this.crcProtected = crc;
     }
 
-    public int getBitrate() {
+    int getBitrate() {
         return bitrate;
     }
 
@@ -85,7 +85,7 @@ class Frame {
         this.bitrate = bitrate;
     }
 
-    public int getSamplingRate() {
+    int getSamplingRate() {
         return samplingRate;
     }
 
@@ -93,7 +93,7 @@ class Frame {
         this.samplingRate = samplingRate;
     }
 
-    public boolean isPadded() {
+    boolean isPadded() {
         return padded;
     }
 
@@ -101,7 +101,7 @@ class Frame {
         this.padded = padded;
     }
 
-    public boolean isValid() {
+    boolean isValid() {
         return valid;
     }
 
