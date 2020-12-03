@@ -68,6 +68,17 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.30</version>
         </dependency>
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
+            <version>[4.0,)</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.twitter4j/twitter4j-media-support -->
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-media-support</artifactId>
+            <version>4.0.6</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>social_steganography</finalName>
