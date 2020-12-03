@@ -43,6 +43,7 @@ public class PostEntry implements Comparable<PostEntry>{
 
     public PostEntry(String url, MyDate date, String type){
         this.url = url;
+
         this.date = date;
         this.type = type;
     }
@@ -76,5 +77,12 @@ public class PostEntry implements Comparable<PostEntry>{
     @Override
     public int compareTo(PostEntry postEntry) {
         return this.getDate().compareTo(postEntry.getDate());
+    }
+
+    @Override
+    public String toString(){
+        return "URL: " + getUrl() + "\n"
+            + "Timestamp: " + getDate().toString() + "\n"
+            + "In ms: " + getDate().getTime();
     }
 }

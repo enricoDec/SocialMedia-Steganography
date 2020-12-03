@@ -43,7 +43,7 @@ public class ImgurUtil extends BaseUtil {
     }
 
     /**
-     * Returns a list of Postentries (downloadlinks and timestamps) from a json-String
+     * Returns a sorted list of Postentries (downloadlinks and timestamps) from a json-String
      * @param responseString JSON String (Reddit response)
      * @return
      */
