@@ -125,13 +125,12 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
             tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
             if (tmp.size() > 0) {
                 newPostAvailable = true;
-                tmp.stream().forEach(postEntry -> System.out.println(postEntry.getUrl()));
 
                 /**
                  * TODO 0 oder letztes element.
                  */
 
-                //imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
+                imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
                 return tmp;

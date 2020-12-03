@@ -92,7 +92,7 @@ public class BaseUtil {
         //If current postEntry's timestamp is not newer than latestStored, filter it.
         return postEntries
                 .stream()
-                .filter(postEntry -> postEntry.getDate().compareTo(latestStoredTimestamp) < 0)
+                .filter(postEntry -> latestStoredTimestamp.compareTo(postEntry.getDate()) < 0)
                 .collect(Collectors.toList());
     }
 
