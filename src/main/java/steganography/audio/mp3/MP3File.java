@@ -18,7 +18,7 @@
 
 package steganography.audio.mp3;
 
-import steganography.audio.util.Converter;
+import steganography.audio.util.BitByteConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,8 +81,15 @@ public class MP3File {
     /**
      * Returns the positions of bytes that are safe to modify.
      * @return List of Integers - all modifiable bytes in this MP3 file
+     * @throws IllegalArgumentException if there are no frames.<br/>
+     *                                  This can happen when findAllFrames has not been called prior to this method
+     *                                  or this file is not an MP3 file.
      */
     public List<Integer> getModifiablePositions() {
+        if (this.frames == null)
+            throw new IllegalArgumentException("There are no frames. Therefore, there are no modifiable bytes. " +
+                    "Make sure findAllFrames() has been called!");
+
         List<Integer> result = new ArrayList<>();
 
         int frameCounter = 0;
@@ -174,7 +181,7 @@ public class MP3File {
             }
 
             // frame candidate found, check next bits
-            byte[] bitsOfNextByte = Converter.byteToBits(this.mp3Bytes[i+1]);
+            byte[] bitsOfNextByte = BitByteConverter.byteToBits(this.mp3Bytes[i+1]);
             if (bitsOfNextByte[0] == 0 || bitsOfNextByte[1] == 0 || bitsOfNextByte[2] == 0) {
                 // this and next bytes are no frame, so skip loop
                 i++;
@@ -222,7 +229,7 @@ public class MP3File {
         // get the bits, that have to be checked
         byte[] bytesToValidate = new byte[6];
         System.arraycopy(this.mp3Bytes, frame.getStartingByte(), bytesToValidate, 0, 6);
-        byte[][] bitsToValidate = Converter.byteToBits(bytesToValidate);
+        byte[][] bitsToValidate = BitByteConverter.byteToBits(bytesToValidate);
 
         // --------------------------------------------------------------------------------------------------------- \\
         // ------------------------------------------- VALIDATING HEADER ------------------------------------------- \\
@@ -307,7 +314,7 @@ public class MP3File {
         // 1101 = 256 kbps
         // 1110 = 320 kbps
         // 1111 = bad/invalid
-        int bitrateValue = Converter.bitsToByte(
+        int bitrateValue = BitByteConverter.bitsToByte(
                 new byte[] {
                         0, 0, 0, 0,
                         bitsToValidate[2][0], bitsToValidate[2][1], bitsToValidate[2][2], bitsToValidate[2][3]
@@ -320,7 +327,7 @@ public class MP3File {
         // 01 = 48000 Hz
         // 10 = 32000 Hz
         // 11 = reserved/invalid
-        int samplingRateValue = Converter.bitsToByte(
+        int samplingRateValue = BitByteConverter.bitsToByte(
                 new byte[] {
                         0, 0, 0, 0, 0, 0, bitsToValidate[2][4], bitsToValidate[2][5]
                 }

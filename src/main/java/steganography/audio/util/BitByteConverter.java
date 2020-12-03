@@ -22,7 +22,7 @@ package steganography.audio.util;
  * This class provides methods that make working with bits and bytes easier.
  * @author Richard Rudek
  */
-public class Converter {
+public class BitByteConverter {
 
     /**
      * Converts a byte array to a 2d-array containing the bit representation of each byte.
