@@ -21,6 +21,7 @@ package steganography.video.unit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
 import steganography.video.VideoDecoder;
 
@@ -33,18 +34,14 @@ public class VideoDecoderTest {
     private final File ffmpegBin = new File("src/main/resources");
     private Video video;
 
-    @BeforeEach
-    public void beforeEach() {
-    }
-
     /**
      * Try to decode valid Video and check frame count
      */
     @Test
     public void decodeToPictureFrameCount(){
         try {
-            FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));
-            this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
+            File file = new File("src/test/java/steganography/video/resources/video1.mp4");
+            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
         } catch (IOException e) {
@@ -58,8 +55,8 @@ public class VideoDecoderTest {
     @Test
     public void decodeToPictureNoAudio(){
         try {
-            FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video2.MP4"));
-            this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
+            File file = new File("src/test/java/steganography/video/resources/video2.MP4");
+            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
         } catch (IOException e) {
@@ -73,12 +70,8 @@ public class VideoDecoderTest {
      */
     @Test
     public void decodeAudioToPicture(){
-        try {
-            FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3"));
-            Assertions.assertThrows(UnsupportedEncodingException.class, () -> new Video(fileInputStream.readAllBytes(), ffmpegBin));
-        } catch (IOException e) {
-            Assertions.fail(e.toString());
-        }
+        File file = new File("src/test/java/steganography/video/resources/audio.mp3");
+        Assertions.assertThrows(UnsupportedEncodingException.class, () -> new Video(ByteArrayUtils.read(file), ffmpegBin));
     }
 
     /**
@@ -87,8 +80,8 @@ public class VideoDecoderTest {
     @Test
     public void decodeToPictureValidBufferedImage(){
         try {
-            FileInputStream fileInputStream = new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4"));
-            this.video = new Video(fileInputStream.readAllBytes(), ffmpegBin);
+            File file = new File("src/test/java/steganography/video/resources/video1.mp4");
+            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             ImageIO.setUseCache(false);
             List<byte[]> imageList = decoder.toPictureByteArray(4);

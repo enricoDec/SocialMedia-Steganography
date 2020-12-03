@@ -27,6 +27,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -37,7 +38,7 @@ import java.util.concurrent.*;
  * @version : 1.0
  * @since : 23-11-2020
  **/
-public class VideoDecoder implements IDecoder{
+public class VideoDecoder implements IDecoder {
     private final File ffmpegBin;
     private final byte[] videoByteArray;
     private final List<Long> ptsList = new ArrayList<>();
@@ -85,16 +86,12 @@ public class VideoDecoder implements IDecoder{
                             Map<byte[], Long> map = null;
                             // End of Stream
                             if (frame == null) {
-                                return map = Map.of(
-                                        new byte[0], 0L
-                                );
+                                return null;
                             }
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                             try {
                                 ImageIO.write(frame.getImage(), "png", byteArrayOutputStream);
-                                map = Map.of(
-                                        byteArrayOutputStream.toByteArray(), frame.getPts()
-                                );
+                                map = Collections.singletonMap(byteArrayOutputStream.toByteArray(), frame.getPts());
                                 if (logging && frameNumber % 2 == 0) {
                                     System.out.println("(Video -> Picture): (" + frameNumber + "/" + video.getFrameCount() + ")");
                                 }
@@ -155,14 +152,14 @@ public class VideoDecoder implements IDecoder{
             futureList = taskExecutor.invokeAll(taskList);
             //Wait for all results
             for (Future<Map<byte[], Long>> result : futureList) {
-                result.get().forEach(
-                        (k, v) -> {
-                            if (k.length == 0)
-                                return;
-                            decodedImages.add(k);
-                            ptsList.add(v);
-                        }
-                );
+                if (result.get() != null) {
+                    result.get().forEach(
+                            (k, v) -> {
+                                decodedImages.add(k);
+                                ptsList.add(v);
+                            }
+                    );
+                }
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
