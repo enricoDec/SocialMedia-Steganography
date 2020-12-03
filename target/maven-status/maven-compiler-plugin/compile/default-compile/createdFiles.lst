@@ -1,6 +1,0 @@
-App.class
-apis\SocialMedia.class
-apis\SocialMediaListener.class
-SocialMediaSteganography.class
-apis\Token.class
-steganography\Steganography.class
