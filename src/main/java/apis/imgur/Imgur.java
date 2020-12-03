@@ -158,7 +158,7 @@ public class Imgur extends SocialMedia {
 
             Request request = new Request.Builder()
                     .addHeader("User-Agent", "Sharksystems Steganography by Anon-User")
-                    .headers(Headers.of("Authorization", ("Client-ID abc" + ImgurConstants.CLIENT_ID)))
+                    .headers(Headers.of("Authorization", ("Client-ID " + ImgurConstants.CLIENT_ID)))
                     .url(ImgurConstants.UPLOAD_URL)
                     .post(body)
                     .build();
@@ -168,7 +168,7 @@ public class Imgur extends SocialMedia {
             String res = response.body().string();
             ImgurPostResponse ipr = gson.fromJson(res, ImgurPostResponse.class);
 
-            if (ipr != null || ipr.data != null || ipr.data.link != null || BaseUtil.hasErrorCode(ipr.status)) {
+            if (ipr == null || ipr.data == null || ipr.data.link == null || BaseUtil.hasErrorCode(ipr.status)) {
                 logger.info("Unsuccessfull uploaded!");
                 logger.info("Request was: " + request.toString());
                 logger.info("Response String was: " + res);

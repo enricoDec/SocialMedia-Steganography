@@ -37,16 +37,16 @@ public class App {
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
         //Setup
-        SocialMedia socialMedia = new Imgur();
-        socialMedia.setToken(new Token("677cfdc1835e8be427f723fd0819e568230f32d9", 100));
+        SocialMedia socialMedia = new Reddit();
+        socialMedia.setToken(new Token("668533834712-z1ehiaimW5LV7SKT8jlhgDtWl0IqWA", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload
         byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
-        String payload = "HelloWorld";
+        String payload = "This is a secret message which was built by ProjectStudiumSteganography";
 
         //Encode and Post
-        sms.encodeAndPost(socialMedia, byts, payload.getBytes());
+        //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
 
         //Search in social media for pictures and try to decode
         List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
