@@ -19,6 +19,7 @@
 package steganography.video;
 
 import com.github.kokorin.jaffree.ffmpeg.*;
+import steganography.util.ByteArrayUtils;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
@@ -116,6 +117,6 @@ public class VideoEncoder implements IEncoder {
                     .execute();
         }
 
-        return new FileInputStream(tempFile).readAllBytes();
+        return ByteArrayUtils.read(tempFile);
     }
 }
