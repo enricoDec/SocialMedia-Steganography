@@ -50,7 +50,7 @@ public class App {
 
         try {
             Tweet tweet = new Tweet();
-            out.write(tweet.downloadTweet("https://pbs.twimg.com/media/EnxCeYkWEAALO4y?format=jpg&name=small"));
+            out.write(tweet.downloadTweet("https://pbs.twimg.com/media/EoUrHVMXUAkmo52?format=jpg&name=medium"));
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
