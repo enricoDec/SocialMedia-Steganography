@@ -21,6 +21,7 @@ package steganography.video.unit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
 
 import java.io.*;
@@ -34,17 +35,13 @@ import java.io.*;
 public class VideoTest {
     private final File ffmpegBin = new File("src/main/resources");
 
-    @BeforeEach
-    public void beforeEach() {
-    }
-
     /**
      * Check if Video data is read correctly
      */
     @Test
     public void decodeToPictureMetadata() {
         try {
-            Video video = new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/video1.mp4")).readAllBytes(), ffmpegBin);
+            Video video = new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video1.mp4")), ffmpegBin);
             Assertions.assertNotNull(video.getCodec());
             Assertions.assertNotEquals(0, video.getTimebase());
             Assertions.assertNotEquals(0, video.getFrameRate());
@@ -65,7 +62,7 @@ public class VideoTest {
     @Test
     public void decodeToPictureWrongData() {
         try {
-            new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3")).readAllBytes(), ffmpegBin);
+            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), ffmpegBin);
         } catch (UnsupportedEncodingException e) {
             //do nothing
         } catch (IOException e) {
@@ -94,7 +91,7 @@ public class VideoTest {
     @Test
     public void decodeToPictureInvalidFFmpegPath() {
         try {
-            new Video(new FileInputStream(new File("src/test/java/steganography/video/resources/audio.mp3")).readAllBytes(), new File(""));
+            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), new File(""));
         } catch (IllegalArgumentException e) {
             // do nothing
         } catch (IOException e) {
