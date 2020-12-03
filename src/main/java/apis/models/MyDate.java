@@ -52,8 +52,6 @@ public class MyDate implements Comparable<MyDate>{
      */
     @Override
     public int compareTo(MyDate opposite) {
-        System.out.println("This: " + this.getTime());
-        System.out.println("Opp: " + opposite.getTime());
         return Long.valueOf(this.getTime()).compareTo(opposite.getTime());
     }
 }
