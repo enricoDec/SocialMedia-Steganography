@@ -184,7 +184,7 @@ public class AnimatedGif {
             AnimatedGif giffer = new AnimatedGif();
         try {
             FileInputStream file = new FileInputStream(new File(path + "doggy2.gif"));
-            byte[][] animatedGif = giffer.splitGifDecoder(file.readAllBytes());
+            byte[][] animatedGif = null;
             giffer.sequenceGifDecoder(animatedGif);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
