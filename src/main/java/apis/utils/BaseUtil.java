@@ -30,18 +30,43 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ * Base utilities which both, Reddit & Imgur are using
+ */
 public class BaseUtil {
     private static final Logger logger = Logger.getLogger(BaseUtil.class.getName());
 
-    public void sortPostEntries(List<PostEntry> postEntries){
+    /**
+     * Sorts a list of post entries, based on their timestamp
+     * @param postEntries
+     */
+    public static void sortPostEntries(List<PostEntry> postEntries){
         Collections.sort(postEntries);
+        postEntries.stream().forEach(postEntry -> System.out.println(postEntry));
     }
 
+    /**
+     * Calls the JSONPersistentManager singleton and stores a (the latest timestamp of the postenty-list)
+     * according to a specific network.
+     * @param network the specific network
+     * @param latestPostTimestamp
+     */
     public void setLatestPostTimestamp(APINames network, MyDate latestPostTimestamp) {
         logger.info("Set timestamp in ms: " + latestPostTimestamp.getTime());
         JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(network, latestPostTimestamp.getTime());
     }
 
+    /**
+     * Restores the latest stored timestamp with the JSONPersistentManager.
+     * @param network Name of the network
+     * @return MyDate(0) if an exception was thrown. Happens if there is no stored timestamp found,
+     *         or the timestamp was stored wrong e.g. with an character for an example 'k' within the stored value like
+     *         '1231k512'.
+     */
     public MyDate getLatestStoredTimestamp(APINames network) {
         MyDate oldPostTimestamp = null;
 
@@ -56,10 +81,19 @@ public class BaseUtil {
         return oldPostTimestamp;
     }
 
+    /**
+     * Generates the keyword list, which has to be processed by the subscription deamons.
+     *
+     * @param network Networkname
+     * @param onceUsedKeyword If keyword is NOT null AND the length is NOT 0, a list with just and only this keyword gets returned.
+     *                        If the keyword is null or the length is 0, a keywordlist will be restored by the JSONPersistentManager.
+     *                        All empty occuring keywords will be removed from the list.
+     * @return the list of keywords, or if no keywords were found, an empty list.
+     */
     public List<String> getKeywordList(APINames network, String onceUsedKeyword){
         List<String> keywords = new ArrayList<>();
 
-        if(onceUsedKeyword != null){
+        if(onceUsedKeyword != null || !(onceUsedKeyword.length() == 0)){
             keywords.add(onceUsedKeyword);
         }else{
             try {
@@ -71,15 +105,41 @@ public class BaseUtil {
         }
 
         if (onceUsedKeyword == null && keywords == null || keywords.size() == 0) {
-            return null;
+            return Collections.emptyList();
         }
         return keywords;
     }
 
+    /**
+     * Stores a keyword for a network
+     * @param network
+     * @param keyword
+     * @return true if ok, false if exception occured.
+     */
+    public boolean storeKeyword(APINames network, String keyword){
+        try{
+            JSONPersistentManager.getInstance().addKeywordForAPI(network, keyword);
+            return true;
+        }catch (Exception e){
+            logger.info("Keyword '" + keyword + "' could not be stored for network '" + network.getValue() + "'.");
+            return false;
+        }
+    }
+
+    /**
+     * Returns a timestamp for a String of info which represents the time as ms.
+     * @return Timestamp in seconds
+     */
     public MyDate getTimestamp(String info){
         return new MyDate(new Date(Long.valueOf(info.substring(0, info.length()-2))));
     }
 
+    /**
+     * Proofs if a HTTP Code is has an error or not.
+     * Uses range between 199 and 299 for "good" codes.
+     * @param responseCode
+     * @return true if has error code and param is not in range of "good" codes.
+     */
     public static boolean hasErrorCode(int responseCode) {
         if (199 <= responseCode && responseCode <= 299) {
             return false;
@@ -88,6 +148,13 @@ public class BaseUtil {
         }
     }
 
+    /**
+     * Eliminated old posts according to a timatestamp (should be latest stored, but can be used for other
+     * purposes with any timestamp)
+     * @param latestStoredTimestamp
+     * @param postEntries
+     * @return the filtered list, which only has items with timestamps wich are newer than the param latestStoredTimestamp
+     */
     public static List<PostEntry> elimateOldPostEntries(MyDate latestStoredTimestamp, List<PostEntry> postEntries){
         //If current postEntry's timestamp is not newer than latestStored, filter it.
         return postEntries
@@ -96,7 +163,13 @@ public class BaseUtil {
                 .collect(Collectors.toList());
     }
 
-    public static String encodeUrl(String url){
+    /**
+     * 'Decoded' an URL: 'amd;' will be replaced with an empty String.
+     *  This is the only encoding which is used in the URL String for this application.
+     * @param url
+     * @return
+     */
+    public static String decodeUrl(String url){
         return url.replace("amp;", "");
     }
 }

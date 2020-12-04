@@ -22,6 +22,12 @@ package apis.reddit.models;
  * @author Mario Teklic
  */
 
+/**
+ * Reddit 'About' response, which has information about a specific
+ * subreddit such as 'allow_images': some subreddits doesnt allow to
+ * upload images. If the user wants to upload an image, this should
+ * be checked before the upload is made
+ */
 public class RedditAboutResponse {
 
     private AboutData data;

@@ -18,6 +18,11 @@
 
 package apis;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public enum MediaType {
     JPEG,JPG,BMP,PNG,GIF,TIFF;
 }

@@ -30,6 +30,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
 
     private static final Logger logger = Logger.getLogger(SocialMediaSteganographyImpl.class.getName());

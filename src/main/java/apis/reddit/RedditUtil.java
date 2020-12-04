@@ -37,14 +37,29 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public class RedditUtil extends BaseUtil {
 
     private final static Logger logger = Logger.getLogger(Reddit.class.getName());
 
+    /**
+     * Returns the downloadable and decoded URL of an image from a reddit post
+     * @param data GET Response of reddit
+     * @return
+     */
     public String getUrl(RedditGetResponse.ResponseChildData data){
-        return this.encodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
+        return this.decodeUrl(data.getData().getPreview().getImages().getSource().getUrl());
     }
 
+    /**
+     *  Returns the timestamp from a reddit post
+     * @param data GET Response of reddit
+     * @return
+     */
     public MyDate getTimestamp(RedditGetResponse.ResponseChildData data){
         String info = data.getData().getCreated();
         if(info == null || info.isEmpty()){
@@ -54,9 +69,11 @@ public class RedditUtil extends BaseUtil {
     }
 
     /**
-     * Returns a list of Postentries (downloadlinks and timestamps) from a json-String
+     /**
+     * Converts a response String in json-format from an Imgur Response, to PostEntry-Objects
+     * Filters all types but .png out of the list.
      * @param responseString JSON String (Reddit response)
-     * @return
+     * @return Returns a sorted list of Postentries (downloadlinks and timestamps) from a json-String
      */
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
@@ -65,7 +82,7 @@ public class RedditUtil extends BaseUtil {
 
         for(RedditGetResponse.ResponseChildData child : responseArray.getData().getChildren()){
             if(child != null && !this.hasNullObjects(child)){
-                postEntries.add(new PostEntry(this.encodeUrl(this.getUrl(child)), this.getTimestamp(child), ".png"));
+                postEntries.add(new PostEntry(this.decodeUrl(this.getUrl(child)), this.getTimestamp(child), ".png"));
             }
         }
 
@@ -73,10 +90,17 @@ public class RedditUtil extends BaseUtil {
         }catch (Exception e){
             e.printStackTrace();
         }
-        this.sortPostEntries(postEntries);
         return postEntries;
     }
 
+    /**
+     * Proofs if there are null objects in a GET responses child data
+     * Tests only objcets which are used in the process after this method.
+     * Only date and download-url.
+     * @param responseChildData
+     * @return true if HAS null objects, false if NOT. False is in this case GOOD.
+     * @throws Exception while trying to initialize variables.
+     */
     public boolean hasNullObjects(RedditGetResponse.ResponseChildData responseChildData){
         MyDate myDate = null;
         String url = null;
@@ -95,9 +119,22 @@ public class RedditUtil extends BaseUtil {
               */
             return true;
         }
+
+        if(myDate == null && url != null)
+            return true;
+        if(myDate != null && url == null)
+            return true;
+        if(myDate == null && url == null)
+            return true;
+
         return false;
     }
 
+    /**
+     * Tests if on a specific subreddit, image uploads are allowed or not.
+     * @param subreddit E.g. 'nature' but NOT 'r/nature'! Subreddit prefix will be added in this method. Dont need to provide before.
+     * @return true if is allowed.
+     */
     public boolean isImageUploadAllowed(String subreddit){
         try {
             URL url = new URL(RedditConstants.BASE +
@@ -129,22 +166,5 @@ public class RedditUtil extends BaseUtil {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public MediaType getMediaType(String url){
-        if(url.contains(MediaType.BMP.name().toLowerCase())){
-            return MediaType.BMP;
-        }else if(url.contains(MediaType.GIF.name().toLowerCase())){
-            return MediaType.GIF;
-        }else if(url.contains(MediaType.JPEG.name().toLowerCase())){
-            return MediaType.JPEG;
-        }else if(url.contains(MediaType.PNG.name().toLowerCase())){
-            return MediaType.PNG;
-        }else if(url.contains(MediaType.TIFF.name().toLowerCase())){
-            return MediaType.TIFF;
-        }else if(url.contains(MediaType.JPG.name().toLowerCase())){
-            return MediaType.JPG;
-        }
-        return null;
     }
 }

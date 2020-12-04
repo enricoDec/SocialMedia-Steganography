@@ -26,6 +26,11 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public class BlobConverterImpl {
 
     /**

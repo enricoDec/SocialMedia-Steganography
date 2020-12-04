@@ -27,6 +27,13 @@ import okio.Buffer;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ *
+ */
 public class BearerInterceptor implements Interceptor {
 
     private static final Logger logger = Logger.getLogger(BearerInterceptor.class.getName());
@@ -34,6 +41,9 @@ public class BearerInterceptor implements Interceptor {
     public BearerInterceptor(){
     }
 
+    /**
+     * Adds an User-Agent to a Request and proceedes the request
+     */
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();

@@ -17,8 +17,8 @@
  */
 
 package apis.models;
-/*
- *
+
+/**
  * @author Mario Teklic
  */
 
@@ -43,7 +43,6 @@ public class PostEntry implements Comparable<PostEntry>{
 
     public PostEntry(String url, MyDate date, String type){
         this.url = url;
-
         this.date = date;
         this.type = type;
     }

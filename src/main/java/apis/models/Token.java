@@ -18,9 +18,6 @@
 
 package apis.models;
 
-/**
- * Represents the authentication needed for a Social Media API
- */
 public class Token {
 
     /**

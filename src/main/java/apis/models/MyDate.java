@@ -17,17 +17,32 @@
  */
 
 package apis.models;
-/*
- *
- * @author Mario Teklic
- */
 
 import java.util.Date;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public class MyDate implements Comparable<MyDate>{
 
+    /**
+     * Date
+     */
     private Date date;
 
+    /**
+     * Privat default constructor. Should not be used because some networks
+     * deliver timestamps with seconds instead of milliseconds. This does not work with
+     * the Java Date object
+     */
+    private MyDate(){}
+
+    /**
+     * Multiplies a dates getTime() value by 1000 which will results in a ms value instead of a seconds value
+     * @param date which has incorrect value. Seconds instead ms.
+     */
     public MyDate(Date date) {
         if(date.getTime() > 1000 && String.valueOf(date.getTime()).endsWith("000")){
             this.date = new Date(date.getTime());
@@ -40,16 +55,6 @@ public class MyDate implements Comparable<MyDate>{
         return this.date.getTime();
     }
 
-    public String toString() {
-        return date.toString();
-    }
-
-    /**
-     * Compares two MyDate objects
-     * @return 0, if datetimes are equal. Could be the same postentry.
-     * @return 1, if this postentry is newer
-     * @return -1, if this postentry is older
-     */
     @Override
     public int compareTo(MyDate opposite) {
         return Long.valueOf(this.getTime()).compareTo(opposite.getTime());

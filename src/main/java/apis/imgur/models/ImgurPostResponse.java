@@ -18,6 +18,13 @@
 
 package apis.imgur.models;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ * Represtens a POST response from Imgur API
+ */
 public class ImgurPostResponse {
     public boolean success;
     public int status;

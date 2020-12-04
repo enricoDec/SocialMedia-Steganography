@@ -43,19 +43,41 @@ import java.util.stream.Collectors;
 import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ * Reddit social media can upload, download, check for new postentries for a specific keyword/subreddit
+ */
 public class Reddit extends SocialMedia {
 
-    /**
-     * TODO Keywords, Timestamp
-     * Reddit, Imgur
-     */
-
     private static final Logger logger = Logger.getLogger(Reddit.class.getName());
+
+    /**
+     * Utilities which are used while uploading, download, searching
+     */
     private RedditUtil redditUtil;
+
+    /**
+     * For uploading and searching once or in an given interval for new post entries.
+     * Asynchron.
+     */
     private RedditSubscriptionDeamon redditSubscriptionDeamon;
+
+    /**
+     * Token which is needed while uploading a new image
+     */
     private Token token;
+
+    /**
+     * Manages the interval called search for new post entries
+     */
     private ScheduledExecutorService executor;
 
+    /**
+     * Default constructor. Prepares the subscription deamon, utils and the executor.
+     */
     public Reddit() {
         this.redditUtil = new RedditUtil();
         this.redditSubscriptionDeamon = new RedditSubscriptionDeamon();
@@ -123,7 +145,7 @@ public class Reddit extends SocialMedia {
 
     /**
      * Listens for new post entries in imgur network for stored keywords.
-     *
+     * Asynchron.
      * @param interval Interval in minutes
      */
     public void listen(Integer interval) {
@@ -143,7 +165,7 @@ public class Reddit extends SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        JSONPersistentManager.getInstance().addKeywordForAPI(REDDIT, keyword);
+        this.redditUtil.storeKeyword(REDDIT, keyword);
         listen(DEFAULT_INTERVALL);
         return true;
     }

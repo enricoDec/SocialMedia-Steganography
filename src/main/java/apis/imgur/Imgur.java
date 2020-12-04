@@ -43,14 +43,43 @@ import java.util.stream.Collectors;
 import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ * Imgur Social Media API implementation
+ */
 public class Imgur extends SocialMedia {
 
     private final static Logger logger = Logger.getLogger(Imgur.class.getName());
+
+    /**
+     * Subscription deamon can search automatically for new posts for given keywords in an given interval
+     * Asynchron
+     */
     private ImgurSubscriptionDeamon imgurSubscriptionDeamon;
+
+    /**
+     * Is used for uploading posts to Imgur
+     */
     private Token token;
+
+    /**
+     * Handles the automatically process of looking for new post entries
+     */
     private ScheduledExecutorService executor;
 
+    /**
+     * Utilities
+     */
+    private ImgurUtil imgurUtil;
+
+    /**
+     * Standard constructor prepares the subscriptiondeamon but does not start it
+     */
     public Imgur() {
+        imgurUtil = new ImgurUtil();
         imgurSubscriptionDeamon = new ImgurSubscriptionDeamon();
         executor = Executors.newSingleThreadScheduledExecutor();
     }
@@ -100,6 +129,9 @@ public class Imgur extends SocialMedia {
         return false;
     }
 
+    /**
+     * Shares an uploaded media with the community/makes it public and searchable
+     */
     private boolean shareWithCommunity(ImgurPostResponse postResponse, String keyword) {
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new BearerInterceptor()).build();
 
@@ -185,7 +217,7 @@ public class Imgur extends SocialMedia {
 
     /**
      * Listens for new post entries in imgur network for stored keywords.
-     *
+     * Asynchron.
      * @param interval Interval in minutes
      */
     public void listen(Integer interval) {
@@ -205,7 +237,7 @@ public class Imgur extends SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        JSONPersistentManager.getInstance().addKeywordForAPI(IMGUR, keyword);
+        this.imgurUtil.storeKeyword(IMGUR, keyword);
         listen(DEFAULT_INTERVALL);
         return true;
     }

@@ -24,6 +24,9 @@ package apis.reddit.models;
 
 import java.util.List;
 
+/**
+ * Represents a POST response by the Reddit network
+ */
 public class RedditPostResponse {
 
     private JsonItems json;

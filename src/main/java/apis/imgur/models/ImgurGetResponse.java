@@ -20,6 +20,13 @@ package apis.imgur.models;
 
 import java.util.List;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ *  Represents a GET response from Imgur API
+ */
 public class ImgurGetResponse {
 
     private List<ImgurData> data;

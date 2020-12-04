@@ -42,12 +42,30 @@ import java.util.stream.Collectors;
 import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ *
+ */
 public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
     private static final Logger logger = Logger.getLogger(RedditSubscriptionDeamon.class.getName());
+
+    /**
+     * Utilities for processing the search
+     */
     private RedditUtil redditUtil;
 
+    /**
+     * Represents if there were post entries found in the last search
+     */
     private boolean newPostAvailable;
+
+    /**
+     * Latest found post entries
+     */
     private List<PostEntry> latestPostEntries;
 
     /**
@@ -62,6 +80,13 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
     }
 
+    /**
+     * Searches for the latest upload medias in this social media network for the given keyword.
+     * @param onceUsedKeyword If this String is not null and has more characters than 0, the method will
+     *                        search only for this keyword.
+     *                        If this param is null or has 0 characters, the stored keywordlist will be
+     *                        restored and for earch keyword will be searched in the network.
+     */
     private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
         List<String> keywords = redditUtil.getKeywordList(REDDIT, onceUsedKeyword);
 
@@ -110,15 +135,12 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         return resultList;
     }
 
-    /**
-     * @return
-     */
     @Override
     public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
         List<PostEntry> tmp = this.getRecentMedia(keyword);
 
         if (tmp != null) {
-            Collections.sort(tmp, Collections.reverseOrder());
+            BaseUtil.sortPostEntries(tmp);
             tmp = BaseUtil.elimateOldPostEntries(redditUtil.getLatestStoredTimestamp(REDDIT), tmp);
             logger.info((tmp.size()) + " postentries found after eliminate old entries.");
 
@@ -128,7 +150,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
                 /**
                  * TODO 0 oder letztes element.
                  */
-                redditUtil.setLatestPostTimestamp(REDDIT, tmp.get(0).getDate());
+                redditUtil.setLatestPostTimestamp(REDDIT, tmp.get(tmp.size()-1).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
                 return tmp;
@@ -146,6 +168,9 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         return newPostAvailable;
     }
 
+    /**
+     * Returns a list of the latest found post entries
+     */
     public List<PostEntry> getLatestPostEntries() {
         return this.latestPostEntries;
     }

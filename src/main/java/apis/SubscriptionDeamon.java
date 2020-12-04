@@ -23,12 +23,22 @@ import apis.models.PostEntry;
 
 import java.util.List;
 
+/**
+ * @author Mario Teklic
+ */
+
 public interface SubscriptionDeamon extends Runnable {
 
-    public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword);
+    /**
+     * Searches for new post entries for a specific keyword, or for all stored keywords.
+     *
+     * @param keyword If onceUsedKeyword is null, every stored keyword will be processed.
+     * @return
+     */
+    List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword);
 
     /**
      * Getter & Setter
      */
-    public boolean isNewPostAvailable();
+    boolean isNewPostAvailable();
 }

@@ -29,13 +29,20 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
+/**
+ * @author Mario Teklic
+ */
 
+/**
+ *
+ */
 public class ImgurUtil extends BaseUtil {
-
-    public static String latestLink;
 
     private static final Logger logger = Logger.getLogger(ImgurUtil.class.getName());
 
+    /**
+     *
+     */
     public ImgurUtil(){
         SimpleFormatter fmt = new SimpleFormatter();
         StreamHandler sh = new StreamHandler(System.out, fmt);
@@ -43,9 +50,9 @@ public class ImgurUtil extends BaseUtil {
     }
 
     /**
-     * Returns a sorted list of Postentries (downloadlinks and timestamps) from a json-String
-     * @param responseString JSON String (Reddit response)
-     * @return
+     * Converts a response String in json-format from an Imgur Response, to PostEntry-Objects
+     * @param responseString JSON String (Imgur response)
+     * @return Returns a sorted list of Postentries (downloadlinks and timestamps) from a json-String
      */
     public List<PostEntry> getPosts(String responseString){
         List<PostEntry> postEntries = new ArrayList<>();
@@ -58,21 +65,14 @@ public class ImgurUtil extends BaseUtil {
                 }
             }
         }
-        this.sortPostEntries(postEntries);
         return postEntries;
     }
 
+    /**
+     * Returns which media types are supported by this network
+     */
     private boolean supportedFormat(String link) {
         return link.contains(".png");
-    }
-
-
-    public void setLatestLink(String latestLink) {
-        this.latestLink = latestLink;
-    }
-
-    public String getLatestLink() {
-        return latestLink;
     }
 
 }

@@ -36,19 +36,39 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static apis.imgur.ImgurConstants.BASE_URI;
+import static apis.imgur.ImgurConstants.SEARCH_URI;
 import static apis.models.APINames.IMGUR;
 
+/**
+ * @author Mario Teklic
+ */
+
+/**
+ * Can search for new post entries in Imgur in an interval or just once
+ */
 public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
     private static final Logger logger = Logger.getLogger(ImgurSubscriptionDeamon.class.getName());
+
+    /**
+     * Utilities for processing the search
+     */
     private ImgurUtil imgurUtil;
 
-    private final String BASE_URI = "https://api.imgur.com/3/";
-    private final String SEARCH_URI = "gallery/search/time?q=";
-
+    /**
+     * Represents if there were post entries found in the last search
+     */
     private boolean newPostAvailable;
+
+    /**
+     * Latest found post entries
+     */
     private List<PostEntry> latestPostEntries;
 
+    /**
+     * Subcription for a Keyword in a Social Media
+     */
     public ImgurSubscriptionDeamon() {
         this.imgurUtil = new ImgurUtil();
     }
@@ -59,6 +79,13 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
     }
 
+    /**
+     * Searches for the latest upload medias in this social media network for the given keyword.
+     * @param onceUsedKeyword If this String is not null and has more characters than 0, the method will
+     *                        search only for this keyword.
+     *                        If this param is null or has 0 characters, the stored keywordlist will be
+     *                        restored and for earch keyword will be searched in the network.
+     */
     private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
         List<String> keywords = imgurUtil.getKeywordList(IMGUR, onceUsedKeyword);
 
@@ -106,22 +133,12 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         return resultList;
     }
 
-    /**
-     * TODO in reddit übernehmen
-     */
-
-    /**
-     * Searches for new post entries for a specific keyword, or for all stored keywords.
-     *
-     * @param keyword If onceUsedKeyword is null, every stored keyword will be processed.
-     * @return
-     */
     @Override
     public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
         List<PostEntry> tmp = this.getRecentMedia(keyword);
 
         if (tmp != null) {
-            Collections.sort(tmp, Collections.reverseOrder());
+            BaseUtil.sortPostEntries(tmp);
             tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
             if (tmp.size() > 0) {
                 newPostAvailable = true;
@@ -130,7 +147,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
                  * TODO 0 oder letztes element.
                  */
 
-                imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(0).getDate());
+                imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(tmp.size()-1).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
                 return tmp;
@@ -149,6 +166,9 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         return this.newPostAvailable;
     }
 
+    /**
+     * Returns a list of the latest found post entries
+     */
     public List<PostEntry> getLatestPostEntries() {
         return this.latestPostEntries;
     }

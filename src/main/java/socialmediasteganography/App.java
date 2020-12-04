@@ -32,13 +32,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public class App {
     public static void main(String[] args) throws IOException {
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
         //Setup
         SocialMedia socialMedia = new Reddit();
-        socialMedia.setToken(new Token("668533834712-z1ehiaimW5LV7SKT8jlhgDtWl0IqWA", 100));
+        socialMedia.setToken(new Token("668533834712-21jXXV_3ErQSxinevlA3PATGuj3z5A", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload

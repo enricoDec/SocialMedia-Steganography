@@ -18,6 +18,11 @@
 
 package apis.reddit;
 
+/**
+ * @author Mario Teklic
+ */
+
+
 public interface RedditConstants {
     String APP_NAME = "SharksystemsStega";
     String BASE = "https://www.reddit.com";
