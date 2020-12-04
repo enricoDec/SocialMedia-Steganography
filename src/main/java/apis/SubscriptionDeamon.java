@@ -18,7 +18,6 @@
 
 package apis;
 
-import apis.models.MyDate;
 import apis.models.PostEntry;
 
 import java.util.List;

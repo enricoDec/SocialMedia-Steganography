@@ -1,4 +1,4 @@
-package apis.utils;
+package socialmediasteganography;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mario Teklic
  */
 
-class BlobConverterImplTest {
+class SocialMediaSteganographyImplTest {
 
     @Test
-    void downloadToByte() {
+    void encodeAndPost() {
     }
 
     @Test
-    void byteToFile() {
+    void searchForHiddenMessages() {
     }
 }

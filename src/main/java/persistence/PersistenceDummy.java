@@ -18,12 +18,10 @@
 
 package persistence;
 
-import apis.reddit.Reddit;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 public class PersistenceDummy implements JSONPersistentHelper{

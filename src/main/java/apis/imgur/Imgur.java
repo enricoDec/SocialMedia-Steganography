@@ -26,11 +26,7 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
-import persistence.JSONPersistentManager;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +37,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static apis.models.APINames.IMGUR;
-import static apis.models.APINames.REDDIT;
 
 /**
  * @author Mario Teklic

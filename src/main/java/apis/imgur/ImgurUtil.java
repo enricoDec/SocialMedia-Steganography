@@ -34,20 +34,11 @@ import java.util.logging.StreamHandler;
  */
 
 /**
- *
+ * Imgur Utilities
  */
 public class ImgurUtil extends BaseUtil {
 
     private static final Logger logger = Logger.getLogger(ImgurUtil.class.getName());
-
-    /**
-     *
-     */
-    public ImgurUtil(){
-        SimpleFormatter fmt = new SimpleFormatter();
-        StreamHandler sh = new StreamHandler(System.out, fmt);
-        logger.addHandler(sh);
-    }
 
     /**
      * Converts a response String in json-format from an Imgur Response, to PostEntry-Objects

@@ -19,12 +19,8 @@
 package apis.reddit;
 
 import apis.SubscriptionDeamon;
-import apis.models.APINames;
 import apis.utils.BaseUtil;
-import apis.utils.BlobConverterImpl;
-import apis.models.MyDate;
 import apis.models.PostEntry;
-import persistence.JSONPersistentManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,13 +29,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
 /**

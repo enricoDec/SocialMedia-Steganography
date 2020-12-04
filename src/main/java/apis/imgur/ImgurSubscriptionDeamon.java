@@ -19,12 +19,9 @@
 package apis.imgur;
 
 import apis.SubscriptionDeamon;
-import apis.models.APINames;
 import apis.reddit.RedditConstants;
-import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.utils.BaseUtil;
-import persistence.JSONPersistentManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;

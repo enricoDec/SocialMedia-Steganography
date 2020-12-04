@@ -38,9 +38,6 @@ public class BearerInterceptor implements Interceptor {
 
     private static final Logger logger = Logger.getLogger(BearerInterceptor.class.getName());
 
-    public BearerInterceptor(){
-    }
-
     /**
      * Adds an User-Agent to a Request and proceedes the request
      */

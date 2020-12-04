@@ -18,7 +18,6 @@
 
 package apis.reddit;
 
-import apis.MediaType;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.reddit.models.RedditAboutResponse;
