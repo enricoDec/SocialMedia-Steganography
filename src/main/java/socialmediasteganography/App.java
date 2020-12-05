@@ -42,8 +42,8 @@ public class App {
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
         //Setup
-        SocialMedia socialMedia = new Reddit();
-        socialMedia.setToken(new Token("668533834712-21jXXV_3ErQSxinevlA3PATGuj3z5A", 100));
+        SocialMedia socialMedia = new Imgur();
+        socialMedia.setToken(new Token("8d62001c17c74e223cda94f9f86d00bca60f5009", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload

@@ -46,6 +46,7 @@ public class ImgurUtil extends BaseUtil {
      * @return Returns a sorted list of Postentries (downloadlinks and timestamps) from a json-String
      */
     public List<PostEntry> getPosts(String responseString){
+        System.out.println(responseString);
         List<PostEntry> postEntries = new ArrayList<>();
         ImgurGetResponse responseObject = new Gson().fromJson(responseString, ImgurGetResponse.class);
 

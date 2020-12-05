@@ -83,7 +83,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
      *                        If this param is null or has 0 characters, the stored keywordlist will be
      *                        restored and for earch keyword will be searched in the network.
      */
-    private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
+    public List<PostEntry> getRecentMedia(String onceUsedKeyword) {
         List<String> keywords = imgurUtil.getKeywordList(IMGUR, onceUsedKeyword);
 
         if (keywords == null || keywords.size() == 0) {
@@ -136,7 +136,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
         if (tmp != null) {
             BaseUtil.sortPostEntries(tmp);
-            tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
+            tmp = imgurUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
             if (tmp.size() > 0) {
                 newPostAvailable = true;
 
