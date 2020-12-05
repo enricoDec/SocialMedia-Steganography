@@ -25,6 +25,7 @@ package steganography.image;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import steganography.util.ByteArrayUtils;
 
 import javax.imageio.*;
 import javax.imageio.metadata.IIOInvalidTreeException;
@@ -114,11 +115,16 @@ public class AnimatedGif {
 
                 for (int i = 0; i < nop; i++) {
                     ByteArrayInputStream readInput = new ByteArrayInputStream(gifs[i]);
-                    ImageInputStream ciis = ImageIO.createImageInputStream(readInput);
+                    BufferedImage bufferedImage = ImageIO.read(readInput);
+                    ImageTypeSpecifier specifier = ImageTypeSpecifier.createFromBufferedImageType(bufferedImage.getType());
+                    IIOMetadata newMetadata = writer.getDefaultImageMetadata(specifier,param);
+                    ByteArrayInputStream ioInput = new ByteArrayInputStream(gifs[i]);
+                    ImageInputStream ciis = ImageIO.createImageInputStream(ioInput);
                     reader.setInput(ciis, false);
                     IIOImage frame = reader.readAll(0,null);
+                    newMetadata = createMetadata(delay[i], frame, newMetadata);
                     // Cannot change Metadata since its read-only at the moment.
-                    writer.writeToSequence(frame,param);
+                    writer.writeToSequence(new IIOImage(bufferedImage,null,newMetadata),param);
 
                 }
                 writer.endWriteSequence();
@@ -131,18 +137,15 @@ public class AnimatedGif {
             return null;
         }
 
-        private  IIOImage createMetadata(int delay, IIOImage gifFrame) throws IIOInvalidTreeException {
+        private  IIOMetadata createMetadata(int delay, IIOImage gifFrame, IIOMetadata newMetadata) throws IIOInvalidTreeException {
             IIOMetadata metadata = gifFrame.getMetadata();
             String name = metadata.getNativeMetadataFormatName();
             IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(name);
 
-
-
             IIOMetadataNode graphicsControlExtensionNote = getNode(root,"GraphicControlExtension");
-            System.out.println(graphicsControlExtensionNote.toString());
             graphicsControlExtensionNote.setAttribute("delayTime", Integer.toString(delay));
-            metadata.setFromTree(name, root);
-            return gifFrame;
+            newMetadata.setFromTree(name, root);
+            return newMetadata;
         }
 
         private static IIOMetadataNode getNode(IIOMetadataNode root, String nodeName) {
@@ -182,14 +185,15 @@ public class AnimatedGif {
         }
     public static void main(String[] args) {
             AnimatedGif giffer = new AnimatedGif();
+            File input =new File(path + "doggy2.gif");
         try {
-            FileInputStream file = new FileInputStream(new File(path + "doggy2.gif"));
-            byte[][] animatedGif = null;
-            giffer.sequenceGifDecoder(animatedGif);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            byte[] gif = ByteArrayUtils.read(input);
+            giffer.sequenceGifDecoder(giffer.splitGifDecoder(gif));
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
         }
 
         //create FileInputStream which obtains input bytes from a file in a file system
@@ -223,7 +227,7 @@ public class AnimatedGif {
         giffer.sequenceGifDecoder(split); */
         //splitGifTest("cat.gif");
         //mergeGIF();
-    }
+
     /**
      * Splits a gif into single frames
      * @param name Name of the gif

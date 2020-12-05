@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.image.GIFTableDecoder;
+import steganography.util.ByteArrayUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,9 +47,8 @@ public class GIFTableDecoderTest {
     @Test
     public void saveColorTable_FullTabel_intArray() {
         try {
-            FileInputStream in = new FileInputStream("src/main/resources/gifFrames/25.gif");
-            gif = in.readAllBytes();
-            in.close();
+            File in = new File("src/main/resources/gifFrames/25.gif");
+            gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertEquals(256,table.length);
         } catch (FileNotFoundException e) {
@@ -61,9 +61,8 @@ public class GIFTableDecoderTest {
     @Test
     public void saveColorTable_SmallTable_intArray() {
         try {
-            FileInputStream in = new FileInputStream("src/main/resources/gifFrames/1.gif");
-            gif = in.readAllBytes();
-            in.close();
+            File in = new File("src/main/resources/gifFrames/1.gif");
+            gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertTrue(table.length > 0 && table.length < 256);
         } catch (FileNotFoundException e) {
