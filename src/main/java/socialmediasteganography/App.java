@@ -43,7 +43,7 @@ public class App {
 
         //Setup
         SocialMedia socialMedia = new Imgur();
-        socialMedia.setToken(new Token("8d62001c17c74e223cda94f9f86d00bca60f5009", 100));
+        socialMedia.setToken(new Token("e1e5f0ff327cb45aa5440f456297317cbcb77859", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload

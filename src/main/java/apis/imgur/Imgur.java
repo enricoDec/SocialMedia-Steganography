@@ -227,10 +227,6 @@ public class Imgur extends SocialMedia {
         if (!executor.isShutdown())
             executor.shutdown();
 
-        /**
-         * TODO wo müssen daten hin, müsste man im deamon nicht irgendwo update() vom observer aufrufen?
-         */
-
         if (interval == null) {
             executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
         } else {
