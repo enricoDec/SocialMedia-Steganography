@@ -18,7 +18,7 @@
 
 package steganography.image.mocks;
 
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.BufferedImageCoordinateOverlay;
 
 import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;

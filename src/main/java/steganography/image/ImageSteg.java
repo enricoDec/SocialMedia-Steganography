@@ -19,9 +19,10 @@
 package steganography.image;
 
 import steganography.Steganography;
-import steganography.util.BuffImgEncoder;
-import steganography.util.BuffImgAndFormat;
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.encoders.PixelBit;
+import steganography.image.overlays.ShuffleOverlay;
+import steganography.image.encoders.BuffImgEncoder;
+import steganography.image.overlays.BufferedImageCoordinateOverlay;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -44,18 +45,21 @@ public class ImageSteg implements Steganography {
     // }
 
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload)
+            throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException {
+
         return encode(carrier, payload, DEFAULT_SEED);
     }
 
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException, ImageWritingException {
+
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
         int type = buffImgAndFormat.getBufferedImage().getType();
 
-        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
 
         if (this.useDefaultHeader) {
             encoder.encode(int2bytes(HEADER_SIGNATURE));
@@ -63,26 +67,28 @@ public class ImageSteg implements Steganography {
         }
         encoder.encode(payload);
 
-        return bufferedImage2byteArray(overlay.getBufferedImage(), buffImgAndFormat.getFormat());
+        return bufferedImage2byteArray(encoder.getOverlay().getBufferedImage(), buffImgAndFormat.getFormat());
     }
 
     @Override
-    public byte[] decode(byte[] steganographicData) throws IOException {
+    public byte[] decode(byte[] steganographicData)
+            throws IOException, UnsupportedImageTypeException, NoImageException, UnknownStegFormatException {
+
         return decode(steganographicData, DEFAULT_SEED);
     }
 
     @Override
-    public byte[] decode(byte[] steganographicData, long seed) throws IOException {
+    public byte[] decode(byte[] steganographicData, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException, UnknownStegFormatException {
+
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
 
-        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
 
         // TODO: only do this if useDefaultHeader == true, but length has to be given from user
         // decode 4 bytes and compare them to header signature
         if (bytesToInt(encoder.decode(4)) != HEADER_SIGNATURE) {
-            // TODO: Specialized Exception
-            throw new UnsupportedEncodingException("No steganographic encoding found.");
+            throw new UnknownStegFormatException("No steganographic encoding found.");
         }
 
         // decode the next 4 bytes to get the amount of bytes to read
@@ -92,7 +98,9 @@ public class ImageSteg implements Steganography {
     }
 
     @Override
-    public boolean isSteganographicData(byte[] data) throws IOException {
+    public boolean isSteganographicData(byte[] data)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
 
         BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), DEFAULT_SEED);
@@ -109,7 +117,7 @@ public class ImageSteg implements Steganography {
      * @return the payload-capacity of image
      */
     public int getImageCapacity(byte[] image, boolean subtractDefaultHeader, boolean withTransparent)
-            throws IOException {
+            throws IOException, NoImageException {
 
         BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
         int capacity;
@@ -141,24 +149,59 @@ public class ImageSteg implements Steganography {
     //                                       UTIL
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedEncodingException {
+    /**
+     * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
+     * @param bufferedImage image to get the encoder for
+     * @param seed to hand to the overlay
+     * @return BuffImgEncoder with set BufferedImageCoordinateOverlay, chosen accordingly to the images type
+     * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
+     */
+    private BuffImgEncoder getEncoder(BufferedImage bufferedImage, long seed)
+            throws UnsupportedImageTypeException {
+
         int type = bufferedImage.getType();
+
         switch (type) {
-            case BufferedImage.TYPE_INT_ARGB:
+
+            // Types for PixelBit Algorithm TODO: Add IgnoreAreaOverlay as optional by enum?
+            //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_4BYTE_ABGR:
+            case BufferedImage.TYPE_3BYTE_BGR:
+            case BufferedImage.TYPE_INT_ARGB:
             case BufferedImage.TYPE_INT_RGB:
             case BufferedImage.TYPE_INT_BGR:
-                return new ShuffleOverlay(bufferedImage, seed);
+                return new PixelBit(new ShuffleOverlay(bufferedImage, seed));
+
+            // Type(s) for ColorCouple Algorithm
+            //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
                 // TODO: Put 8 Bit algorithm here
-                throw new UnsupportedEncodingException("8 Bit / Type BYTE_INDEXED not yet implemented");
+                throw new UnsupportedImageTypeException("8 Bit / Type BYTE_INDEXED not yet implemented");
                 // return overlay8Bit
+
+            // Types that have not been tested, but are probably suitable for PixelBit Algorithm
+            //----------------------------------------------------------------------------------
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
+            case BufferedImage.TYPE_INT_ARGB_PRE:
+                // TODO: Test those types (find them first)
+                throw new UnsupportedImageTypeException("Image type is not supported because untested.");
+
+            // Types that will (probably) not be supported - explicit for completion reasons
+            //----------------------------------------------------------------------------------
+            case BufferedImage.TYPE_BYTE_BINARY:
+            case BufferedImage.TYPE_BYTE_GRAY:
+            case BufferedImage.TYPE_CUSTOM:
+            case BufferedImage.TYPE_USHORT_555_RGB:
+            case BufferedImage.TYPE_USHORT_565_RGB:
+            case BufferedImage.TYPE_USHORT_GRAY:
             default:
-                throw new UnsupportedEncodingException("Image type is not supported");
+                throw new UnsupportedImageTypeException("Image type is not supported");
         }
     }
 
-    private BuffImgAndFormat carrier2BufferedImage(byte[] carrier) throws IOException {
+    private BuffImgAndFormat carrier2BufferedImage(byte[] carrier)
+            throws IOException, NoImageException {
+
         BuffImgAndFormat buffImgAndFormat;
 
         try(ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier))) {
@@ -176,20 +219,20 @@ public class ImageSteg implements Steganography {
                     reader.dispose();
                 }
             } else {
-                // TODO: Specialized Exception
-                throw new UnsupportedEncodingException("No image could be read from input.");
+                throw new NoImageException("No image could be read from input.");
             }
         }
 
         return buffImgAndFormat;
     }
 
-    private byte[] bufferedImage2byteArray(BufferedImage image, String format) throws IOException {
+    private byte[] bufferedImage2byteArray(BufferedImage image, String format)
+            throws IOException, ImageWritingException {
+
         ByteArrayOutputStream resultImage = new ByteArrayOutputStream();
 
         if (!ImageIO.write(image, format, resultImage)) {
-            // TODO: Specialized Exception
-            throw new UnsupportedEncodingException("Could not write image. Unknown, internal failure");
+            throw new ImageWritingException("Could not write image. Unknown, internal error");
         }
 
         return resultImage.toByteArray();
@@ -209,5 +252,25 @@ public class ImageSteg implements Steganography {
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;
+    }
+
+    private static class BuffImgAndFormat {
+
+        private final BufferedImage bufferedImage;
+
+        private final String format;
+
+        public BuffImgAndFormat(BufferedImage bufferedImage, String format) {
+            this.bufferedImage = bufferedImage;
+            this.format = format;
+        }
+
+        public BufferedImage getBufferedImage() {
+            return bufferedImage;
+        }
+
+        public String getFormat() {
+            return format;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package steganography.image;
+package steganography.image.encoders;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

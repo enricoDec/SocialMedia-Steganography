@@ -21,6 +21,8 @@ package steganography.image;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import steganography.Steganography;
+import steganography.image.encoders.PixelBit;
+
 import java.io.*;
 
 public class TestImageSteg {

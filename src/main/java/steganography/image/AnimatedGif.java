@@ -22,9 +22,7 @@
  */
 package steganography.image;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import steganography.image.encoders.GifDecoder;
 import steganography.util.ByteArrayUtils;
 
 import javax.imageio.*;
@@ -34,11 +32,8 @@ import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Selina Wernike

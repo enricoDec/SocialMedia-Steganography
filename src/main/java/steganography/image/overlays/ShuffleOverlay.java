@@ -16,26 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.image;
+package steganography.image.overlays;
 
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ShuffleOverlay extends SerialOverlay {
 
     protected Random random;
 
-    protected ShuffleOverlay(BufferedImage bufferedImage) throws UnsupportedEncodingException {
+    protected ShuffleOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
         super(bufferedImage);
     }
 
-    public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedEncodingException {
+    public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         super(bufferedImage);
 
         this.random = new Random(seed);

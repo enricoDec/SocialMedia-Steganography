@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.util;
+package steganography.image.overlays;
 
 import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;

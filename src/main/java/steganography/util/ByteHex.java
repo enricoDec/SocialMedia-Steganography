@@ -20,7 +20,7 @@
  * @author Selina Wernike
  * This Class transforms a byte into a hex string and vice versa
  */
-package steganography.image;
+package steganography.util;
 
 public class ByteHex {
 

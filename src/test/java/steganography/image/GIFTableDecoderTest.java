@@ -19,17 +19,14 @@
 package steganography.image;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import steganography.image.GIFTableDecoder;
+import steganography.image.encoders.GIFTableDecoder;
 import steganography.util.ByteArrayUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

@@ -16,10 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.image;
+package steganography.image.encoders;
 
-import steganography.util.BuffImgEncoder;
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.BufferedImageCoordinateOverlay;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;

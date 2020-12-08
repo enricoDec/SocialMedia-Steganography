@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.image;
+package steganography.image.overlays;
 
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,15 +33,15 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
     protected int currentX = 0;
     protected int currentY = 0;
 
-    protected SerialOverlay(BufferedImage bufferedImage) throws UnsupportedEncodingException {
+    protected SerialOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
         this.bufferedImage = bufferedImage;
 
         int type = this.bufferedImage.getType();
         if (!this.typeAccepted(type))
-            throw new UnsupportedEncodingException("This overlay doesn't support images of type " + type);
+            throw new UnsupportedImageTypeException("This overlay doesn't support images of type " + type);
     }
 
-    public SerialOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedEncodingException {
+    public SerialOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         this(bufferedImage);
         createOverlay();
     }

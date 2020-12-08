@@ -16,14 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.image;
-
-import steganography.util.BufferedImageCoordinateOverlay;
+package steganography.image.overlays;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class RemoveTransparentShuffleOverlay implements BufferedImageCoordinateOverlay {
 

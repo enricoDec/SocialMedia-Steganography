@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.image;
+package steganography.image.overlays;
 
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Random;
 
@@ -31,7 +30,7 @@ public class TableOverlay extends ShuffleOverlay {
     private Map<Integer, List<Integer>> colorCouple;
     private Random position;
 
-    public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple, int[] colorTable ) throws UnsupportedEncodingException {
+    public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple, int[] colorTable ) throws UnsupportedImageTypeException {
         super(bufferedImage);
         this.position = new Random(seed);
         this.colorCouple = colorCouple;

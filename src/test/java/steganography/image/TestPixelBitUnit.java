@@ -20,6 +20,7 @@ package steganography.image;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import steganography.image.encoders.PixelBit;
 import steganography.image.mocks.MockOverlay;
 
 import java.util.Random;
