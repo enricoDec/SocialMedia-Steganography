@@ -54,7 +54,7 @@ public class MP3SequenceOverlay implements AudioOverlay {
 
     @Override
     public void setByte(byte value) throws NoSuchElementException {
-        this.MP3_BYTES[this.currentPosition] = value;
+        this.MP3_BYTES[this.dataByteOrder.get(this.currentPosition)] = value;
     }
 
     @Override

@@ -93,26 +93,28 @@ public class MP3File {
         List<Integer> result = new ArrayList<>();
 
         int frameCounter = 0;
-        Frame currentFrame;
+        Frame currentFrame = this.frames.get(frameCounter);
+
         // loop through mp3 bytes starting at first frame to find data bytes
-        // TODO test if this really skip the headers and checksums
-        for (int i = this.frames.get(0).getStartingByte() + Frame.HEADER_LENGTH; i < this.mp3Bytes.length; i++) {
+        for (int i = currentFrame.getStartingByte(); i < this.mp3Bytes.length; i++) {
             // get the next frame
             currentFrame = this.frames.get(frameCounter);
 
-            // if the header of the frame is crc protected, skip the next two bytes (crc checksum)
-            if (currentFrame.isCrcProtected())
-                i += 2;
+            // skip header (and checksum)
+            if (i == currentFrame.getStartingByte()) {
+                i += Frame.HEADER_LENGTH;
+                i += currentFrame.isCrcProtected() ? Frame.CHECKSUM_LENGTH : 0;
+            }
 
             // add the data byte to the list of modifiable bytes
-            if (i < (currentFrame.getStartingByte() + currentFrame.getLength()))
-                result.add(i);
+            result.add(i);
 
             // look at the next frame when loop has gone through every data byte of the current frame
-            if (i > (currentFrame.getStartingByte() + currentFrame.getLength()))
+            if (i == (currentFrame.getStartingByte() + currentFrame.getLength() - 1))
                 frameCounter++;
 
-            if (frameCounter >= this.frameCount)
+            // stop if loop went through every frame
+            if (frameCounter == this.frameCount)
                 break;
         }
         System.out.println("Found " + result.size() + " modifiable Positions in the MP3 byte array.");

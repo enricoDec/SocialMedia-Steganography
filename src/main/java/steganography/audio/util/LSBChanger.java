@@ -43,6 +43,7 @@ public class LSBChanger {
      */
     public byte[] encode(byte[] message) throws IllegalArgumentException {
         byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
+
         if (messageBytesAndBits.length > this.OVERLAY.available())
             throw new IllegalArgumentException("Message (requires " + messageBytesAndBits.length +
                     " bytes) does not fit into overlay (" + this.OVERLAY.available() + " bytes available).");

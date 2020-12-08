@@ -52,7 +52,7 @@ public class BitByteConverter {
         }
         // set first bit manually because java only knows 2's complement,
         // otherwise the first bit would always be set to 0
-        bitArray[0] = (byte) (byteToConvert > 0 ? 0 : 1);
+        bitArray[0] = (byte) (byteToConvert < 0 ? 1 : 0);
         return bitArray;
     }
 

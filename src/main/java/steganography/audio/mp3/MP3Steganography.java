@@ -85,6 +85,9 @@ public class MP3Steganography implements Steganography {
      */
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
+        if (carrier == null || carrier.length == 0 || payload == null || payload.length == 0)
+            throw new IOException("Carrier or payload are null or have length 0");
+
         System.out.println("[INFO] Starting to encode into MP3 file.");
 
         // add mp3 steganography header
@@ -96,20 +99,21 @@ public class MP3Steganography implements Steganography {
 
         // start encoding
         AudioOverlay overlay;
+        byte[] result;
         try {
             // create overlay (also checks if the bytes are a valid mp3 file)
             overlay = getOverlay(carrier, seed);
             // get the encoder
             LSBChanger lsbChanger = new LSBChanger(overlay);
             // encode the payload
-            lsbChanger.encode(payload);
+            result = lsbChanger.encode(payload);
         } catch (UnsupportedAudioFileException | IllegalArgumentException e) {
             throw new IOException(e.getMessage());
         }
 
         System.out.println("[INFO] Finished encoding into MP3 file.");
         System.out.println();
-        return overlay.getBytes();
+        return result;
     }
 
     /**
@@ -120,15 +124,21 @@ public class MP3Steganography implements Steganography {
         return decode(steganographicData, DEFAULT_SEED);
     }
 
+    /**
+     * @throws IOException if the given byte array doesn't contain an mp3 file.
+     */
     @Override
     public byte[] decode(byte[] steganographicData, long seed) throws IOException {
+        if (steganographicData == null || steganographicData.length == 0)
+            throw new IOException("steganographicData is null or has length 0");
+
         System.out.println("[INFO] Starting to decode from MP3 file.");
-        AudioOverlay overlay;
+
         byte[] message;
 
         try {
             // create overlay (also checks if the bytes are a valid mp3 file)
-            overlay = getOverlay(steganographicData, seed);
+            AudioOverlay overlay = getOverlay(steganographicData, seed);
             // get the decoder
             LSBChanger lsbChanger = new LSBChanger(overlay);
 

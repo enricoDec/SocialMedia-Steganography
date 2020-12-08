@@ -28,6 +28,10 @@ class Frame {
      */
     public static final int HEADER_LENGTH = 4;
     /**
+     * The length of the checksum following an MP3 header in bytes
+     */
+    public static final int CHECKSUM_LENGTH = 2;
+    /**
      * The number of the byte in an MP3 file where this frame begins
      */
     private int startingByte;
