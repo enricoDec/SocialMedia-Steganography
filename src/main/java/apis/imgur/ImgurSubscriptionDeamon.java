@@ -70,6 +70,10 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         this.imgurUtil = new ImgurUtil();
     }
 
+    public void injectImgurUtil(ImgurUtil util){
+        this.imgurUtil = util;
+    }
+
     @Override
     public void run() {
         //bool newPostAvailable will be setted in getRecentMediaForSubscribedKeywords()

@@ -71,12 +71,20 @@ public class Imgur extends SocialMedia {
     private ImgurUtil imgurUtil;
 
     /**
-     * Standard constructor prepares the subscriptiondeamon but does not start it
+     * Standard constructor prepares the Subscriptiondeamon but does not start it
      */
     public Imgur() {
         imgurUtil = new ImgurUtil();
         imgurSubscriptionDeamon = new ImgurSubscriptionDeamon();
         executor = Executors.newSingleThreadScheduledExecutor();
+    }
+
+    /**
+     * Inject mocked Deamon for testing
+     * @param deamon
+     */
+    public void injectSubscriptionDeamon(ImgurSubscriptionDeamon deamon){
+        this.imgurSubscriptionDeamon = deamon;
     }
 
     @Override
