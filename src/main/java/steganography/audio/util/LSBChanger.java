@@ -18,48 +18,68 @@
 
 package steganography.audio.util;
 
+import steganography.audio.mp3.overlays.AudioOverlay;
+
+import java.util.NoSuchElementException;
+
 /**
  * This class can read from and write to the least significant bits of a byte array.
  * @author Richard Rudek
  */
 public class LSBChanger {
 
-    /**
-     * Takes the byte array message and writes the message into the least significant bits of the byte array carrier.
-     * @param carrier bytes to write into
-     * @param message bytes to encode
-     * @return The given byte array with the message encoded into the least significant bits
-     */
-    public static byte[] writeToByteArray(byte[] carrier, byte[] message) {
-        byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
-        int counter = 0;
-        for (byte[] messageBytes : messageBytesAndBits) {
-            for (byte messageBit : messageBytes) {
-                byte[] currentBits = BitByteConverter.byteToBits(carrier[counter]);
-                if (currentBits[7] != messageBit)
-                    currentBits[7] = messageBit;
-                carrier[counter] = BitByteConverter.bitsToByte(currentBits);
-                counter++;
-            }
-        }
-        return carrier;
+    private final AudioOverlay OVERLAY;
+
+    public LSBChanger(AudioOverlay overlay) {
+        this.OVERLAY = overlay;
     }
 
     /**
-     * Reads a message from the byte array encodedCarrier starting at the byte with the number startingPosition
-     * until length bytes have been read.
-     * @param encodedCarrier byte array containing a message
-     * @param startingPosition starting position to start the reading process
-     * @param length amount of bytes in the message
-     * @return The message as a byte array
+     * Takes the byte array message and writes the message into the least significant bits of the byte array carrier
+     * using the overlay given in the constructor.
+     * @param message bytes to encode
+     * @return the given byte array with the message encoded into the least significant bits
+     * @throws IllegalArgumentException if the message does not fit into the overlays bytes
      */
-    public static byte[] readFromByteArray(byte[] encodedCarrier, int startingPosition, int length) {
+    public byte[] encode(byte[] message) throws IllegalArgumentException {
+        byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
+        if (messageBytesAndBits.length > this.OVERLAY.available())
+            throw new IllegalArgumentException("Message (requires " + messageBytesAndBits.length +
+                    " bytes) does not fit into overlay (" + this.OVERLAY.available() + " bytes available).");
+
+        for (byte[] messageBytes : messageBytesAndBits) {
+            for (byte messageBit : messageBytes) {
+                // get the next byte
+                byte currentByte = this.OVERLAY.next();
+                // get the bit representation and change the last bit
+                byte[] currentBits = BitByteConverter.byteToBits(currentByte);
+                if (currentBits[7] != messageBit)
+                    currentBits[7] = messageBit;
+                // set the changed byte in this overlay
+                this.OVERLAY.setByte(BitByteConverter.bitsToByte(currentBits));
+            }
+        }
+        return this.OVERLAY.getBytes();
+    }
+
+    /**
+     * Reads a message from this overlays byte array until length bytes have been read.
+     * @param length amount of bytes in the message
+     * @return the message as a byte array
+     * @throws IllegalArgumentException if there are not enough bytes to read the message from
+     */
+    public byte[] decode(int length) throws IllegalArgumentException {
+        if (length * 8 > this.OVERLAY.available())
+            throw new IllegalArgumentException("Message could not be read from byte array because only " +
+                    (this.OVERLAY.available() / 8) + " bytes are available in the MP3 file, but " + length +
+                    " bytes are required to get the whole message.");
+
         byte[] message = new byte[length];
-        int messageCounter = 0;
         byte[] tempByte = new byte[8];
         int tempByteCounter = 0;
-        for (int i = startingPosition; i < length * 8; i++) {
-            byte[] currentBits = BitByteConverter.byteToBits(encodedCarrier[i]);
+        int messageCounter = 0;
+        for (int i = 0; i < length * 8; i++) {
+            byte[] currentBits = BitByteConverter.byteToBits(this.OVERLAY.next());
             tempByte[tempByteCounter++] = currentBits[7];
             if (tempByteCounter == 8) {
                 message[messageCounter++] = BitByteConverter.bitsToByte(tempByte);

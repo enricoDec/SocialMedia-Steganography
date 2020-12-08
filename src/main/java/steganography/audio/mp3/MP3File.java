@@ -80,7 +80,7 @@ public class MP3File {
 
     /**
      * Returns the positions of bytes that are safe to modify.
-     * @return List of Integers - all modifiable bytes in this MP3 file
+     * @return List of Integers - all positions of modifiable bytes in this MP3 file
      * @throws IllegalArgumentException if there are no frames.<br/>
      *                                  This can happen when findAllFrames has not been called prior to this method
      *                                  or this file is not an MP3 file.
@@ -115,6 +115,7 @@ public class MP3File {
             if (frameCounter >= this.frameCount)
                 break;
         }
+        System.out.println("Found " + result.size() + " modifiable Positions in the MP3 byte array.");
         return result;
     }
 
@@ -125,10 +126,12 @@ public class MP3File {
      *         false, if there are none
      */
     public boolean findAllFrames() {
+        System.out.println("Starting the search for the frames in the MP3 byte array.");
         if (this.frames == null) {
             this.frames = new ArrayList<>();
             this.frameCount = findFrames();
         }
+        System.out.println(this.frameCount + " frames found.");
 
         if (this.frameCount == 0) {
             this.frames = null;
@@ -144,7 +147,6 @@ public class MP3File {
     private int findFrames() {
         int lastPosition = 0;
         int framesFound = 0;
-        System.out.println("Starting the search for the frames in the MP3 byte Array.");
         while (lastPosition != -1) {
             try {
                 // find the next frame
@@ -160,7 +162,6 @@ public class MP3File {
                 lastPosition = -1;
             }
         }
-        System.out.println("All frames found.");
         return framesFound;
     }
 
