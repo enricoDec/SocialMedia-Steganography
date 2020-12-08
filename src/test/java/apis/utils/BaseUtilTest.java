@@ -1,16 +1,12 @@
 package apis.utils;
 
-import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
 
-import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 class BaseUtilTest {
-
-    PrintStream p = System.out;
 
     @BeforeEach
     public void setPersistence(){

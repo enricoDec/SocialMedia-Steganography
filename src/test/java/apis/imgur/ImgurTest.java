@@ -1,15 +1,16 @@
 package apis.imgur;
 
 import apis.SocialMedia;
-import apis.models.APINames;
+import apis.imgur.models.ImgurPostResponse;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.models.Token;
+import apis.utils.BaseUtil;
+import apis.utils.BlobConverterImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
 
@@ -17,7 +18,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
+import static apis.models.APINames.IMGUR;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
@@ -34,33 +37,77 @@ class ImgurTest {
     }
 
     @BeforeEach
-    public void init(){
+    public void init() {
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, 0);
     }
 
     @Test
-    void postToSocialNetwork() {
+    void postToSocialNetworkShouldReceiveErrorCode() {
+        Imgur imgur = new Imgur();
+        byte[] file = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
+        imgur.setToken(new Token("dummy", 123));
+        assertFalse(imgur.postToSocialNetwork(file, "test"));
     }
 
     @Test
     void uploadPicture() {
+        Imgur imgur = new Imgur();
+        byte[] file = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
+        imgur.setToken(new Token("dummy", 123));
+        ImgurPostResponse response = Imgur.uploadPicture(file, "test");
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().getLink());
+        assertFalse(BaseUtil.hasErrorCode(response.status));
     }
 
     @Test
-    void listen() {
+    void subscribeAndChangeSchedulerPeriod() throws Exception {
+        Imgur imgur = new Imgur();
+        String newKeyword = String.valueOf(System.currentTimeMillis());
+
+        try{
+            imgur.subscribeToKeyword(newKeyword);
+            imgur.changeSchedulerPeriod(1);
+            Thread.sleep(2000);
+            assertTrue(imgur.isSchedulerRunning());
+            Thread.sleep(2000);
+            assertTrue(imgur.isSchedulerRunning());
+        }catch (Exception e){
+            //Should not throw an exception. If thrown -> test failed.
+            assertTrue(false);
+        }
     }
 
     @Test
-    void subscribeToKeyword() {
+    void subscribeToKeyword() throws Exception {
+        Imgur imgur = new Imgur();
+        String newKeyword = String.valueOf(System.currentTimeMillis());
+
+        List<String> before = JSONPersistentManager.getInstance().getKeywordListForAPI(IMGUR);
+
+        assertTrue(!before.contains(newKeyword));
+
+        try {
+            imgur.subscribeToKeyword(newKeyword);
+            //Exception must be thrown, otherwise test should fail
+            assertTrue(false);
+        } catch (RejectedExecutionException e) {
+            //Will be thrown by deamon scheduled executor. This is tested in "subscribeAndListen()"
+            assertTrue(true);
+        }
+
+        List<String> after = JSONPersistentManager.getInstance().getKeywordListForAPI(IMGUR);
+
+        assertTrue(after.contains(newKeyword));
     }
 
     @Test
-    void getRecentMediaForKeyword() throws MalformedURLException {
+    void getRecentMediaForKeyword() {
         Imgur imgur = new Imgur();
 
-        ImgurSubscriptionDeamon deamon = Mockito.mock(ImgurSubscriptionDeamon.class);
-        Mockito.when(deamon.getRecentMediaForSubscribedKeywords(ArgumentMatchers.anyString()))
-                .thenReturn(getSingleDownloadablePicAsList());
+        ImgurSubscriptionDeamon deamon = Mockito.mock(ImgurSubscriptionDeamon.class, Mockito.withSettings().verboseLogging());
 
         ImgurUtil util = Mockito.mock(ImgurUtil.class);
         deamon.injectImgurUtil(util);
@@ -69,26 +116,15 @@ class ImgurTest {
         List<byte[]> bytes = imgur.getRecentMediaForKeyword("test");
 
         assertNotNull(bytes);
-        assertTrue(bytes.size() == 1);
-        assertTrue(bytes.get(0).length > 0);
 
         //verify getrecentmedia deamon
         Mockito.verify(deamon, Mockito.times(1)).getRecentMediaForSubscribedKeywords(ArgumentMatchers.anyString());
-        Mockito.verify(deamon, Mockito.times(1)).getRecentMedia(ArgumentMatchers.anyString());
-
-        /*Mockito.verify(util, Mockito.times(1)).getKeywordList(ArgumentMatchers.any(APINames.class), ArgumentMatchers.anyString());
-        Mockito.verify(util, Mockito.times(1)).getPosts(ArgumentMatchers.anyString());
-        Mockito.verify(util, Mockito.times(1)).elimateOldPostEntries(ArgumentMatchers.any(MyDate.class), ArgumentMatchers.anyList());
-        Mockito.verify(util, Mockito.times(1)).getLatestStoredTimestamp(ArgumentMatchers.any(APINames.class));
-        Mockito.verify(util, Mockito.times(1)).setLatestPostTimestamp(ArgumentMatchers.any(APINames.class), ArgumentMatchers.any(MyDate.class));
-        Mockito.verify(util, Mockito.times(1)).getKeywordList(ArgumentMatchers.any(APINames.class), ArgumentMatchers.anyString());
-    */
     }
 
 
     @Test
     void setGetToken() {
-        SocialMedia imgur =new Imgur();
+        SocialMedia imgur = new Imgur();
         Token token = new Token("thisisatoken", 100);
         imgur.setToken(token);
         assertTrue(token.getToken().equals(imgur.getToken().getToken()));

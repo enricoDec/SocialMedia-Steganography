@@ -54,7 +54,8 @@ public class App {
         //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
 
         //Search in social media for pictures and try to decode
-        List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        socialMedia.subscribeToKeyword("nature");
 
 /*
         //Auswertung als Strings

@@ -26,12 +26,14 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -66,6 +68,11 @@ public class Imgur extends SocialMedia {
     private ScheduledExecutorService executor;
 
     /**
+     * Future of scheduler service
+     */
+    private ScheduledFuture scheduledFuture;
+
+    /**
      * Utilities
      */
     private ImgurUtil imgurUtil;
@@ -76,20 +83,21 @@ public class Imgur extends SocialMedia {
     public Imgur() {
         imgurUtil = new ImgurUtil();
         imgurSubscriptionDeamon = new ImgurSubscriptionDeamon();
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
     }
 
     /**
      * Inject mocked Deamon for testing
+     *
      * @param deamon
      */
-    public void injectSubscriptionDeamon(ImgurSubscriptionDeamon deamon){
+    public void injectSubscriptionDeamon(ImgurSubscriptionDeamon deamon) {
         this.imgurSubscriptionDeamon = deamon;
     }
 
     @Override
     public boolean postToSocialNetwork(byte[] media, String keyword) {
-        if (this.getToken() == null && this.getToken().getToken() == null) {
+        if (this.getToken() == null || this.getToken().getToken() == null) {
             logger.info("No Token was set!");
         }
 
@@ -207,7 +215,7 @@ public class Imgur extends SocialMedia {
                 logger.info("Unsuccessfull uploaded!");
                 logger.info("Request was: " + request.toString());
                 logger.info("Response String was: " + res);
-            }else{
+            } else {
                 logger.info("Successfull uploaded anonymously.\nURL: " + ipr.data.link);
             }
             return ipr;
@@ -221,23 +229,32 @@ public class Imgur extends SocialMedia {
     /**
      * Listens for new post entries in imgur network for stored keywords.
      * Asynchron.
+     *
      * @param interval Interval in minutes
      */
-    public void listen(Integer interval) {
-        if (!executor.isShutdown())
-            executor.shutdown();
+    public void changeSchedulerPeriod(Integer interval) {
+        if (scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
 
         if (interval == null) {
-            executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, 5, TimeUnit.MINUTES);
         } else {
-            executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, interval, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, interval, TimeUnit.MINUTES);
         }
+    }
+
+    /**
+     * Returns if the Subscription deamon is running
+     * @return
+     */
+    public boolean isSchedulerRunning(){
+        return !scheduledFuture.isCancelled() && !scheduledFuture.isDone();
     }
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
         this.imgurUtil.storeKeyword(IMGUR, keyword);
-        listen(DEFAULT_INTERVALL);
+        changeSchedulerPeriod(DEFAULT_INTERVALL);
         return true;
     }
 

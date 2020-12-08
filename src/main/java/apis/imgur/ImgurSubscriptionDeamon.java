@@ -136,7 +136,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
     @Override
     public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
-        List<PostEntry> tmp = this.getRecentMedia(keyword);
+        List<PostEntry> tmp = getRecentMedia(keyword);
 
         if (tmp != null) {
             BaseUtil.sortPostEntries(tmp);
@@ -156,7 +156,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         }
 
         logger.info("No new media found.");
-        latestPostEntries = null;
+        latestPostEntries = Collections.emptyList();
         newPostAvailable = false;
         return null;
     }

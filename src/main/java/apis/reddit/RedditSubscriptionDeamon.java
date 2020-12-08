@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -151,7 +152,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         }
 
         logger.info("No new media found.");
-        latestPostEntries = null;
+        latestPostEntries = Collections.emptyList();
         newPostAvailable = false;
         return null;
     }

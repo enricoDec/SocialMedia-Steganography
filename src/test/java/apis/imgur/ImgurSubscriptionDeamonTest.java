@@ -1,22 +1,20 @@
 package apis.imgur;
 
-import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
 import apis.utils.BaseUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import persistence.JSONPersistentManager;
+import persistence.PersistenceDummy;
 
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static apis.models.APINames.IMGUR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Matchers.*;
 
@@ -26,9 +24,6 @@ import static org.mockito.Matchers.*;
  */
 
 class ImgurSubscriptionDeamonTest {
-
-    PrintStream p = System.out;
-
 
     public List<PostEntry> getUnsortedPostEntryList() throws MalformedURLException {
         List<PostEntry> list = new ArrayList<>();
@@ -44,7 +39,7 @@ class ImgurSubscriptionDeamonTest {
     public void mockitoObjects(){
         //baseUtil = Mockito.mock(BaseUtil.class);
         //Mockito.when(baseUtil.getLatestStoredTimestamp(APINames.IMGUR)).thenReturn(new MyDate(new Date(100)));
-        MockitoAnnotations.initMocks(this);
+        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
     }
 
     @Test
@@ -74,13 +69,11 @@ class ImgurSubscriptionDeamonTest {
 
         ImgurSubscriptionDeamon deamon = new ImgurSubscriptionDeamon();
 
-        p.println(getUnsortedPostEntryList().size());
         List<PostEntry> list = deamon.getRecentMediaForSubscribedKeywords("test");
 
         List<PostEntry> sortedByExtern = getUnsortedPostEntryList();
         BaseUtil.sortPostEntries(sortedByExtern);
 
-        p.println(list.size());
         assertTrue(!list.isEmpty());
         for(int i = 0; i < sortedByExtern.size(); i++){
             assertEquals(sortedByExtern.get(i).getDate(), list.get(i).getDate());
@@ -88,11 +81,17 @@ class ImgurSubscriptionDeamonTest {
     }
 
     @Test
-    void isNewPostAvailable() {
+    void isNewPostAvailableGetLatestPostEntries() {
+        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(IMGUR, 0);
 
-    }
+        ImgurSubscriptionDeamon deamon = new ImgurSubscriptionDeamon();
 
-    @Test
-    void getLatestPostEntries() {
+        assertEquals(false, deamon.isNewPostAvailable());
+        assertEquals(null, deamon.getLatestPostEntries());
+
+        deamon.getRecentMediaForSubscribedKeywords("nature");
+        assertEquals(true, deamon.isNewPostAvailable());
+        assertNotNull(deamon.getLatestPostEntries());
+        assertTrue(deamon.getLatestPostEntries().size() > 0);
     }
 }
