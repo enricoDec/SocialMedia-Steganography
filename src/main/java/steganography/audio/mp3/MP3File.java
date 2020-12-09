@@ -85,7 +85,7 @@ public class MP3File {
      *                                  This can happen when findAllFrames has not been called prior to this method
      *                                  or this file is not an MP3 file.
      */
-    public List<Integer> getModifiablePositions() {
+    public List<Integer> getModifiablePositions() throws IllegalArgumentException {
         if (this.frames == null)
             throw new IllegalArgumentException("There are no frames. Therefore, there are no modifiable bytes. " +
                     "Make sure findAllFrames() has been called!");
@@ -117,7 +117,7 @@ public class MP3File {
             if (frameCounter == this.frameCount)
                 break;
         }
-        System.out.println("Found " + result.size() + " modifiable Positions in the MP3 byte array.");
+        System.out.println("[INFO] Found " + result.size() + " modifiable Positions in the MP3 byte array.");
         return result;
     }
 
@@ -128,7 +128,7 @@ public class MP3File {
      *         false, if there are none
      */
     public boolean findAllFrames() {
-        System.out.println("Starting the search for the frames in the MP3 byte array.");
+        System.out.println("[INFO] Starting the search for the frames in the MP3 byte array.");
         if (this.frames == null) {
             this.frames = new ArrayList<>();
             this.frameCount = findFrames();
