@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by Enrico de Chadarevian
+ * Contributed by Richard Rudek
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.audio.overlays;
 
-import java.io.IOException;
-import java.util.List;
-
-public interface IDecoder {
+/**
+ * This enum contains every overlay that can be used to encode or decode messages into or from MP3 files.
+ * @author Richard Rudek
+ */
+public enum MP3Overlays {
+    /**
+     * Goes through MP3 files and reads/writes from/to data bytes in order
+     */
+    SEQUENCE_OVERLAY,
 
     /**
-     * Decode a Video to single Pictures (that can be read as Buff Images)
-     * @param nThread number of Threads to use to decode
-     * @return list of pictures decoded from Video
+     * Goes through MP3 files and reads/writes from/to shuffled data bytes according to a seed
      */
-    List<byte[]> toPictureByteArray(int nThread) throws IOException;
+    SHUFFLE_OVERLAY
 }

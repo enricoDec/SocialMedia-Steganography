@@ -19,7 +19,7 @@
 package steganography.audio.mp3;
 
 /**
- * This class is a POJO and holds information about a frame in an MP3 file.
+ * This class holds information about a frame in an MP3 file.
  * @author Richard Rudek
  */
 class Frame {

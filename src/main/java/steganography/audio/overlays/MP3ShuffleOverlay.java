@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by Enrico de Chadarevian
+ * Contributed by Richard Rudek
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.audio.overlays;
 
-import java.io.IOException;
-import java.util.List;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.util.Collections;
+import java.util.Random;
 
-public interface IDecoder {
+/**
+ * This class returns the MP3 data bytes randomized according to a seed.
+ * @author Richard Rudek
+ */
+public class MP3ShuffleOverlay extends MP3SequenceOverlay {
 
-    /**
-     * Decode a Video to single Pictures (that can be read as Buff Images)
-     * @param nThread number of Threads to use to decode
-     * @return list of pictures decoded from Video
-     */
-    List<byte[]> toPictureByteArray(int nThread) throws IOException;
+
+    public MP3ShuffleOverlay(byte[] bytes, long seed) throws UnsupportedAudioFileException {
+        super(bytes, seed);
+        createOverlay(seed);
+    }
+
+    @Override
+    protected void createOverlay(long seed) {
+        Random r = new Random(seed);
+        Collections.shuffle(this.dataByteOrder, r);
+    }
 }

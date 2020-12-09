@@ -1,4 +1,22 @@
-package steganography.audio.mp3.overlays;
+/*
+ * Copyright (c) 2020
+ * Contributed by Richard Rudek
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package steganography.audio.overlays;
 
 import steganography.audio.mp3.MP3File;
 
@@ -8,12 +26,13 @@ import java.util.NoSuchElementException;
 
 /**
  * This class returns the data bytes of an MP3 file in order.
+ * @author Richard Rudek
  */
 public class MP3SequenceOverlay implements AudioOverlay {
 
-    private final byte[] MP3_BYTES;
-    private List<Integer> dataByteOrder;
-    private int currentPosition = -1;
+    protected byte[] mp3Bytes;
+    protected List<Integer> dataByteOrder;
+    protected int currentPosition = -1;
 
     /**
      * Adds a sequence overlay to a given MP3 file. This overlay retrieves only the data bytes of the MP3 file and
@@ -24,19 +43,16 @@ public class MP3SequenceOverlay implements AudioOverlay {
      * @throws UnsupportedAudioFileException if the given byte array does not contain an MP3 file
      */
     public MP3SequenceOverlay(byte[] bytes, long seed) throws UnsupportedAudioFileException {
-        this(bytes);
-    }
-
-    protected MP3SequenceOverlay(byte[] bytes) throws UnsupportedAudioFileException {
         MP3File mp3File = new MP3File(bytes);
         if (!mp3File.findAllFrames())
             throw new UnsupportedAudioFileException("The given byte array is not a valid MP3 file.");
-        this.MP3_BYTES = mp3File.getMP3Bytes();
-        createOverlay(mp3File);
+        this.mp3Bytes = mp3File.getMP3Bytes();
+        this.dataByteOrder = mp3File.getModifiablePositions();
+
+        createOverlay(seed);
     }
 
-    protected void createOverlay(MP3File mp3File) {
-        this.dataByteOrder = mp3File.getModifiablePositions();
+    protected void createOverlay(long seed) {
     }
 
     @Override
@@ -44,7 +60,7 @@ public class MP3SequenceOverlay implements AudioOverlay {
         if (++this.currentPosition >= this.dataByteOrder.size())
             throw new NoSuchElementException("No more bytes left.");
 
-        return this.MP3_BYTES[this.dataByteOrder.get(this.currentPosition)];
+        return this.mp3Bytes[this.dataByteOrder.get(this.currentPosition)];
     }
 
     @Override
@@ -54,11 +70,11 @@ public class MP3SequenceOverlay implements AudioOverlay {
 
     @Override
     public void setByte(byte value) throws NoSuchElementException {
-        this.MP3_BYTES[this.dataByteOrder.get(this.currentPosition)] = value;
+        this.mp3Bytes[this.dataByteOrder.get(this.currentPosition)] = value;
     }
 
     @Override
     public byte[] getBytes() {
-        return this.MP3_BYTES;
+        return this.mp3Bytes;
     }
 }

@@ -19,20 +19,19 @@
 package steganography.audio.mp3;
 
 import steganography.Steganography;
-import steganography.audio.mp3.overlays.AudioOverlay;
-import steganography.audio.mp3.overlays.MP3Overlays;
-import steganography.audio.mp3.overlays.MP3SequenceOverlay;
-import steganography.audio.mp3.overlays.MP3ShuffleOverlay;
+import steganography.audio.overlays.AudioOverlay;
+import steganography.audio.overlays.MP3Overlays;
+import steganography.audio.overlays.MP3SequenceOverlay;
+import steganography.audio.overlays.MP3ShuffleOverlay;
 import steganography.audio.util.LSBChanger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 /**
- * This class can encode and decode messages from a byte array containing an MP3 audio file.
+ * This class can encode and decode messages from a byte array containing an MP3 audio file using an overlay.
  * @author Richard Rudek
  */
 public class MP3Steganography implements Steganography {
