@@ -19,17 +19,12 @@
 package steganography;
 
 import steganography.exceptions.*;
-import steganography.image.exceptions.ImageCapacityException;
 
 import java.io.IOException;
 
 public interface Steganography {
-
-    // void useDefaultHeader(boolean useDefaultHeader);
-
     /**
      * Takes some data and conceals it in a carrier (container used to hide data).
-     *
      * @param carrier carrier used to hide the data
      * @param payload data to hide
      * @return steganographic data
@@ -39,9 +34,7 @@ public interface Steganography {
                     MediaReassemblingException, MediaCapacityException;
 
     /**
-     * conceals payload in carrier (container used to hide payload)
-     * using the given seed
-     *
+     * Takes some data and conceals it in a carrier (container used to hide data) according to the given seed.
      * @param carrier carrier used to hide the data
      * @param payload data to hide
      * @param seed affects the resulting steganographic data (similar to a password)
@@ -52,23 +45,21 @@ public interface Steganography {
                     MediaReassemblingException, MediaCapacityException;
 
     /**
-     * Retrieves hidden message from a steganographic file
-     *
+     * Retrieves hidden message from a steganographic file.
      * @param steganographicData Data containing data to extract
-     * @return retrieved data
+     * @return hidden message
      */
     byte[] decode(byte[] steganographicData)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
 
     /**
-     * Retrieves hidden message from a steganographic file
-     *
+     * Retrieves hidden message from a steganographic file.
      * @param steganographicData Data containing data to extract
      * @param seed seed that was used to encode the given stenographicData
      * @return hidden message
      */
     byte[] decode(byte[] steganographicData, long seed)
-            throws IOException,MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
 
     /**
      * Tests if the given data has a hidden message encoded in it

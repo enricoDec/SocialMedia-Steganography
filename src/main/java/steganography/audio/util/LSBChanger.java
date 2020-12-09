@@ -18,7 +18,9 @@
 
 package steganography.audio.util;
 
+import steganography.audio.exception.AudioCapacityException;
 import steganography.audio.overlays.AudioOverlay;
+import steganography.exceptions.UnknownStegFormatException;
 
 /**
  * This class can read from and write to the least significant bits of a byte array.
@@ -37,13 +39,13 @@ public class LSBChanger {
      * using the overlay given in the constructor.
      * @param message bytes to encode
      * @return the given byte array with the message encoded into the least significant bits
-     * @throws IllegalArgumentException if the message does not fit into the overlays bytes
+     * @throws AudioCapacityException if the message does not fit into the overlays bytes
      */
-    public byte[] encode(byte[] message) throws IllegalArgumentException {
+    public byte[] encode(byte[] message) throws AudioCapacityException {
         byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
 
         if (messageBytesAndBits.length > this.OVERLAY.available())
-            throw new IllegalArgumentException("Message (requires " + messageBytesAndBits.length +
+            throw new AudioCapacityException("Message (requires " + messageBytesAndBits.length +
                     " bytes) does not fit into overlay (" + this.OVERLAY.available() + " bytes available).");
 
         for (byte[] messageBytes : messageBytesAndBits) {
@@ -65,11 +67,11 @@ public class LSBChanger {
      * Reads a message from this overlays byte array until length bytes have been read.
      * @param length amount of bytes in the message
      * @return the message as a byte array
-     * @throws IllegalArgumentException if there are not enough bytes to read the message from
+     * @throws UnknownStegFormatException if there are not enough bytes to read the message from
      */
-    public byte[] decode(int length) throws IllegalArgumentException {
+    public byte[] decode(int length) throws UnknownStegFormatException {
         if (length * 8 > this.OVERLAY.available())
-            throw new IllegalArgumentException("Message could not be read from byte array because only " +
+            throw new UnknownStegFormatException("Message could not be read from byte array because only " +
                     (this.OVERLAY.available() / 8) + " bytes are available in the MP3 file, but " + length +
                     " bytes are required to get the whole message.");
 

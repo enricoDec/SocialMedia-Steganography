@@ -19,13 +19,17 @@
 package steganography.audio.mp3;
 
 import steganography.Steganography;
+import steganography.audio.exception.AudioCapacityException;
+import steganography.audio.exception.AudioNotFoundException;
 import steganography.audio.overlays.AudioOverlay;
 import steganography.audio.overlays.MP3Overlays;
 import steganography.audio.overlays.MP3SequenceOverlay;
 import steganography.audio.overlays.MP3ShuffleOverlay;
 import steganography.audio.util.LSBChanger;
+import steganography.exceptions.MediaCapacityException;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.UnknownStegFormatException;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +41,7 @@ import java.nio.charset.StandardCharsets;
 public class MP3Steganography implements Steganography {
 
     private static final String HEADER_IDENTIFIER = "HAIM";
-    private static final long DEFAULT_SEED = 5571009188606006082L;  // converted MP3W/LSB to long
+    private static final long DEFAULT_SEED = 5571009188606006082L;
 
     private final MP3Overlays OVERLAY;
 
@@ -57,7 +61,7 @@ public class MP3Steganography implements Steganography {
         this(MP3Overlays.SEQUENCE_OVERLAY);
     }
 
-    private AudioOverlay getOverlay(byte[] bytes, long seed) throws UnsupportedAudioFileException {
+    private AudioOverlay getOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
         AudioOverlay overlay;
         switch (this.OVERLAY) {
             case SHUFFLE_OVERLAY:
@@ -72,20 +76,22 @@ public class MP3Steganography implements Steganography {
     }
 
     /**
-     * @throws IOException if carrier is not an MP3 file or if the payload does not fit into the carrier
+     * @throws
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload)
+            throws AudioNotFoundException, AudioCapacityException {
         return encode(carrier, payload, DEFAULT_SEED);
     }
 
     /**
-     * @throws IOException if carrier is not an MP3 file or if the payload does not fit into the carrier
+     * @throws
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws AudioNotFoundException, AudioCapacityException {
         if (carrier == null || carrier.length == 0 || payload == null || payload.length == 0)
-            throw new IOException("Carrier or payload are null or have length 0");
+            throw new NullPointerException("Carrier or payload are null or have length 0");
 
         System.out.println("[INFO] Starting to encode into MP3 file.");
 
@@ -94,21 +100,17 @@ public class MP3Steganography implements Steganography {
 
         // check if payload fits into carrier
         if (payload.length * 8 > carrier.length)
-            throw new IOException("Message is longer than carrier.");
+            throw new AudioCapacityException("Message is longer than carrier.");
 
         // start encoding
         AudioOverlay overlay;
         byte[] result;
-        try {
-            // create overlay (also checks if the bytes are a valid mp3 file)
-            overlay = getOverlay(carrier, seed);
-            // get the encoder
-            LSBChanger lsbChanger = new LSBChanger(overlay);
-            // encode the payload
-            result = lsbChanger.encode(payload);
-        } catch (UnsupportedAudioFileException | IllegalArgumentException e) {
-            throw new IOException(e.getMessage());
-        }
+        // create overlay (also checks if the bytes are a valid mp3 file)
+        overlay = getOverlay(carrier, seed);
+        // get the encoder
+        LSBChanger lsbChanger = new LSBChanger(overlay);
+        // encode the payload
+        result = lsbChanger.encode(payload);
 
         System.out.println("[INFO] Finished encoding into MP3 file.");
         System.out.println();
@@ -116,44 +118,40 @@ public class MP3Steganography implements Steganography {
     }
 
     /**
-     * @throws IOException if the given byte array doesn't contain an mp3 file.
+     * @throws
      */
     @Override
-    public byte[] decode(byte[] steganographicData) throws IOException {
+    public byte[] decode(byte[] steganographicData) throws UnknownStegFormatException, AudioNotFoundException {
         return decode(steganographicData, DEFAULT_SEED);
     }
 
     /**
-     * @throws IOException if the given byte array doesn't contain an mp3 file.
+     * @throws
      */
     @Override
-    public byte[] decode(byte[] steganographicData, long seed) throws IOException {
+    public byte[] decode(byte[] steganographicData, long seed) throws UnknownStegFormatException, AudioNotFoundException {
         if (steganographicData == null || steganographicData.length == 0)
-            throw new IOException("steganographicData is null or has length 0");
+            throw new NullPointerException("steganographicData is null or has length 0");
 
         System.out.println("[INFO] Starting to decode from MP3 file.");
 
         byte[] message;
 
-        try {
-            // create overlay (also checks if the bytes are a valid mp3 file)
-            AudioOverlay overlay = getOverlay(steganographicData, seed);
-            // get the decoder
-            LSBChanger lsbChanger = new LSBChanger(overlay);
+        // create overlay (also checks if the bytes are a valid mp3 file)
+        AudioOverlay overlay = getOverlay(steganographicData, seed);
+        // get the decoder
+        LSBChanger lsbChanger = new LSBChanger(overlay);
 
-            // decode the header
-            byte[] header = lsbChanger.decode(4);
-            if (!new String(header, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER))
-                throw new IllegalArgumentException("No hidden Message found.");
+        // decode the header
+        byte[] header = lsbChanger.decode(4);
+        if (!new String(header, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER))
+            throw new IllegalArgumentException("No hidden Message found.");
 
-            // if header was found, decode message length
-            int length = ByteBuffer.wrap(lsbChanger.decode(4)).getInt();
+        // if header was found, decode message length
+        int length = ByteBuffer.wrap(lsbChanger.decode(4)).getInt();
 
-            // decode message according to decoded message length
-            message = lsbChanger.decode(length);
-        } catch (UnsupportedAudioFileException | IllegalArgumentException e) {
-            throw new IOException(e.getMessage());
-        }
+        // decode message according to decoded message length
+        message = lsbChanger.decode(length);
 
         System.out.println("[INFO] Finished decoding from MP3 file.");
         System.out.println();
@@ -161,20 +159,29 @@ public class MP3Steganography implements Steganography {
     }
 
     /**
-     * @throws IOException if the given byte array does not contain an MP3 file.
+     * @throws
      */
     @Override
-    public boolean isSteganographicData(byte[] data) throws IOException {
-        byte[] possibleHeader;
-        try {
-            // TODO where does the seed come from?
-            AudioOverlay overlay = getOverlay(data, DEFAULT_SEED);
-            LSBChanger lsbChanger = new LSBChanger(overlay);
-            possibleHeader = lsbChanger.decode(4);
-        } catch (UnsupportedAudioFileException | IllegalArgumentException e) {
-            throw new IOException(e.getMessage());
-        }
+    public boolean isSteganographicData(byte[] data) throws AudioNotFoundException {
+        return isSteganographicData(data, DEFAULT_SEED);
+    }
 
+    /**
+     * @throws
+     */
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed) throws AudioNotFoundException {
+        byte[] possibleHeader;
+        // create overlay and decoder
+        AudioOverlay overlay = getOverlay(data, seed);
+        LSBChanger lsbChanger = new LSBChanger(overlay);
+
+        // try to decode header
+        try {
+            possibleHeader = lsbChanger.decode(4);
+        } catch (UnknownStegFormatException e) {
+            return false;
+        }
         return new String(possibleHeader, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER);
     }
 

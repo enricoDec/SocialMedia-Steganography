@@ -18,9 +18,9 @@
 
 package steganography.audio.overlays;
 
+import steganography.audio.exception.AudioNotFoundException;
 import steganography.audio.mp3.MP3File;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -40,12 +40,12 @@ public class MP3SequenceOverlay implements AudioOverlay {
      * @param bytes byte array containing an MP§ file
      * @param seed would normally be used to influence the overlay (e.g. shuffling).
      *             Obviously, this cannot be used in the a sequence overlay.
-     * @throws UnsupportedAudioFileException if the given byte array does not contain an MP3 file
+     * @throws AudioNotFoundException if the given byte array does not contain an MP3 file
      */
-    public MP3SequenceOverlay(byte[] bytes, long seed) throws UnsupportedAudioFileException {
+    public MP3SequenceOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
         MP3File mp3File = new MP3File(bytes);
         if (!mp3File.findAllFrames())
-            throw new UnsupportedAudioFileException("The given byte array is not a valid MP3 file.");
+            throw new AudioNotFoundException("The given byte array is not a valid MP3 file.");
         this.mp3Bytes = mp3File.getMP3Bytes();
         this.dataByteOrder = mp3File.getModifiablePositions();
 
