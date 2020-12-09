@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020
- * Contributed by NAME HERE
+ * Contributed by Enrico de Chadarevian
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
