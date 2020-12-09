@@ -21,6 +21,7 @@ package steganography.image;
 import steganography.Steganography;
 import steganography.exceptions.UnknownStegFormatException;
 import steganography.image.encoders.PixelBit;
+import steganography.image.exceptions.MediaCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
@@ -50,14 +51,16 @@ public class ImageSteg implements Steganography {
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload)
-            throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException {
+            throws IOException, UnsupportedImageTypeException, NoImageException,
+                    ImageWritingException, MediaCapacityException {
 
         return encode(carrier, payload, DEFAULT_SEED);
     }
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed)
-            throws IOException, NoImageException, UnsupportedImageTypeException, ImageWritingException {
+            throws IOException, NoImageException, UnsupportedImageTypeException,
+                    ImageWritingException, MediaCapacityException {
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 

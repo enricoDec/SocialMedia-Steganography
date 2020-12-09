@@ -32,7 +32,9 @@ import java.io.*;
 public class TestImageSteg {
 
     @Test
-    void testEncodingAndDecodingStringWithDefaultHeaderWithSeed() {
+    void testEncodingAndDecodingStringWithDefaultHeaderWithSeed()
+            throws UnsupportedMediaTypeException, MediaNotFoundException,
+                    MediaReassemblingException, UnknownStegFormatException {
         System.out.println("testEncodingAndDecodingStringWithDefaultHeader:");
         String pathToImage = "../testFiles/camera_lens.png";
 

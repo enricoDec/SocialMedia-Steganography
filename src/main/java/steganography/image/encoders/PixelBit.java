@@ -18,6 +18,7 @@
 
 package steganography.image.encoders;
 
+import steganography.image.exceptions.MediaCapacityException;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;
 
 import java.io.ByteArrayOutputStream;
@@ -46,13 +47,13 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     @Override
-    public void encode(byte[] payload) {
+    public void encode(byte[] payload) throws MediaCapacityException {
         if ((payload.length * 8) > overlay.available()) {
             StringBuilder sb = new StringBuilder("More Bits of payload (")
                 .append(payload.length * 8)
                 .append(") than pixels available (")
                 .append(this.overlay.available()).append(")");
-            throw new IndexOutOfBoundsException(sb.toString());
+            throw new MediaCapacityException(sb.toString());
         }
 
         // TODO: this must be determined by some algorithm
