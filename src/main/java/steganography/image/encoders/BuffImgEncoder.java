@@ -18,6 +18,7 @@
 
 package steganography.image.encoders;
 
+import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;
 
 public abstract class BuffImgEncoder {
@@ -37,7 +38,7 @@ public abstract class BuffImgEncoder {
      * given to the constructor.
      * @param payload payload or "message" to encode
      */
-    public abstract void encode(byte[] payload);
+    public abstract void encode(byte[] payload) throws ImageCapacityException;
 
     /**
      * Decodes pixels in the sequence provided by the overlay

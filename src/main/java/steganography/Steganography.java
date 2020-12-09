@@ -18,13 +18,8 @@
 
 package steganography;
 
-import steganography.exceptions.MediaNotFoundException;
-import steganography.exceptions.MediaReassemblingException;
-import steganography.exceptions.UnknownStegFormatException;
-import steganography.exceptions.UnsupportedMediaTypeException;
-import steganography.image.exceptions.ImageWritingException;
-import steganography.image.exceptions.NoImageException;
-import steganography.image.exceptions.UnsupportedImageTypeException;
+import steganography.exceptions.*;
+import steganography.image.exceptions.ImageCapacityException;
 
 import java.io.IOException;
 
@@ -40,7 +35,8 @@ public interface Steganography {
      * @return steganographic data
      */
     byte[] encode(byte[] carrier, byte[] payload)
-            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException;
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException,
+                    MediaReassemblingException, MediaCapacityException;
 
     /**
      * conceals payload in carrier (container used to hide payload)
@@ -52,7 +48,8 @@ public interface Steganography {
      * @return steganographic data
      */
     byte[] encode(byte[] carrier, byte[] payload, long seed)
-            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException;
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException,
+                    MediaReassemblingException, MediaCapacityException;
 
     /**
      * Retrieves hidden message from a steganographic file

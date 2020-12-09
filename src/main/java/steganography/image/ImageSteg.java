@@ -23,6 +23,7 @@ import steganography.image.encoders.GIFTableDecoder;
 import steganography.exceptions.UnknownStegFormatException;
 import steganography.image.encoders.PixelBit;
 import steganography.image.encoders.PixelIndex;
+import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
@@ -53,14 +54,16 @@ public class ImageSteg implements Steganography {
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload)
-            throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException {
+            throws IOException, UnsupportedImageTypeException, NoImageException,
+                    ImageWritingException, ImageCapacityException {
 
         return encode(carrier, payload, DEFAULT_SEED);
     }
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed)
-            throws IOException, NoImageException, UnsupportedImageTypeException, ImageWritingException {
+            throws IOException, NoImageException, UnsupportedImageTypeException,
+                    ImageWritingException, ImageCapacityException {
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
@@ -189,17 +192,8 @@ public class ImageSteg implements Steganography {
             // Type(s) for ColorCouple Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
-                GIFTableDecoder gifTableDecoder = new GIFTableDecoder();
-                Map<Integer, List<Integer>> colorCouple = null;
-                try {
-                    colorCouple = gifTableDecoder.getColorCouples(gifTableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage, "gif")));
-                    PixelBit pixelBit = new PixelIndex( new TableOverlay(bufferedImage, seed,colorCouple), colorCouple, seed);
-                    return pixelBit;
-                } catch (IOException e) {
-                    throw new UnsupportedImageTypeException("Image is not supported");
-                } catch (ImageWritingException e) {
-                    throw new UnsupportedImageTypeException("Image is not supported");
-                }
+                // TODO: Put 8 Bit algorithm here
+                throw new UnsupportedImageTypeException("8 Bit / Type BYTE_INDEXED not yet implemented");
                 // return overlay8Bit
 
             // Types that have not been tested, but are probably suitable for PixelBit Algorithm
