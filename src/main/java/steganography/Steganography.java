@@ -73,4 +73,13 @@ public interface Steganography {
      * @return true if the given data has a hidden message encoded in it
      */
     boolean isSteganographicData(byte[] data) throws IOException, NoImageException, UnsupportedImageTypeException;
+
+    /**
+     * Tests if the given data has a hidden message encoded in it, using the given seed
+     * @param data data to test
+     * @param seed seed the hidden message was encoded with
+     * @return true if the given data has a hidden message encoded in it
+     */
+    boolean isSteganographicData(byte[] data, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException;
 }
