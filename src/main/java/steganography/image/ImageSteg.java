@@ -19,10 +19,13 @@
 package steganography.image;
 
 import steganography.Steganography;
+import steganography.image.encoders.GIFTableDecoder;
 import steganography.image.encoders.PixelBit;
+import steganography.image.encoders.PixelIndex;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.TableOverlay;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -31,6 +34,8 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class ImageSteg implements Steganography {
 
@@ -175,8 +180,17 @@ public class ImageSteg implements Steganography {
             // Type(s) for ColorCouple Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
-                // TODO: Put 8 Bit algorithm here
-                throw new UnsupportedImageTypeException("8 Bit / Type BYTE_INDEXED not yet implemented");
+                GIFTableDecoder gifTableDecoder = new GIFTableDecoder();
+                Map<Integer, List<Integer>> colorCouple = null;
+                try {
+                    colorCouple = gifTableDecoder.getColorCouples(gifTableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage, "gif")));
+                    PixelBit pixelBit = new PixelIndex( new TableOverlay(bufferedImage, seed,colorCouple), colorCouple, seed);
+                    return pixelBit;
+                } catch (IOException e) {
+                    throw new UnsupportedImageTypeException("Image is not supported");
+                } catch (ImageWritingException e) {
+                    throw new UnsupportedImageTypeException("Image is not supported");
+                }
                 // return overlay8Bit
 
             // Types that have not been tested, but are probably suitable for PixelBit Algorithm

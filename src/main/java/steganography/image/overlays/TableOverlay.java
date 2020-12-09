@@ -26,27 +26,21 @@ import java.util.Random;
 
 
 public class TableOverlay extends ShuffleOverlay {
-    private int[] colorTable;
     private Map<Integer, List<Integer>> colorCouple;
     private Random position;
 
-    public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple, int[] colorTable ) throws UnsupportedImageTypeException {
+    public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple ) throws UnsupportedImageTypeException {
         super(bufferedImage);
         this.position = new Random(seed);
         this.colorCouple = colorCouple;
-        this.colorTable = colorTable;
         createOverlay();
     }
 
-    /**
-     * Changes the color of a pixel according to the values in ColorCouple
-     * @param value The value determins wether the pixel value is even or uneven.
-     */
     @Override
-    public void setPixel(int value) {
-        List<Integer> color = this.colorCouple.get(this.bufferedImage.getRGB(this.currentX, this.currentY));
-            int index = position.nextInt(color.size());
-            this.bufferedImage.setRGB(this.currentX, this.currentY, color.get(index));
+    protected boolean typeAccepted(int type) {
+        int pixelSize = this.bufferedImage.getColorModel().getPixelSize();
+
+        return pixelSize == 8;
     }
 
     @Override

@@ -86,6 +86,7 @@ public class AnimatedGif {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     BufferedImage image = gif.getFrame(i);
                     ImageIO.write(image, "GIF", bos);
+                    ImageIO.write(image, "GIF", new File(path + "/gifFrames/" + i + ".gif"));
                     output[i] = bos.toByteArray();
 
                 }
@@ -180,7 +181,7 @@ public class AnimatedGif {
         }
     public static void main(String[] args) {
             AnimatedGif giffer = new AnimatedGif();
-            File input =new File(path + "doggy2.gif");
+            File input =new File(path + "doggy.gif");
         try {
             byte[] gif = ByteArrayUtils.read(input);
             giffer.sequenceGifDecoder(giffer.splitGifDecoder(gif));
@@ -190,38 +191,6 @@ public class AnimatedGif {
         }
 
         }
-
-        //create FileInputStream which obtains input bytes from a file in a file system
-        //FileInputStream is meant for reading streams of raw bytes such as image data. For reading streams of characters, consider using FileReader.
-
-        /*ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            for (int readNum; (readNum = fis.read(buf)) != -1;) {
-                //Writes to this byte array output stream
-                bos.write(buf, 0, readNum);
-                System.out.println("read " + readNum + " bytes,");
-            }
-        } catch (IOException ex) {
-           ex.printStackTrace();
-        }
-
-        byte[] bytes = bos.toByteArray();
-        byte[][] split = giffer.splitGifDecoder(bytes);
-
-        ImageSteg coder = new ImageSteg();
-        try {
-            byte[] pic = coder.encode(split[0], new byte[] {1,2,3,4,5,6,7,8,9,1,2});
-            split[0] = pic;
-            byte[] out = coder.decode(pic);
-            System.out.println(out.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        giffer.sequenceGifDecoder(split); */
-        //splitGifTest("cat.gif");
-        //mergeGIF();
 
     /**
      * Splits a gif into single frames
@@ -250,30 +219,6 @@ public class AnimatedGif {
                    image = reader.read(i);
                 IIOMetadata metadata = reader.getImageMetadata(i);
                 metadataArray[i] = metadata;
-            /*
-                Node tree = metadata.getAsTree("javax_imageio_gif_image_1.0");
-                NodeList children = tree.getChildNodes();
-
-                for(int j = 0; j < children.getLength(); j++) {
-                    Node nodeItem = children.item(j);
-
-                    if(nodeItem.getNodeName().equals("ImageDescriptor")) {
-                        Map<String, Integer> imgAttr = new HashMap<String,Integer>();
-
-                        for(int k = 0; k < imgatt.length; k++) {
-                            NamedNodeMap attr = nodeItem.getAttributes();
-                            Node attnode = attr.getNamedItem(imgatt[k]);
-                            imgAttr.put(imgatt[k], Integer.valueOf(attnode.getNodeValue()));
-                        }
-                        if(i == 0) {
-                            master = new BufferedImage(imgAttr.get("imageWidth"), imgAttr.get("imageHeight"), BufferedImage.TYPE_INT_ARGB_PRE);
-                        }
-                        master.getGraphics().drawImage(image, imgAttr.get("imageLeftPosition"), imgAttr.get("imageTopPosition"),null );
-                    }
-
-                }
-                */
-
                 ImageIO.write(image, "GIF", new File(path + "/gifFrames/" + i + ".gif"));
             }
 
