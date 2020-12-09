@@ -1,10 +1,11 @@
-package steganography.image;
+package steganography.exceptions;
 
 import socialmediasteganography.SocialMediaSteganographyException;
 
 /**
- * Thrown if the format of a steganographicly encoded (hidden) message cannot be determined and therefore
- * the message cannot be decoded. The same applies, if there is no hidden message.
+ * Thrown if the format of a steganographically encoded (hidden) message cannot be determined and therefore
+ * the message cannot be decoded (i.e. an expected header was not found).
+ * The same applies, if there is no hidden message.
  */
 public class UnknownStegFormatException extends SocialMediaSteganographyException {
 

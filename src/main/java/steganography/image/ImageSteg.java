@@ -20,8 +20,12 @@ package steganography.image;
 
 import steganography.Steganography;
 import steganography.image.encoders.GIFTableDecoder;
+import steganography.exceptions.UnknownStegFormatException;
 import steganography.image.encoders.PixelBit;
 import steganography.image.encoders.PixelIndex;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;
@@ -34,8 +38,6 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class ImageSteg implements Steganography {
 
@@ -106,9 +108,16 @@ public class ImageSteg implements Steganography {
     public boolean isSteganographicData(byte[] data)
             throws IOException, NoImageException, UnsupportedImageTypeException {
 
+        return isSteganographicData(data, DEFAULT_SEED);
+    }
+
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
 
-        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), DEFAULT_SEED);
+        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
 
         return bytesToInt(encoder.decode(4)) == HEADER_SIGNATURE;

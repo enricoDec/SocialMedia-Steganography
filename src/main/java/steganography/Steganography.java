@@ -18,13 +18,15 @@
 
 package steganography;
 
-import steganography.image.ImageWritingException;
-import steganography.image.NoImageException;
-import steganography.image.UnknownStegFormatException;
-import steganography.image.UnsupportedImageTypeException;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.MediaReassemblingException;
+import steganography.exceptions.UnknownStegFormatException;
+import steganography.exceptions.UnsupportedMediaTypeException;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public interface Steganography {
 
@@ -37,7 +39,8 @@ public interface Steganography {
      * @param payload data to hide
      * @return steganographic data
      */
-    byte[] encode(byte[] carrier, byte[] payload) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException;
+    byte[] encode(byte[] carrier, byte[] payload)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException;
 
     /**
      * conceals payload in carrier (container used to hide payload)
@@ -48,7 +51,8 @@ public interface Steganography {
      * @param seed affects the resulting steganographic data (similar to a password)
      * @return steganographic data
      */
-    byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, NoImageException, UnsupportedImageTypeException, ImageWritingException;
+    byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException;
 
     /**
      * Retrieves hidden message from a steganographic file
@@ -56,7 +60,8 @@ public interface Steganography {
      * @param steganographicData Data containing data to extract
      * @return retrieved data
      */
-    byte[] decode(byte[] steganographicData) throws IOException, UnsupportedImageTypeException, NoImageException, UnknownStegFormatException;
+    byte[] decode(byte[] steganographicData)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
 
     /**
      * Retrieves hidden message from a steganographic file
@@ -65,12 +70,23 @@ public interface Steganography {
      * @param seed seed that was used to encode the given stenographicData
      * @return hidden message
      */
-    byte[] decode(byte[] steganographicData, long seed) throws IOException, NoImageException, UnsupportedImageTypeException, UnknownStegFormatException;
+    byte[] decode(byte[] steganographicData, long seed)
+            throws IOException,MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
 
     /**
      * Tests if the given data has a hidden message encoded in it
      * @param data data to test
      * @return true if the given data has a hidden message encoded in it
      */
-    boolean isSteganographicData(byte[] data) throws IOException, NoImageException, UnsupportedImageTypeException;
+    boolean isSteganographicData(byte[] data)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException;
+
+    /**
+     * Tests if the given data has a hidden message encoded in it, using the given seed
+     * @param data data to test
+     * @param seed seed the hidden message was encoded with
+     * @return true if the given data has a hidden message encoded in it
+     */
+    boolean isSteganographicData(byte[] data, long seed)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException;
 }

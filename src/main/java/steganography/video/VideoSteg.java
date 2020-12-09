@@ -19,7 +19,11 @@
 package steganography.video;
 
 import steganography.Steganography;
+import steganography.exceptions.UnknownStegFormatException;
 import steganography.image.*;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
 
 import java.io.*;

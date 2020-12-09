@@ -5,10 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import socialmediasteganography.SocialMediaSteganographyException;
 import steganography.Steganography;
-import steganography.image.ImageWritingException;
-import steganography.image.NoImageException;
-import steganography.image.UnknownStegFormatException;
-import steganography.image.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
 
 import java.io.File;
