@@ -19,7 +19,7 @@
 package steganography.util;
 
 import steganography.image.ImageSteg;
-import steganography.image.NoImageException;
+import steganography.image.exceptions.NoImageException;
 
 import java.io.IOException;
 import java.util.ArrayList;

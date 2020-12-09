@@ -19,7 +19,11 @@
 package steganography.image;
 
 import steganography.Steganography;
+import steganography.exceptions.UnknownStegFormatException;
 import steganography.image.encoders.PixelBit;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;

@@ -21,6 +21,10 @@ package steganography.image;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import steganography.Steganography;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.MediaReassemblingException;
+import steganography.exceptions.UnknownStegFormatException;
+import steganography.exceptions.UnsupportedMediaTypeException;
 import steganography.image.encoders.PixelBit;
 
 import java.io.*;
@@ -94,7 +98,10 @@ public class TestImageSteg {
     }
 
     @Test
-    void testEncodingAndDecodingStringWithDefaultHeaderWithoutSeed() {
+    void testEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
+            throws UnsupportedMediaTypeException, MediaNotFoundException,
+                    MediaReassemblingException, UnknownStegFormatException {
+
         System.out.println("testEncodingAndDecodingStringWithDefaultHeaderAndSeed:");
         String pathToImage = "../testFiles/camera_lens.png";
 
