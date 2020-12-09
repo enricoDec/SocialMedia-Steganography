@@ -18,9 +18,7 @@
 
 package steganography.audio.util;
 
-import steganography.audio.mp3.overlays.AudioOverlay;
-
-import java.util.NoSuchElementException;
+import steganography.audio.overlays.AudioOverlay;
 
 /**
  * This class can read from and write to the least significant bits of a byte array.
