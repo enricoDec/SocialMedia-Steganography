@@ -20,6 +20,9 @@ package socialmediasteganography;
 
 import apis.SocialMedia;
 import steganography.Steganography;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.UnknownStegFormatException;
+import steganography.exceptions.UnsupportedMediaTypeException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -81,6 +84,12 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
                 }
             } catch (IOException e) {
                 logger.info("Decoding failed for entry on index " + i + " with an " + e.getClass().getSimpleName() + ".");
+            } catch (UnknownStegFormatException e) {
+                e.printStackTrace();
+            } catch (UnsupportedMediaTypeException e) {
+                e.printStackTrace();
+            } catch (MediaNotFoundException e) {
+                e.printStackTrace();
             }
         }
         return decodedMedias;
