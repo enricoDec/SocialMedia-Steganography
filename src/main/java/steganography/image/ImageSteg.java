@@ -39,6 +39,8 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class ImageSteg implements Steganography {
 
