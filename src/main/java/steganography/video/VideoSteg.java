@@ -19,8 +19,11 @@
 package steganography.video;
 
 import steganography.Steganography;
+import steganography.exceptions.MediaNotFoundException;
 import steganography.exceptions.UnknownStegFormatException;
+import steganography.exceptions.UnsupportedMediaTypeException;
 import steganography.image.*;
+import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
@@ -52,7 +55,7 @@ public class VideoSteg implements Steganography {
      * This will make the decoding way faster since the images will be stored in-memory and not cached on disk
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException {
+    public byte[] encode(byte[] carrier, byte[] payload) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
         return encode(carrier, payload, this.seed);
     }
 
@@ -62,7 +65,7 @@ public class VideoSteg implements Steganography {
      * This will make the decoding way faster since the images will be stored in-memory and not cached on disk
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException {
+    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
         VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
@@ -99,7 +102,7 @@ public class VideoSteg implements Steganography {
      * @param payload   payload (secret)
      * @return Encoded list of Pictures
      */
-    private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException {
+    private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
         long maxVideoCapacity = getVideoCapacity(imageList, true, false);
         if (payload.length > maxVideoCapacity)
             throw new IllegalArgumentException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes "
@@ -219,7 +222,7 @@ public class VideoSteg implements Steganography {
                 Steganography steganography = new ImageSteg();
                 try {
                     byteArrayOutputStream.write(steganography.decode(bytes, seed));
-                } catch (UnsupportedEncodingException | NoImageException | UnsupportedImageTypeException | UnknownStegFormatException e) {
+                } catch (UnsupportedEncodingException | UnknownStegFormatException | MediaNotFoundException | UnsupportedMediaTypeException e) {
                     if (debug)
                         log("Decoded Frame (" + i + "/" + imageList.size() + ")");
                     return byteArrayOutputStream.toByteArray();
@@ -297,7 +300,12 @@ public class VideoSteg implements Steganography {
     }
 
     @Override
-    public boolean isSteganographicData(byte[] data) throws IOException, UnsupportedImageTypeException, NoImageException {
+    public boolean isSteganographicData(byte[] data) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException {
+        return isSteganographicData(data, ImageSteg.DEFAULT_SEED);
+    }
+
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
         //List used to save the single frames decoded from the carrier
         List<byte[]> imageList;
 
@@ -308,7 +316,7 @@ public class VideoSteg implements Steganography {
 
         boolean isSteganographicData = true;
         for (byte[] image : imageList) {
-            if (!new ImageSteg().isSteganographicData(image))
+            if (!new ImageSteg().isSteganographicData(image, seed))
                 isSteganographicData = false;
         }
         return isSteganographicData;

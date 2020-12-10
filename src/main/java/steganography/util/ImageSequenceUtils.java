@@ -36,6 +36,7 @@ public class ImageSequenceUtils {
      * @return list of payload splits (index is equal to order of image list).
      * Entry is Null if no payload for image
      * @throws IOException if IO Exception is thrown during read operations
+     * @throws NoImageException read failed
      */
     public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException, NoImageException {
         int chunkCursor = 0;
