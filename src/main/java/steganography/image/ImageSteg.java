@@ -140,6 +140,17 @@ public class ImageSteg implements Steganography {
 
         BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
         int capacity;
+        if (bufferedImage.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
+            try {
+                BuffImgEncoder encoder = getEncoder(bufferedImage,DEFAULT_SEED);
+                capacity = encoder.getOverlay().available() / 8;
+
+                return (subtractDefaultHeader) ? capacity - 8 : capacity;
+            } catch (UnsupportedImageTypeException e) {
+                e.printStackTrace();
+                System.out.println("Cannot handle format");
+            }
+        }
         if (!withTransparent) {
             capacity = bufferedImage.getWidth() * bufferedImage.getHeight();
         } else {
@@ -194,8 +205,13 @@ public class ImageSteg implements Steganography {
             // Type(s) for ColorCouple Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
-                // TODO: Put 8 Bit algorithm here
-                throw new UnsupportedImageTypeException("8 Bit / Type BYTE_INDEXED not yet implemented");
+                GIFTableDecoder tableDecoder = new GIFTableDecoder();
+                try {
+                    Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(tableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage,"gif")));
+                    return new PixelIndex(new TableOverlay(bufferedImage,seed,colorCouple),colorCouple,seed);
+                } catch (IOException | ImageWritingException e) {
+                    e.printStackTrace();
+                }
                 // return overlay8Bit
 
             // Types that have not been tested, but are probably suitable for PixelBit Algorithm

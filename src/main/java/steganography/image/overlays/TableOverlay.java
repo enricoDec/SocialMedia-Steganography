@@ -49,8 +49,9 @@ public class TableOverlay extends ShuffleOverlay {
         for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
             for (int x = 0; x < this.bufferedImage.getWidth(); x++) {
                 int pixel = this.bufferedImage.getRGB(x, y);
-                if(this.colorCouple.containsKey(pixel))
+                if(this.colorCouple.containsKey(pixel)) {
                     this.pixelOrder.add(x + (y * this.bufferedImage.getWidth()));
+                }
             }
         }
 

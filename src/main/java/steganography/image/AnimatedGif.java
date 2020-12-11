@@ -22,8 +22,13 @@
  */
 package steganography.image;
 
+import steganography.Steganography;
+import steganography.exceptions.*;
 import steganography.image.encoders.GifDecoder;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
+import steganography.util.ImageSequenceUtils;
 
 import javax.imageio.*;
 import javax.imageio.metadata.IIOInvalidTreeException;
@@ -34,6 +39,9 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Selina Wernike
@@ -47,6 +55,46 @@ public class AnimatedGif {
         private int nop = 0;
         private IIOMetadata[] metadataForImages;
 
+
+        public byte[] gifEncode(byte[] payload, byte[] animatedGif) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
+            Steganography steg = new ImageSteg();
+            if (animatedGif != null && payload != null) {
+                byte[][] gifFrames = splitGifDecoder(animatedGif);
+                List<byte[]> frames = Arrays.asList(gifFrames);
+                List<byte[]> payloads = ImageSequenceUtils.sequenceDistribution(frames,payload);
+                for(int i = 0; i < payloads.size();i++) {
+                    if(payloads.get(i) != null) {
+                        gifFrames[i] = steg.encode(gifFrames[i], payloads.get(i));
+                    }
+
+                }
+                return sequenceGifDecoder(gifFrames);
+            }
+            throw new NullPointerException("Image or payload are null");
+        }
+
+        public byte[] gifDecode(byte[] stegGif) throws UnsupportedImageTypeException, NoImageException, IOException {
+            ImageSteg steg = new ImageSteg();
+            byte[][] gifFrames = splitGifDecoder(stegGif);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+
+
+                for (byte[] frame : gifFrames) {
+
+                    byte[] decoded = steg.decode(frame);
+                    if (decoded != null && decoded.length >= 1) {
+                        bos.write(decoded);
+                    }
+                }
+
+                return bos.toByteArray();
+            } catch (UnknownStegFormatException e) {
+                return bos.toByteArray();
+            } finally {
+                bos.close();
+            }
+        }
 
     /**
      *
@@ -100,12 +148,10 @@ public class AnimatedGif {
         public byte[] sequenceGifDecoder(byte[][] gifs) {
             ImageWriter writer = (ImageWriter)ImageIO.getImageWritersByFormatName("gif").next();
             ImageWriteParam param = writer.getDefaultWriteParam();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ImageReader reader = (ImageReader)ImageIO.getImageReadersByFormatName("gif").next();
+            FileInputStream in;
+            try( ByteArrayOutputStream bos = new ByteArrayOutputStream();ImageOutputStream out = new FileImageOutputStream(new File(path + "doggy.gif"));) {
 
-            try {
-
-                ImageOutputStream out = new FileImageOutputStream(new File(path + "doggy.gif"));
                 writer.setOutput(out);
                 writer.prepareWriteSequence(null);
 
@@ -124,7 +170,7 @@ public class AnimatedGif {
 
                 }
                 writer.endWriteSequence();
-                out.close();
+                return ByteArrayUtils.read(new File(path + "doggy.gif"));
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -181,16 +227,23 @@ public class AnimatedGif {
         }
     public static void main(String[] args) {
             AnimatedGif giffer = new AnimatedGif();
-            File input =new File(path + "doggy.gif");
-        try {
+            File input = new File(path + "doggy.gif");
+            File payloadFile = new File(path + "Ford.jpg");
+            BufferedImage payloadPicture;
+        try(ImageOutputStream out = new FileImageOutputStream(new File(path + "steGif.gif"));) {
             byte[] gif = ByteArrayUtils.read(input);
-            giffer.sequenceGifDecoder(giffer.splitGifDecoder(gif));
-
-        } catch (IOException e) {
+            byte[] payload = ByteArrayUtils.read(payloadFile);
+            byte[] hiddenGif = giffer.gifEncode(payload, gif);
+            byte[] message = giffer.gifDecode(hiddenGif);
+            ByteArrayInputStream bin = new ByteArrayInputStream(message);
+            payloadPicture = ImageIO.read(bin);
+            bin.close();
+            ImageIO.write(payloadPicture,"jpg",out);
+        } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | MediaReassemblingException | MediaCapacityException e) {
             e.printStackTrace();
         }
 
-        }
+    }
 
     /**
      * Splits a gif into single frames
