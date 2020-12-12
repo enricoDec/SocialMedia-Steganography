@@ -199,8 +199,8 @@ public class Reddit extends SocialMedia {
     }
 
     @Override
-    public APINames getApiName() {
-        return REDDIT;
+    public String getApiName() {
+        return REDDIT.getValue();
     }
 
     @Override

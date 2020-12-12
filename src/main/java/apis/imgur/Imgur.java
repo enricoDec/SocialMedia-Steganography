@@ -282,8 +282,8 @@ public class Imgur extends SocialMedia {
     }
 
     @Override
-    public APINames getApiName() {
-        return REDDIT;
+    public String getApiName() {
+        return IMGUR.getValue();
     }
 
     @Override
