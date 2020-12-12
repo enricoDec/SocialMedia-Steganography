@@ -28,6 +28,7 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
 /**
@@ -199,6 +201,15 @@ public class Reddit extends SocialMedia {
     @Override
     public APINames getApiName() {
         return REDDIT;
+    }
+
+    @Override
+    public List<String> getAllSubscribedKeywords() {
+        try{
+            return JSONPersistentManager.getInstance().getKeywordListForAPI(REDDIT);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override

@@ -27,6 +27,8 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentHelper;
+import persistence.JSONPersistentManager;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -282,6 +284,15 @@ public class Imgur extends SocialMedia {
     @Override
     public APINames getApiName() {
         return REDDIT;
+    }
+
+    @Override
+    public List<String> getAllSubscribedKeywords() {
+        try{
+            return JSONPersistentManager.getInstance().getKeywordListForAPI(IMGUR);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override

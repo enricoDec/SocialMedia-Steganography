@@ -75,4 +75,6 @@ public abstract class SocialMedia {
     public abstract void unsubscribe();
 
     public abstract APINames getApiName();
+
+    public abstract List<String> getAllSubscribedKeywords();
 }
