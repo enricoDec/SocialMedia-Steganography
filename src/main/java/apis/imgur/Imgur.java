@@ -19,6 +19,7 @@
 package apis.imgur;
 
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
 import apis.imgur.models.ImgurPostResponse;
 import apis.interceptors.BearerInterceptor;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static apis.models.APINames.IMGUR;
+import static apis.models.APINames.REDDIT;
 
 /**
  * @author Mario Teklic
@@ -275,5 +277,16 @@ public class Imgur extends SocialMedia {
     @Override
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    @Override
+    public APINames getApiName() {
+        return REDDIT;
+    }
+
+    @Override
+    public void unsubscribe() {
+        if (!executor.isShutdown())
+            executor.shutdown();
     }
 }

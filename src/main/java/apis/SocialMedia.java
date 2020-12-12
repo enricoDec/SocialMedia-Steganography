@@ -18,6 +18,7 @@
 
 package apis;
 
+import apis.models.APINames;
 import apis.models.Token;
 
 import java.util.ArrayList;
@@ -70,4 +71,8 @@ public abstract class SocialMedia {
      * @return true if successful
      */
     public abstract List<byte[]> getRecentMediaForKeyword(String keyword);
+
+    public abstract void unsubscribe();
+
+    public abstract APINames getApiName();
 }

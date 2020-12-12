@@ -19,6 +19,7 @@
 package apis.reddit;
 
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.interceptors.BearerInterceptor;
@@ -193,5 +194,16 @@ public class Reddit extends SocialMedia {
     @Override
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    @Override
+    public APINames getApiName() {
+        return REDDIT;
+    }
+
+    @Override
+    public void unsubscribe() {
+        if (!executor.isShutdown())
+            executor.shutdown();
     }
 }
