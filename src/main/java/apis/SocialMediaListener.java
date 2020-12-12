@@ -18,6 +18,8 @@
 
 package apis;
 
+import java.util.List;
+
 public interface SocialMediaListener {
-    public void updateSocialMediaMessage(String message);
+    public void updateSocialMediaMessage(List<String> messages);
 }

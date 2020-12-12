@@ -18,17 +18,21 @@
 
 package steganography;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 public interface Steganography {
 
+    // void useDefaultHeader(boolean useDefaultHeader);
+
     /**
-     * Takes some data and conceals it
-     * in a carrier (container used to hide data)
+     * Takes some data and conceals it in a carrier (container used to hide data).
      *
      * @param carrier carrier used to hide the data
      * @param payload data to hide
      * @return steganographic data
      */
-    byte[] encode(byte[] carrier, byte[] payload);
+    byte[] encode(byte[] carrier, byte[] payload) throws IOException;
 
     /**
      * conceals payload in carrier (container used to hide payload)
@@ -39,7 +43,7 @@ public interface Steganography {
      * @param seed affects the resulting steganographic data (similar to a password)
      * @return steganographic data
      */
-    byte[] encode(byte[] carrier, byte[] payload, String seed);
+    byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException;
 
     /**
      * Retrieves hidden message from a steganographic file
@@ -47,7 +51,7 @@ public interface Steganography {
      * @param steganographicData Data containing data to extract
      * @return retrieved data
      */
-    byte[] decode(byte[] steganographicData);
+    byte[] decode(byte[] steganographicData) throws IOException;
 
     /**
      * Retrieves hidden message from a steganographic file
@@ -56,12 +60,12 @@ public interface Steganography {
      * @param seed seed that was used to encode the given stenographicData
      * @return hidden message
      */
-    byte[] decode(byte[] steganographicData, String seed);
+    byte[] decode(byte[] steganographicData, long seed) throws IOException;
 
     /**
      * Tests if the given data has a hidden message encoded in it
      * @param data data to test
      * @return true if the given data has a hidden message encoded in it
      */
-    boolean isSteganographicData(byte[] data);
+    boolean isSteganographicData(byte[] data) throws IOException;
 }
