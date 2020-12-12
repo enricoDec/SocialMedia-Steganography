@@ -20,6 +20,10 @@ package steganography.video.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import steganography.image.exceptions.ImageCapacityException;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
 import steganography.video.VideoSteg;
 
@@ -40,7 +44,7 @@ public class VideoStegTest {
      * Default Seed Integration Test
      */
     @Test
-    public void encoderIntegrationTest() {
+    public void encoderIntegrationTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -67,7 +71,7 @@ public class VideoStegTest {
      * Custom Seed Integration Test
      */
     @Test
-    public void encoderIntegrationWithSeedTest() {
+    public void encoderIntegrationWithSeedTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -93,7 +97,7 @@ public class VideoStegTest {
      * No Seed Integration Test
      */
     @Test
-    public void encoderIntegrationNoSeedTest() {
+    public void encoderIntegrationNoSeedTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -119,7 +123,7 @@ public class VideoStegTest {
      * No Audio in Video
      */
     @Test
-    public void encoderIntegrationNoAudioTest() {
+    public void encoderIntegrationNoAudioTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -145,7 +149,7 @@ public class VideoStegTest {
      * Default Seed Integration Test
      */
     @Test
-    public void encoderIntegrationSingleThreadTest() {
+    public void encoderIntegrationSingleThreadTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -172,7 +176,7 @@ public class VideoStegTest {
      * Custom Seed Integration Test
      */
     @Test
-    public void encoderIntegrationWithSeedSingleThreadTest() {
+    public void encoderIntegrationWithSeedSingleThreadTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -198,7 +202,7 @@ public class VideoStegTest {
      * No Seed Integration Test
      */
     @Test
-    public void encoderIntegrationNoSeedSingleThreadTest() {
+    public void encoderIntegrationNoSeedSingleThreadTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -224,7 +228,7 @@ public class VideoStegTest {
      * No Audio in Video
      */
     @Test
-    public void encoderIntegrationNoAudioSingleThreadTest() {
+    public void encoderIntegrationNoAudioSingleThreadTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
@@ -249,7 +253,7 @@ public class VideoStegTest {
      * Large Payload Test
      */
     @Test
-    public void encoderIntegrationLargePayloadTest() {
+    public void encoderIntegrationLargePayloadTest() throws UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);

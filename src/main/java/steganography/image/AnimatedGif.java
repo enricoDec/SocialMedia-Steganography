@@ -47,7 +47,7 @@ import java.util.List;
  * @author Selina Wernike
  * The class splits an animated gif into several single frame gifs or vice versa
  */
-public class AnimatedGif {
+public class AnimatedGif implements Steganography{
         private static String  path = "src/main/resources/";
         private static IIOMetadata[] metadataArray;
         private static int noi = 0;
@@ -56,7 +56,13 @@ public class AnimatedGif {
         private IIOMetadata[] metadataForImages;
 
 
-        public byte[] gifEncode(byte[] payload, byte[] animatedGif) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
+    @Override
+    public byte[] encode(byte[] carrier, byte[] payload) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
+        return encode(carrier, payload, ImageSteg.DEFAULT_SEED);
+    }
+
+    @Override
+        public byte[] encode(byte[] payload, byte[] animatedGif, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
             Steganography steg = new ImageSteg();
             if (animatedGif != null && payload != null) {
                 byte[][] gifFrames = splitGifDecoder(animatedGif);
@@ -64,7 +70,7 @@ public class AnimatedGif {
                 List<byte[]> payloads = ImageSequenceUtils.sequenceDistribution(frames,payload);
                 for(int i = 0; i < payloads.size();i++) {
                     if(payloads.get(i) != null) {
-                        gifFrames[i] = steg.encode(gifFrames[i], payloads.get(i));
+                        gifFrames[i] = steg.encode(gifFrames[i], payloads.get(i), seed);
                     }
 
                 }
@@ -73,7 +79,13 @@ public class AnimatedGif {
             throw new NullPointerException("Image or payload are null");
         }
 
-        public byte[] gifDecode(byte[] stegGif) throws UnsupportedImageTypeException, NoImageException, IOException {
+    @Override
+    public byte[] decode(byte[] steganographicData) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException {
+        return decode(steganographicData, ImageSteg.DEFAULT_SEED);
+    }
+
+    @Override
+        public byte[] decode(byte[] stegGif, long seed) throws UnsupportedImageTypeException, NoImageException, IOException {
             ImageSteg steg = new ImageSteg();
             byte[][] gifFrames = splitGifDecoder(stegGif);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -82,7 +94,7 @@ public class AnimatedGif {
 
                 for (byte[] frame : gifFrames) {
 
-                    byte[] decoded = steg.decode(frame);
+                    byte[] decoded = steg.decode(frame, seed);
                     if (decoded != null && decoded.length >= 1) {
                         bos.write(decoded);
                     }
@@ -134,7 +146,6 @@ public class AnimatedGif {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     BufferedImage image = gif.getFrame(i);
                     ImageIO.write(image, "GIF", bos);
-                    ImageIO.write(image, "GIF", new File(path + "/gifFrames/" + i + ".gif"));
                     output[i] = bos.toByteArray();
 
                 }
@@ -233,73 +244,28 @@ public class AnimatedGif {
         try(ImageOutputStream out = new FileImageOutputStream(new File(path + "steGif.gif"));) {
             byte[] gif = ByteArrayUtils.read(input);
             byte[] payload = ByteArrayUtils.read(payloadFile);
-            byte[] hiddenGif = giffer.gifEncode(payload, gif);
-            byte[] message = giffer.gifDecode(hiddenGif);
+            byte[] hiddenGif = giffer.encode(payload, gif);
+            byte[] message = giffer.decode(hiddenGif);
             ByteArrayInputStream bin = new ByteArrayInputStream(message);
             payloadPicture = ImageIO.read(bin);
             bin.close();
             ImageIO.write(payloadPicture,"jpg",out);
         } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | MediaReassemblingException | MediaCapacityException e) {
             e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Splits a gif into single frames
-     * @param name Name of the gif
-     * @return {byte[][]} Byte array with all frames as byte[]
-     */
-    public static byte[][] splitGifTest(String name) {
-        try {
-            String[] imgatt = new String[]{
-                    "imageLeftPosition",
-                    "imageTopPosition",
-                    "imageWidth",
-                    "imageHeight"
-            };
-
-            ImageReader reader = (ImageReader)ImageIO.getImageReadersByFormatName("gif").next();
-            ImageInputStream ciis = ImageIO.createImageInputStream(new File(path + name));
-            reader.setInput(ciis,false);
-            noi = reader.getNumImages(true);
-            metadataArray = new IIOMetadata[noi];
-            System.out.println(noi);
-            BufferedImage master = null;
-
-            for (int i = 0; i < noi; i++) {
-                BufferedImage image;
-                   image = reader.read(i);
-                IIOMetadata metadata = reader.getImageMetadata(i);
-                metadataArray[i] = metadata;
-                ImageIO.write(image, "GIF", new File(path + "/gifFrames/" + i + ".gif"));
-            }
-
-        } catch (IOException e) {
+        } catch (UnknownStegFormatException e) {
             e.printStackTrace();
         }
-        return null;
+
     }
 
-    public static byte[] mergeGIF() {
-        ImageWriter writer = (ImageWriter)ImageIO.getImageWritersByFormatName("gif").next();
-        ImageWriteParam param = writer.getDefaultWriteParam();
-        try {
-            ImageOutputStream out = new FileImageOutputStream(new File(path + "bubbles2.gif"));
-            writer.setOutput(out);
-            writer.prepareWriteSequence(null);
 
-        for (int i = 0; i < noi; i++) {
-            BufferedImage next = ImageIO.read(new File(path + "/gifFrames/" + i + ".gif"));
-            writer.writeToSequence(new IIOImage(next,null,metadataArray[i]),param);
-
-        }
-        writer.endWriteSequence();
-        out.close();
-    } catch (IOException e) {
-        e.printStackTrace();
+    @Override
+    public boolean isSteganographicData(byte[] data) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
+        return isSteganographicData(data, ImageSteg.DEFAULT_SEED);
     }
 
-        return null;
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
+        return false;
     }
 }
