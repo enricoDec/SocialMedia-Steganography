@@ -33,11 +33,11 @@ public class MyDate implements Comparable<MyDate>{
     private Date date;
 
     /**
-     * Privat default constructor. Should not be used because some networks
+     * Default constructor. Should not be used because some networks
      * deliver timestamps with seconds instead of milliseconds. This does not work with
      * the Java Date object
      */
-    private MyDate(){}
+    public MyDate(){}
 
     /**
      * Multiplies a dates getTime() value by 1000 which will results in a ms value instead of a seconds value
@@ -53,6 +53,10 @@ public class MyDate implements Comparable<MyDate>{
 
     public long getTime(){
         return this.date.getTime();
+    }
+
+    public void setDate(Date date){
+        this.date = date;
     }
 
     @Override

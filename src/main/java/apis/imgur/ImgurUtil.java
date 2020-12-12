@@ -24,6 +24,7 @@ import apis.utils.BaseUtil;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -50,9 +51,9 @@ public class ImgurUtil extends BaseUtil {
         ImgurGetResponse responseObject = new Gson().fromJson(responseString, ImgurGetResponse.class);
 
         for(ImgurGetResponse.ImgurData child : responseObject.getData()){
-            if(child != null){
-                if(supportedFormat(child.getLink())){
-                    postEntries.add(new PostEntry(child.getLink(), this.getTimestamp(child.getDatetime()), child.getType()));
+            if(child != null && child.getImages() != null){
+                if(supportedFormat(child.getImages())){
+                    postEntries.add(new PostEntry(child.getImages().get(0).getLink(), this.getTimestamp(child.getDatetime()), child.getDatetime()));
                 }
             }
         }
@@ -62,8 +63,19 @@ public class ImgurUtil extends BaseUtil {
     /**
      * Returns which media types are supported by this network
      */
-    private boolean supportedFormat(String link) {
-        return link.contains(".png");
+    private boolean supportedFormat(List<ImgurGetResponse.ImgurImages> data) {
+        String[] supported = {"image/png"};
+        ImgurGetResponse.ImgurImages i = data.get(0);
+        if(i.getType() == null
+                || i.getLink() == null){
+            return false;
+        }
+
+        if(Arrays.asList(supported).contains(i.getType())
+                && !i.getLink().isEmpty()){
+            return true;
+        }
+        return false;
     }
 
 }

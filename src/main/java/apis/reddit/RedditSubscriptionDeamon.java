@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -80,7 +81,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
      *                        If this param is null or has 0 characters, the stored keywordlist will be
      *                        restored and for earch keyword will be searched in the network.
      */
-    private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
+    public List<PostEntry> getRecentMedia(String onceUsedKeyword) {
         List<String> keywords = redditUtil.getKeywordList(REDDIT, onceUsedKeyword);
 
         if (keywords == null || keywords.size() == 0) {
@@ -134,7 +135,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
 
         if (tmp != null) {
             BaseUtil.sortPostEntries(tmp);
-            tmp = BaseUtil.elimateOldPostEntries(redditUtil.getLatestStoredTimestamp(REDDIT), tmp);
+            tmp = redditUtil.elimateOldPostEntries(redditUtil.getLatestStoredTimestamp(REDDIT), tmp);
             logger.info((tmp.size()) + " postentries found after eliminate old entries.");
 
             if (tmp.size() > 0) {
@@ -151,7 +152,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         }
 
         logger.info("No new media found.");
-        latestPostEntries = null;
+        latestPostEntries = Collections.emptyList();
         newPostAvailable = false;
         return null;
     }

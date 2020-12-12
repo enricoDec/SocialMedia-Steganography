@@ -46,7 +46,6 @@ public class BaseUtil {
      */
     public static void sortPostEntries(List<PostEntry> postEntries){
         Collections.sort(postEntries);
-        postEntries.stream().forEach(postEntry -> System.out.println(postEntry));
     }
 
     /**
@@ -155,7 +154,7 @@ public class BaseUtil {
      * @param postEntries
      * @return the filtered list, which only has items with timestamps wich are newer than the param latestStoredTimestamp
      */
-    public static List<PostEntry> elimateOldPostEntries(MyDate latestStoredTimestamp, List<PostEntry> postEntries){
+    public List<PostEntry> elimateOldPostEntries(MyDate latestStoredTimestamp, List<PostEntry> postEntries){
         //If current postEntry's timestamp is not newer than latestStored, filter it.
         return postEntries
                 .stream()
@@ -164,7 +163,7 @@ public class BaseUtil {
     }
 
     /**
-     * 'Decoded' an URL: 'amd;' will be replaced with an empty String.
+     * 'Decoded' an URL: 'amp;' will be replaced with an empty String.
      *  This is the only encoding which is used in the URL String for this application.
      * @param url
      * @return

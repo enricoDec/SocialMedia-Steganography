@@ -19,6 +19,7 @@
 package apis.reddit;
 
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.interceptors.BearerInterceptor;
@@ -27,16 +28,19 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentManager;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static apis.models.APINames.IMGUR;
 import static apis.models.APINames.REDDIT;
 
 /**
@@ -70,6 +74,11 @@ public class Reddit extends SocialMedia {
      * Manages the interval called search for new post entries
      */
     private ScheduledExecutorService executor;
+
+    /**
+     * Future of scheduler service
+     */
+    private ScheduledFuture scheduledFuture;
 
     /**
      * Default constructor. Prepares the subscription deamon, utils and the executor.
@@ -144,25 +153,29 @@ public class Reddit extends SocialMedia {
      * Asynchron.
      * @param interval Interval in minutes
      */
-    public void listen(Integer interval) {
-        if (!executor.isShutdown())
-            executor.shutdown();
-
-        /**
-         * TODO wo müssen daten hin, müsste man im deamon nicht irgendwo update() vom observer aufrufen?
-         */
+    public void changeSchedulerPeriod(Integer interval) {
+        if (scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
 
         if (interval == null) {
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, 5, TimeUnit.MINUTES);
         } else {
-            executor.scheduleAtFixedRate(this.redditSubscriptionDeamon, 0, interval, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, interval, TimeUnit.MINUTES);
         }
+    }
+
+    /**
+     * Returns if the Subscription deamon is running
+     * @return
+     */
+    public boolean isSchedulerRunning(){
+        return !scheduledFuture.isCancelled() && !scheduledFuture.isDone();
     }
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
         this.redditUtil.storeKeyword(REDDIT, keyword);
-        listen(DEFAULT_INTERVALL);
+        changeSchedulerPeriod(DEFAULT_INTERVALL);
         return true;
     }
 
@@ -183,5 +196,25 @@ public class Reddit extends SocialMedia {
     @Override
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    @Override
+    public String getApiName() {
+        return REDDIT.getValue();
+    }
+
+    @Override
+    public List<String> getAllSubscribedKeywords() {
+        try{
+            return JSONPersistentManager.getInstance().getKeywordListForAPI(REDDIT);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public void unsubscribe() {
+        if (!executor.isShutdown())
+            executor.shutdown();
     }
 }
