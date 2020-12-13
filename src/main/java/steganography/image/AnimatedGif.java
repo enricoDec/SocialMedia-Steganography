@@ -238,18 +238,16 @@ public class AnimatedGif implements Steganography{
         }
     public static void main(String[] args) {
             AnimatedGif giffer = new AnimatedGif();
-            File input = new File(path + "doggy.gif");
-            File payloadFile = new File(path + "Ford.jpg");
+            File input = new File("src/test/resources/steganography/image/insta.gif");
+            File payloadFile = new File(path + "test.txt");
             BufferedImage payloadPicture;
-        try(ImageOutputStream out = new FileImageOutputStream(new File(path + "steGif.gif"));) {
+        try(FileOutputStream out = new FileOutputStream(new File(path + "steg.txt"));) {
             byte[] gif = ByteArrayUtils.read(input);
             byte[] payload = ByteArrayUtils.read(payloadFile);
             byte[] hiddenGif = giffer.encode(payload, gif);
             byte[] message = giffer.decode(hiddenGif);
-            ByteArrayInputStream bin = new ByteArrayInputStream(message);
-            payloadPicture = ImageIO.read(bin);
-            bin.close();
-            ImageIO.write(payloadPicture,"jpg",out);
+           out.write(message);
+
         } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | MediaReassemblingException | MediaCapacityException e) {
             e.printStackTrace();
         } catch (UnknownStegFormatException e) {

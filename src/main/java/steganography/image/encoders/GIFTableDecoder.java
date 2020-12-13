@@ -97,13 +97,10 @@ public class GIFTableDecoder {
         int[] table = new int[(int) Math.pow(2,length + 1)];
         for (int j = 0; j < table.length;j++) {
             int color = 0 | 0xFF;
-            System.out.print("red: " + ByteHex.byteToHex(gif[i]) + ", ");
             color = (color << 8) | gif[i];
             i++;
-            System.out.print("green: " + ByteHex.byteToHex(gif[i]) + ",");
             color = (color << 8) | gif[i];
             i++;
-            System.out.print("blue: " + ByteHex.byteToHex(gif[i]) + "\n");
             color = (color << 8) | gif[i];
             i++;
             table[j] = color;
@@ -121,11 +118,16 @@ public class GIFTableDecoder {
             List<Integer> couples = new ArrayList<>();
             boolean pixelIsOne = PixelBit.pixelIsOne(colorTable[i]);
             for (int j = 0; j < colorTable.length; j++) {
-                if (i != j) {
+                if (i != j && colorTable[i] != colorTable[j]) {
                     //Red, green and blue Value;
-                    if (Math.abs(getRed(colorTable[i]) - getRed(colorTable[j])) <= 8) {
-                        if (Math.abs(getGreen(colorTable[i]) - getGreen(colorTable[j])) <= 8) {
-                            if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
+                    int redI = getRed(colorTable[i]);
+                    int redJ = getRed(colorTable[j]);
+                    //System.out.println("red I: " + redI + ", red J: " + redJ);
+                    if (Math.abs(redI - redJ) <= 4) {
+                        //System.out.println("green I: " + getGreen(colorTable[i]) +  ", green J:" + getGreen(colorTable[j]));
+                        if (Math.abs(getGreen(colorTable[i]) - getGreen(colorTable[j])) <= 4) {
+                            //System.out.println("blue I: " + getBlue(colorTable[i]) +  ", blue J:" + getBlue(colorTable[j]));
+                            if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 4) {
                                 if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
                                     couples.add(colorTable[j]);
                                 }

@@ -51,16 +51,21 @@ public class ImageSequenceUtils {
                 int maxImagePayload = steganography.getImageCapacity(image, true, false);
                 //New copy of payload array that holds max amount of payload the current image can hold
                 byte[] payloadChunk;
-                //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
-                if (payload.length - chunkCursor > maxImagePayload) {
-                    payloadChunk = new byte[maxImagePayload];
+                if (maxImagePayload <= 0) {
+                    payloadSplitted.add(null);
                 } else {
-                    // else encode only payload length
-                    payloadChunk = new byte[payload.length - chunkCursor];
+                    //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
+                    if (payload.length - chunkCursor > maxImagePayload) {
+                        payloadChunk = new byte[maxImagePayload];
+                    } else {
+                        // else encode only payload length
+                        payloadChunk = new byte[payload.length - chunkCursor];
+                    }
+
+                    System.arraycopy(payload, chunkCursor, payloadChunk, 0, payloadChunk.length);
+                    payloadSplitted.add(payloadChunk);
+                    chunkCursor += payloadChunk.length;
                 }
-                System.arraycopy(payload, chunkCursor, payloadChunk, 0, payloadChunk.length);
-                payloadSplitted.add(payloadChunk);
-                chunkCursor += payloadChunk.length;
             }
         }
         return payloadSplitted;
