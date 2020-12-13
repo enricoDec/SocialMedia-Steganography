@@ -161,7 +161,7 @@ public class AnimatedGif implements Steganography{
             ImageWriteParam param = writer.getDefaultWriteParam();
             ImageReader reader = (ImageReader)ImageIO.getImageReadersByFormatName("gif").next();
             FileInputStream in;
-            try( ByteArrayOutputStream bos = new ByteArrayOutputStream();ImageOutputStream out = new FileImageOutputStream(new File(path + "doggy.gif"));) {
+            try( ByteArrayOutputStream bos = new ByteArrayOutputStream();ImageOutputStream out = new FileImageOutputStream(new File(path + "sequenz.gif"));) {
 
                 writer.setOutput(out);
                 writer.prepareWriteSequence(null);
@@ -181,7 +181,7 @@ public class AnimatedGif implements Steganography{
 
                 }
                 writer.endWriteSequence();
-                return ByteArrayUtils.read(new File(path + "doggy.gif"));
+                return ByteArrayUtils.read(new File(path + "sequenz.gif"));
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
