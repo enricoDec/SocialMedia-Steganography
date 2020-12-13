@@ -43,10 +43,7 @@ public class ImgurGetResponse {
         private String id;
         private String title;
         private String description;
-        private String link;
         private String datetime;
-        private String type;
-
         private List<ImgurImages> images;
 
         public String getId() {
@@ -73,14 +70,6 @@ public class ImgurGetResponse {
             this.description = description;
         }
 
-        public String getLink() {
-            return link;
-        }
-
-        public void setLink(String link) {
-            this.link = link;
-        }
-
         public String getDatetime() {
             return datetime;
         }
@@ -89,22 +78,20 @@ public class ImgurGetResponse {
             this.datetime = datetime;
         }
 
-        public String getType() {
-            return type;
+        public List<ImgurImages> getImages() {
+            return images;
         }
 
-        public void setType(String type) {
-            this.type = type;
+        public void setImages(List<ImgurImages> images) {
+            this.images = images;
         }
-
-
     }
 
     public class ImgurImages{
         private String id;
         private String title;
-        private String datetime;
         private String type;
+        private String datetime;
         private String link;
 
         public String getId() {

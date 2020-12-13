@@ -19,6 +19,7 @@
 package apis.imgur;
 
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
 import apis.imgur.models.ImgurPostResponse;
 import apis.interceptors.BearerInterceptor;
@@ -26,17 +27,22 @@ import apis.utils.BaseUtil;
 import apis.utils.BlobConverterImpl;
 import com.google.gson.Gson;
 import okhttp3.*;
+import persistence.JSONPersistentHelper;
+import persistence.JSONPersistentManager;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static apis.models.APINames.IMGUR;
+import static apis.models.APINames.REDDIT;
 
 /**
  * @author Mario Teklic
@@ -66,22 +72,36 @@ public class Imgur extends SocialMedia {
     private ScheduledExecutorService executor;
 
     /**
+     * Future of scheduler service
+     */
+    private ScheduledFuture scheduledFuture;
+
+    /**
      * Utilities
      */
     private ImgurUtil imgurUtil;
 
     /**
-     * Standard constructor prepares the subscriptiondeamon but does not start it
+     * Standard constructor prepares the Subscriptiondeamon but does not start it
      */
     public Imgur() {
         imgurUtil = new ImgurUtil();
         imgurSubscriptionDeamon = new ImgurSubscriptionDeamon();
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
+    }
+
+    /**
+     * Inject mocked Deamon for testing
+     *
+     * @param deamon
+     */
+    public void injectSubscriptionDeamon(ImgurSubscriptionDeamon deamon) {
+        this.imgurSubscriptionDeamon = deamon;
     }
 
     @Override
     public boolean postToSocialNetwork(byte[] media, String keyword) {
-        if (this.getToken() == null && this.getToken().getToken() == null) {
+        if (this.getToken() == null || this.getToken().getToken() == null) {
             logger.info("No Token was set!");
         }
 
@@ -199,7 +219,7 @@ public class Imgur extends SocialMedia {
                 logger.info("Unsuccessfull uploaded!");
                 logger.info("Request was: " + request.toString());
                 logger.info("Response String was: " + res);
-            }else{
+            } else {
                 logger.info("Successfull uploaded anonymously.\nURL: " + ipr.data.link);
             }
             return ipr;
@@ -213,27 +233,32 @@ public class Imgur extends SocialMedia {
     /**
      * Listens for new post entries in imgur network for stored keywords.
      * Asynchron.
+     *
      * @param interval Interval in minutes
      */
-    public void listen(Integer interval) {
-        if (!executor.isShutdown())
-            executor.shutdown();
-
-        /**
-         * TODO wo müssen daten hin, müsste man im deamon nicht irgendwo update() vom observer aufrufen?
-         */
+    public void changeSchedulerPeriod(Integer interval) {
+        if (scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
 
         if (interval == null) {
-            executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, 5, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, 5, TimeUnit.MINUTES);
         } else {
-            executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon, 0, interval, TimeUnit.MINUTES);
+            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, interval, TimeUnit.MINUTES);
         }
+    }
+
+    /**
+     * Returns if the Subscription deamon is running
+     * @return
+     */
+    public boolean isSchedulerRunning(){
+        return !scheduledFuture.isCancelled() && !scheduledFuture.isDone();
     }
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
         this.imgurUtil.storeKeyword(IMGUR, keyword);
-        listen(DEFAULT_INTERVALL);
+        changeSchedulerPeriod(DEFAULT_INTERVALL);
         return true;
     }
 
@@ -254,5 +279,25 @@ public class Imgur extends SocialMedia {
     @Override
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    @Override
+    public String getApiName() {
+        return IMGUR.getValue();
+    }
+
+    @Override
+    public List<String> getAllSubscribedKeywords() {
+        try{
+            return JSONPersistentManager.getInstance().getKeywordListForAPI(IMGUR);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public void unsubscribe() {
+        if (!executor.isShutdown())
+            executor.shutdown();
     }
 }

@@ -40,7 +40,7 @@ public class GIFTableDecoderTest {
 
     }
 
-
+/*
     @Test
     public void saveColorTable_FullTabel_intArray() {
         try {
@@ -70,6 +70,8 @@ public class GIFTableDecoderTest {
         int[] table = decoder.saveColorTable(gif);
         Assertions.assertTrue(table.length > 0 && table.length < 256);
     }
+    */
+
 
     @Test
     public void saveColorTable_NullInput_NullPointerException() {

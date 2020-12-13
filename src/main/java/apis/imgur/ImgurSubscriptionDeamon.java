@@ -70,6 +70,10 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         this.imgurUtil = new ImgurUtil();
     }
 
+    public void injectImgurUtil(ImgurUtil util){
+        this.imgurUtil = util;
+    }
+
     @Override
     public void run() {
         //bool newPostAvailable will be setted in getRecentMediaForSubscribedKeywords()
@@ -83,7 +87,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
      *                        If this param is null or has 0 characters, the stored keywordlist will be
      *                        restored and for earch keyword will be searched in the network.
      */
-    private List<PostEntry> getRecentMedia(String onceUsedKeyword) {
+    public List<PostEntry> getRecentMedia(String onceUsedKeyword) {
         List<String> keywords = imgurUtil.getKeywordList(IMGUR, onceUsedKeyword);
 
         if (keywords == null || keywords.size() == 0) {
@@ -132,11 +136,11 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
     @Override
     public List<PostEntry> getRecentMediaForSubscribedKeywords(String keyword) {
-        List<PostEntry> tmp = this.getRecentMedia(keyword);
+        List<PostEntry> tmp = getRecentMedia(keyword);
 
         if (tmp != null) {
             BaseUtil.sortPostEntries(tmp);
-            tmp = BaseUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
+            tmp = imgurUtil.elimateOldPostEntries(imgurUtil.getLatestStoredTimestamp(IMGUR), tmp);
             if (tmp.size() > 0) {
                 newPostAvailable = true;
 
@@ -152,7 +156,7 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
         }
 
         logger.info("No new media found.");
-        latestPostEntries = null;
+        latestPostEntries = Collections.emptyList();
         newPostAvailable = false;
         return null;
     }

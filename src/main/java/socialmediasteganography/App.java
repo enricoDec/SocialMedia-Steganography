@@ -42,8 +42,8 @@ public class App {
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
         //Setup
-        SocialMedia socialMedia = new Reddit();
-        socialMedia.setToken(new Token("668533834712-21jXXV_3ErQSxinevlA3PATGuj3z5A", 100));
+        SocialMedia socialMedia = new Imgur();
+        socialMedia.setToken(new Token("e1e5f0ff327cb45aa5440f456297317cbcb77859", 100));
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
 
         //Carrier, Payload
@@ -54,7 +54,8 @@ public class App {
         //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
 
         //Search in social media for pictures and try to decode
-        List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        socialMedia.subscribeToKeyword("nature");
 
 /*
         //Auswertung als Strings
