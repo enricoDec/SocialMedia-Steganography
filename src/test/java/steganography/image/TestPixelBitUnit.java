@@ -21,6 +21,7 @@ package steganography.image;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import steganography.image.encoders.PixelBit;
+import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.mocks.MockOverlay;
 
 import java.util.Random;
@@ -28,7 +29,7 @@ import java.util.Random;
 public class TestPixelBitUnit {
 
     @Test
-    void testFlipSingleIntegerToMatchPayload() {
+    void testFlipSingleIntegerToMatchPayload() throws ImageCapacityException {
         int input = new Random().nextInt();
         boolean inputIsOne = PixelBit.pixelIsOne(input);
 
@@ -45,7 +46,7 @@ public class TestPixelBitUnit {
     }
 
     @Test
-    void testFlipAll8IntegersToMatchPayload() {
+    void testFlipAll8IntegersToMatchPayload() throws ImageCapacityException {
         Random random = new Random();
         int[] input = new int[8];
         byte payloadByte = 0;
@@ -76,7 +77,7 @@ public class TestPixelBitUnit {
     }
 
     @Test
-    void testFlipNoneOf8IntegersToMatchPayload() {
+    void testFlipNoneOf8IntegersToMatchPayload() throws ImageCapacityException {
         Random random = new Random();
         int[] input = new int[8];
         byte payloadByte = 0;
