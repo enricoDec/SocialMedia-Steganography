@@ -83,13 +83,17 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
         this.currentY = this.pixelOrder.get(this.currentPosition) / this.bufferedImage.getWidth();
         return this.bufferedImage.getRGB(this.currentX, this.currentY);
     }
-
+// Overflow bei berechnung des Color Couple und kleine unterschiede zwischen Get und set Pixel
     @Override
     public void setPixel(int value) {
         if (currentPosition < 0 || this.currentPosition >= this.pixelOrder.size())
             throw new NoSuchElementException("No pixel at current position.");
+        int getColor = (this.bufferedImage.getRGB(this.currentX, this.currentY));
+        this.bufferedImage.setRGB(this.currentX, this.currentY, (value));
 
-        this.bufferedImage.setRGB(this.currentX, this.currentY, value);
+            //System.out.println("In: Alpha= " + ((value >> 24) & 0xFF) + ", Red= " + ((value >> 16) & 0xFF) + ", Green= " + ((value >> 8) & 0xFF) + ", Blue= " + (value & 0xFF) + "\n" +
+              //      "Out: " + "Alpha= " + ((getColor >> 24) & 0xFF) + ", Red= " + ((getColor >> 16) & 0xFF) + ", Green= " + ((getColor >> 8) & 0xFF) + ", Blue= " + (getColor & 0xFF));
+
     }
 
     @Override

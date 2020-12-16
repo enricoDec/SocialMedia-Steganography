@@ -19,15 +19,19 @@
 package socialmediasteganography;
 
 
+import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.Token;
 import apis.imgur.Imgur;
 import apis.reddit.Reddit;
+import apis.tumblr.Tumblr;
 import apis.utils.BlobConverterImpl;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
 import steganography.image.ImageSteg;
+import steganography.util.ByteArrayUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,23 +43,98 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+        //JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+
+        /**
+         * Setup Tumblr Client
+         */
+        SocialMedia socialMedia = new Tumblr();
+        socialMedia.setBlogName("mariofenzl");
+
+        /**
+         * encode and post png on tumblr
+         */
+        /*socialMedia.setMediaType(MediaType.PNG);
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
+        //Carrier, Payload
+        byte[] bytes = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
+        String payload = "hallo";
+        //Encode and Post
+        sms.encodeAndPost(socialMedia, bytes, payload.getBytes());*/
+
+
+        /**
+         * encode and post gif on Tumblr
+         */
+        socialMedia.setMediaType(MediaType.GIF);
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
+        //Carrier, Payload
+        File gifFile = new File("src/main/java/apis/tumblr/medias/simpson.gif");
+        byte[] gifByte = ByteArrayUtils.read(gifFile);
+        String payload = "hallo";
+        //Encode and Post
+        sms.encodeAndPost(socialMedia, gifByte, payload.getBytes());
+
+
+        /**
+         * encode and post mp3 on Tumblr
+         */
+        /*socialMedia.setMediaType(MediaType.MP3);
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new MP3Steganography());
+        //Carrier, Payload
+        File gifFile = new File("src/main/java/apis/tumblr/medias/audiotest.mp3");
+        BufferedImage bufferedImage = ImageIO.read(gifFile);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "gif", byteArrayOutputStream);
+        byte[] gifData = byteArrayOutputStream.toByteArray();
+        String payload = "hallo";
+        //Encode and Post
+        sms.encodeAndPost(socialMedia, gifData, payload.getBytes());
+*/
+
+        /**
+         * encode and post mp4 on Tumblr
+         */
+        /*socialMedia.setMediaType(MediaType.MP4);
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new VideoSteg());
+        //Carrier, Payload
+        File videoFile = new File("src/main/java/apis/tumblr/medias/test.mp4");
+        FileInputStream fileInputStream = null;
+        fileInputStream = new FileInputStream(videoFile);
+        byte[] videoData = IOUtils.toByteArray(fileInputStream);
+        String payload = "hallo";
+        //Encode and Post
+        sms.encodeAndPost(socialMedia, videoData, payload.getBytes());*/
+
+        /**
+         * test to decode uploaded picture
+         */
+
+
+
+
+
+        //Search in social media for pictures and try to decode
+        //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        //socialMedia.subscribeToKeyword("nature");
+
+
 
         //Setup
-        SocialMedia socialMedia = new Imgur();
+        /*SocialMedia socialMedia = new Imgur();
         socialMedia.setToken(new Token("e1e5f0ff327cb45aa5440f456297317cbcb77859", 100));
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());*/
 
         //Carrier, Payload
-        byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
-        String payload = "This is a secret message which was built by ProjectStudiumSteganography";
+       /* byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
+        String payload = "This is a secret message which was built by ProjectStudiumSteganography";*/
 
         //Encode and Post
         //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
 
         //Search in social media for pictures and try to decode
         //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
-        socialMedia.subscribeToKeyword("nature");
+        //socialMedia.subscribeToKeyword("nature");
 
 /*
         //Auswertung als Strings
