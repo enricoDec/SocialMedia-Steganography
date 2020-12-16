@@ -23,20 +23,6 @@ public class MP3Test {
     }
 
     @Test
-    public void encode2Characters_Expect80Changes() throws IOException, SocialMediaSteganographyException {
-        // read bytes
-        byte[] mp3Bytes = ByteArrayUtils.read(new File(this.pathToTestFile));
-        byte[] encodedBytes = this.mp3Steg.encode(mp3Bytes, "AA".getBytes(StandardCharsets.UTF_8));
-        for (int i = 0; i < encodedBytes.length; i++) {
-            int counter = 0;
-            if (encodedBytes[i] != mp3Bytes[i])
-                counter++;
-            Assertions.assertNotEquals(mp3Bytes, encodedBytes);
-            Assertions.assertEquals(80, counter);
-        }
-    }
-
-    @Test
     public void encodeSimpleStringInMp3_ExpectSameStringAfterDecode() throws IOException, SocialMediaSteganographyException {
         // read bytes
         byte[] mp3Bytes = ByteArrayUtils.read(new File(this.pathToTestFile));
@@ -46,10 +32,10 @@ public class MP3Test {
         byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
 
         // encode message
-        byte[] encodedBytes = this.mp3Steg.encode(mp3Bytes, messageBytes);  // TODO starts at byte 49
+        byte[] encodedBytes = this.mp3Steg.encode(mp3Bytes, messageBytes);
 
         // read message
-        byte[] decodedMessageBytes = this.mp3Steg.decode(encodedBytes);     // TODO starts at byte 257
+        byte[] decodedMessageBytes = this.mp3Steg.decode(encodedBytes);
         String decodedMessage = new String(decodedMessageBytes, StandardCharsets.UTF_8);
 
         // assert messages are the same
