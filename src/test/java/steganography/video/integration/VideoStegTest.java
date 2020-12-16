@@ -25,6 +25,7 @@ import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
+import steganography.video.Video;
 import steganography.video.VideoSteg;
 
 import javax.imageio.ImageIO;
@@ -38,27 +39,36 @@ import java.util.Arrays;
  * @since : 28-11-2020
  **/
 public class VideoStegTest {
+    private final byte[] payload = "Hallo Welt".getBytes();
+    private final File carrier = new File("src/test/java/steganography/video/resources/Carrier.mp4");
+    private final File carrier_no_audio = new File("src/test/java/steganography/video/resources/Carrier_no_Audio.mp4");
 
     /**
      * Multi Thread Test
      * Default Seed Integration Test
+     * Good Test
      */
     @Test
     public void encoderIntegrationTest() {
         try {
+            //Encode
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(4);
             videoSteg.setMaxDecodingThreads(4);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")));
-            Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload);
 
+            //Assert result Video is not null
+            Assertions.assertNotNull(encodedVideo);
+            //Assert result Video is bigger than Original Video
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
+
+            //Decode
             byte[] decodedPayload = videoSteg.decode(encodedVideo);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            //Assert decoded payload is same as original payload
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -69,23 +79,28 @@ public class VideoStegTest {
     /**
      * Multi Thread Test
      * Custom Seed Integration Test
+     * Good Test
      */
     @Test
     public void encoderIntegrationWithSeedTest() {
         try {
+            //Encode
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(4);
             videoSteg.setMaxDecodingThreads(4);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")) , 87143654783654L);
-            Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload, 87143654783654L);
 
+            //Assert result Video is not null and bigger than Original Video
+            Assertions.assertNotNull(encodedVideo);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
+
+            //Decode with same Seed
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 87143654783654L);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            //Assert decoded payload is same as original payload
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -95,6 +110,7 @@ public class VideoStegTest {
     /**
      * Multi Thread Test
      * No Seed Integration Test
+     * Good Test
      */
     @Test
     public void encoderIntegrationNoSeedTest() {
@@ -104,14 +120,13 @@ public class VideoStegTest {
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(4);
             videoSteg.setMaxDecodingThreads(4);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), 0);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload, 0);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -121,6 +136,8 @@ public class VideoStegTest {
     /**
      * Multi Thread Test
      * No Audio in Video
+     * Good Test
+     * TODO: Fix bug
      */
     @Test
     public void encoderIntegrationNoAudioTest() {
@@ -130,14 +147,13 @@ public class VideoStegTest {
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(4);
             videoSteg.setMaxDecodingThreads(4);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), 0);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload, 0);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -156,14 +172,13 @@ public class VideoStegTest {
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(1);
             videoSteg.setMaxDecodingThreads(1);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")));
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -183,14 +198,13 @@ public class VideoStegTest {
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(1);
             videoSteg.setMaxDecodingThreads(1);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), 87143654783654L);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload, 87143654783654L);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 87143654783654L);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -202,21 +216,20 @@ public class VideoStegTest {
      * No Seed Integration Test
      */
     @Test
-    public void encoderIntegrationNoSeedSingleThreadTest() {
+    public void encoderIntegrationSeed0SingleThreadTest() {
         try {
             VideoSteg videoSteg = new VideoSteg();
             videoSteg.setDebug(true);
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(1);
             videoSteg.setMaxDecodingThreads(1);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), 0);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), payload, 0);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video3.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -235,14 +248,15 @@ public class VideoStegTest {
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(1);
             videoSteg.setMaxDecodingThreads(1);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), 0);
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier_no_audio), payload, 0);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier_no_audio).length < encodedVideo.length);
 
-            byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
+            Video stegVideo = new Video(encodedVideo, videoSteg.getFfmpegBin());
+            Assertions.assertFalse(stegVideo.hasAudioStream());
 
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/payload1.gif")), decodedPayload));
+            byte[] decodedPayload = videoSteg.decode(encodedVideo);
+            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(carrier_no_audio), decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
@@ -250,45 +264,68 @@ public class VideoStegTest {
     }
 
     /**
-     * Large Payload Test
+     * Try to encode a Large Payload in the carrier
+     * Rand Test
      */
     @Test
     public void encoderIntegrationLargePayloadTest() {
+        File randomFile = null;
+        RandomAccessFile largePayload = null;
         try {
             VideoSteg videoSteg = new VideoSteg();
-            videoSteg.setDebug(true);
+            videoSteg.setDebug(false);
             ImageIO.setUseCache(false);
             videoSteg.setMaxEncodingThreads(4);
             videoSteg.setMaxDecodingThreads(4);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")),
-                    ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video1.MP4")), 0);
+
+            randomFile = new File("largePayload");
+            largePayload = new RandomAccessFile(randomFile, "rw");
+            long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier), true, false);
+            largePayload.setLength(maxPayloadBytes);
+            byte[] buffer = new byte[(int) maxPayloadBytes - 1];
+            largePayload.readFully(buffer);
+
+            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier), buffer);
             Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video2.MP4")).length < encodedVideo.length);
+            Assertions.assertTrue(ByteArrayUtils.read(carrier).length < encodedVideo.length);
 
-            byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
+            byte[] decodedPayload = videoSteg.decode(encodedVideo);
 
-            FileOutputStream fileOutputStream = new FileOutputStream(new File("C:\\Users\\enric\\Desktop\\Test\\test.MP4"));
-            fileOutputStream.write(decodedPayload);
-
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video1.MP4")), decodedPayload));
+            Assertions.assertTrue(Arrays.equals(buffer, decodedPayload));
         } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
             e.printStackTrace();
-            Assertions.fail("Video could ne be read");
+            Assertions.fail("Video could not be read");
         }
+        try {
+            largePayload.close();
+        } catch (IOException e) {
+            Assertions.fail(e.toString());
+        }
+        randomFile.deleteOnExit();
     }
 
     /**
      * Payload Larger than capacity Test
+     * Bad Test
      */
     @Test
-    public void encoderIntegrationVeryLargePayloadTest() {
+    public void encoderIntegrationVeryLargePayloadTest() throws IOException, NoImageException {
         VideoSteg videoSteg = new VideoSteg();
         videoSteg.setDebug(true);
         ImageIO.setUseCache(false);
         videoSteg.setMaxEncodingThreads(4);
         videoSteg.setMaxDecodingThreads(4);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> videoSteg.encode(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video1.MP4")),
-                ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video4.MP4")), 0)
+
+        long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier), true, false);
+
+        File randomFile = new File("largePayload");
+        RandomAccessFile largePayload = new RandomAccessFile(randomFile, "rw");
+        largePayload.setLength(maxPayloadBytes + 1);
+        byte[] buffer = new byte[(int) maxPayloadBytes + 1];
+        largePayload.readFully(buffer);
+        Assertions.assertThrows(ImageCapacityException.class, () -> videoSteg.encode(ByteArrayUtils.read(carrier), buffer)
         );
+        largePayload.close();
+        randomFile.deleteOnExit();
     }
 }

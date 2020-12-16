@@ -71,12 +71,11 @@ public class VideoSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
+        //List used to save the single frames decoded from the carrier
         VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
-        List<byte[]> imageList = null;
+        List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
         if (debug) {
             log("Decoding Video Frames to images....");
-            //List used to save the single frames decoded from the carrier
-            imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
             log("Video decoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
             log("Encoding secret message into images...");
         }
@@ -101,8 +100,8 @@ public class VideoSteg implements Steganography {
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
         long maxVideoCapacity = getVideoCapacity(imageList, true, false);
         if (payload.length > maxVideoCapacity)
-            throw new ImageCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes "
-                    + "(" + (maxVideoCapacity / 1000) + " Kilobytes)");
+            throw new ImageCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes. "
+                    + "Payload Bytes: " + payload.length);
 
         //Single Threaded
         if (maxEncodingThreads == 1) {
@@ -398,5 +397,9 @@ public class VideoSteg implements Steganography {
 
     public void setFfmpegBin(File ffmpegBin) {
         this.ffmpegBin = ffmpegBin;
+    }
+
+    public File getFfmpegBin() {
+        return ffmpegBin;
     }
 }
