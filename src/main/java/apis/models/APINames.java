@@ -25,7 +25,8 @@ public enum APINames {
     DAILYMOTION("dailymotion"),
     YOUTUBE("youtube"),
     REDDIT("reddit"),
-    IMGUR("imgur");
+    IMGUR("imgur"),
+    TUMBLR("tumblr");
 
     private String value;
 
