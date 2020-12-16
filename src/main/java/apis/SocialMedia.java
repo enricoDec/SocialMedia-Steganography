@@ -77,4 +77,8 @@ public abstract class SocialMedia {
     public abstract String getApiName();
 
     public abstract List<String> getAllSubscribedKeywords();
+
+
+    public abstract void setBlogName(String blogname);
+    public abstract void setMediaType(MediaType mediaType);
 }
