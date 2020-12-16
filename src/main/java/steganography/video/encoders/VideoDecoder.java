@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.video.encoders;
 
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffmpeg.*;
+import steganography.video.Video;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -119,7 +120,6 @@ public class VideoDecoder implements IDecoder {
                             .disableStream(StreamType.SUBTITLE)
                     )
                     .addOutput(FrameOutput
-                            // TODO: Check if all params are needed
                             .withConsumer(frameConsumer)
                             .setFrameCount(StreamType.VIDEO, video.getFrameCount())
                             .setFrameRate(video.getFrameRate())

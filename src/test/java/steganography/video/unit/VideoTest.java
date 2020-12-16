@@ -36,6 +36,20 @@ public class VideoTest {
     private final File ffmpegBin = new File("src/main/resources");
 
     /**
+     * Try to pass invalid data
+     */
+    @Test
+    public void decodeToPictureWrongData() {
+        try {
+            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), ffmpegBin);
+        } catch (UnsupportedEncodingException e) {
+            //do nothing
+        } catch (IOException e) {
+            Assertions.fail();
+        }
+    }
+
+    /**
      * Check if Video data is read correctly
      */
     @Test
@@ -52,20 +66,6 @@ public class VideoTest {
             Assertions.assertNotNull(video.getPixelformat());
         } catch (IOException e) {
             e.printStackTrace();
-            Assertions.fail();
-        }
-    }
-
-    /**
-     * Try to pass invalid data
-     */
-    @Test
-    public void decodeToPictureWrongData() {
-        try {
-            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), ffmpegBin);
-        } catch (UnsupportedEncodingException e) {
-            //do nothing
-        } catch (IOException e) {
             Assertions.fail();
         }
     }

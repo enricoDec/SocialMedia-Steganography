@@ -34,7 +34,7 @@ import java.util.List;
  * Project name : ProjektStudiumSteganography
  * @version : 1.0
  * @since : 24-11-2020
- *
+ * <p>
  * This class represents a Video
  **/
 public class Video {

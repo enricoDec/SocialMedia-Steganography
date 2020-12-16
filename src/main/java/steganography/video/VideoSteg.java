@@ -28,6 +28,8 @@ import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
+import steganography.video.encoders.VideoDecoder;
+import steganography.video.encoders.VideoEncoder;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -45,14 +47,14 @@ public class VideoSteg implements Steganography {
     private int maxDecodingThreads = 1;
     private boolean debug = false;
     private long startTime = System.currentTimeMillis();
-    // TODO: ASK if config or method
-    private final File ffmpegBin = new File("src/main/resources");
+    private File ffmpegBin = new File("src/main/resources");
     private final int seed = ImageSteg.DEFAULT_SEED;
 
     /**
-     * Set maxEncodingThreads to use multithreading (by default single threaded)
-     * We highly recommend to set call ImageIO.setUseCache(false);
-     * This will make the decoding way faster since the images will be stored in-memory and not cached on disk
+     * Use {@link #setMaxEncodingThreads(int)} and {@link #setMaxDecodingThreads(int)} to enable multithreading (by default single threaded).
+     * <p>
+     * We also highly recommend to set call {@link javax.imageio.ImageIO#setUseCache(boolean)}.
+     * This will make the decoding way faster since the images will be stored in-memory and not cached on disk (will be Memory demanding)
      */
     @Override
     public byte[] encode(byte[] carrier, byte[] payload) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
@@ -60,55 +62,49 @@ public class VideoSteg implements Steganography {
     }
 
     /**
-     * Set maxEncodingThreads to use multithreading (by default single threaded)
-     * We highly recommend to set call ImageIO.setUseCache(false);
-     * This will make the decoding way faster since the images will be stored in-memory and not cached on disk
+     * Use {@link #setMaxEncodingThreads(int)} and {@link #setMaxDecodingThreads(int)} to enable multithreading (by default single threaded).
+     * <p>
+     * We also highly recommend to set call {@link javax.imageio.ImageIO#setUseCache(boolean)}.
+     * This will make the decoding way faster since the images will be stored in-memory and not cached on disk (will be Memory demanding)
      */
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
         VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
-        //List used to save the single frames decoded from the carrier
-        if (debug)
-            log("Decoding Video Frames to images....");
-        List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
+        List<byte[]> imageList = null;
         if (debug) {
+            log("Decoding Video Frames to images....");
+            //List used to save the single frames decoded from the carrier
+            imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
             log("Video decoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
             log("Encoding secret message into images...");
         }
-        startTime = System.currentTimeMillis();
         List<byte[]> stegImagesList = encodeUsingHenkAlgo(imageList, payload, seed);
-        if (debug)
+        if (debug) {
+            startTime = System.currentTimeMillis();
             log("All " + stegImagesList.size() + " images encoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
-
-//        //TEMP
-//        int i = 0;
-//        for (byte[] image : imageList) {
-//            new FileOutputStream(new File("src/main/resources/Frames/Steg/" + "frame" + i + ".png")).write(image);
-//            i++;
-//        }
-
-        //Re-Encode Images to Video
+        }
+        //Encode Images to Video
         VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
         return videoEncoder.imagesToVideo(stegImagesList);
     }
 
     /**
-     * Encodes a given list of byte[] of Pictures using the "Henk-Algo"
-     * Set maxEncodingThreads to use multithreading (by default single threaded)
+     * Encodes a given list of byte[] of Pictures using the "Henk-Algorithm"
      *
-     * @param imageList list of byte[] of Pictures
-     * @param payload   payload (secret)
+     * @param imageList list of Pictures as byte[]
+     * @param payload   payload (secret) as byte[]
+     * @param seed      seed to be used for distribution
      * @return Encoded list of Pictures
      */
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
         long maxVideoCapacity = getVideoCapacity(imageList, true, false);
         if (payload.length > maxVideoCapacity)
-            throw new IllegalArgumentException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes "
+            throw new ImageCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes "
                     + "(" + (maxVideoCapacity / 1000) + " Kilobytes)");
 
-        //If Single Thread
+        //Single Threaded
         if (maxEncodingThreads == 1) {
             List<byte[]> stegImageList = new ArrayList<>();
             List<byte[]> payloadChunk = ImageSequenceUtils.sequenceDistribution(imageList, payload);
@@ -125,16 +121,17 @@ public class VideoSteg implements Steganography {
             }
             return stegImageList;
         } else {
+            //Multithreaded
             return multiThreadingEncode(imageList, payload, seed);
         }
     }
 
     /**
-     * Multi threaded version of encodeUsingHenkAlgo()
+     * Multithreaded version of {@link #encodeUsingHenkAlgo(List, byte[], long)}
      *
      * @param imageList list of images to encode
      * @param payload   payload in byte[]
-     * @param seed      seed to be used
+     * @param seed      seed to be used for distribution
      * @return list of encoded images
      * @throws IOException if any IO errors
      */
@@ -185,7 +182,7 @@ public class VideoSteg implements Steganography {
     }
 
     /**
-     * Set maxEncodingThreads to use multithreading (by default single threaded)
+     * Extract the hidden Payload from a Steganographic Video
      */
     @Override
     public byte[] decode(byte[] steganographicData) throws IOException {
@@ -193,7 +190,7 @@ public class VideoSteg implements Steganography {
     }
 
     /**
-     * Set maxEncodingThreads to use multithreading (by default single threaded)
+     * Extract the hidden Payload from a Steganographic Video using a custom seed
      */
     @Override
     public byte[] decode(byte[] steganographicData, long seed) throws IOException {
@@ -207,7 +204,7 @@ public class VideoSteg implements Steganography {
     }
 
     /**
-     * Decode list of images using henk algorithm
+     * Decode list of images using "Henk-algorithm"
      *
      * @param imageList List of images to be decoded
      * @param seed      seed to use to decode
@@ -238,7 +235,7 @@ public class VideoSteg implements Steganography {
     }
 
     /**
-     * Multi threaded version of decodeUsingHenkAlgo()
+     * Multi threaded version of {@link #decodeUsingHenkAlgo(List, long)}
      *
      * @param imageList list of images to decode
      * @param seed      seed to be used to decode
@@ -397,5 +394,9 @@ public class VideoSteg implements Steganography {
      */
     private void log(String message) {
         System.out.println(message);
+    }
+
+    public void setFfmpegBin(File ffmpegBin) {
+        this.ffmpegBin = ffmpegBin;
     }
 }

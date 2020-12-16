@@ -16,19 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.video.encoders;
 
 import java.io.IOException;
 import java.util.List;
 
-public interface IEncoder {
+public interface IDecoder {
 
     /**
-     * Encodes a List of images to a Video
-     * (PNG Slideshow codec should be used)
-     * @param stegImages list of Stenographic images
-     * @return Encoded Video byte[]
-     * @throws IOException IOException
+     * Decode a Video to single Pictures (that can be read as Buff Images) as byte[]
+     * Current implementation supports many codecs
+     *
+     * @param nThread number of Threads to use to decode
+     * @return list of pictures decoded from Video
      */
-    byte[] imagesToVideo(List<byte[]> stegImages) throws IOException;
+    List<byte[]> toPictureByteArray(int nThread) throws IOException;
 }

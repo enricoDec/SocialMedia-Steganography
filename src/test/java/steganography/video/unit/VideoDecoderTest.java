@@ -19,11 +19,10 @@
 package steganography.video.unit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
-import steganography.video.VideoDecoder;
+import steganography.video.encoders.VideoDecoder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

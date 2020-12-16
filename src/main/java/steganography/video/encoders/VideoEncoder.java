@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.video.encoders;
 
 import com.github.kokorin.jaffree.ffmpeg.*;
 import steganography.util.ByteArrayUtils;
+import steganography.video.Video;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;

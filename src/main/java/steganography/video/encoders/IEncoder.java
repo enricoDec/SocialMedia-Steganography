@@ -16,17 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.video;
+package steganography.video.encoders;
 
 import java.io.IOException;
 import java.util.List;
 
-public interface IDecoder {
+public interface IEncoder {
 
     /**
-     * Decode a Video to single Pictures (that can be read as Buff Images)
-     * @param nThread number of Threads to use to decode
-     * @return list of pictures decoded from Video
+     * Encodes a List of images to a Video
+     * Current implementation uses a lossless codec
+     *
+     * @param stegImages list of Stenographic images
+     * @return Encoded Video byte[]
+     * @throws IOException IOException
      */
-    List<byte[]> toPictureByteArray(int nThread) throws IOException;
+    byte[] imagesToVideo(List<byte[]> stegImages) throws IOException;
 }
