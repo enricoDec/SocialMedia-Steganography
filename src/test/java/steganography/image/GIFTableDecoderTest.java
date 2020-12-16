@@ -40,11 +40,11 @@ public class GIFTableDecoderTest {
 
     }
 
-/*
+
     @Test
     public void saveColorTable_FullTabel_intArray() {
         try {
-            File in = new File("src/main/resources/gifFrames/25.gif");
+            File in = new File("src/test/resources/steganography/image/insta.gif");
             gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertEquals(256,table.length);
@@ -54,11 +54,11 @@ public class GIFTableDecoderTest {
             e.printStackTrace();
         }
     }
-
+/*
     @Test
     public void saveColorTable_SmallTable_intArray() {
         try {
-            File in = new File("src/main/resources/gifFrames/1.gif");
+            File in = new File("src/test/resources/steganography/image/insta.gif");
             gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertTrue(table.length > 0 && table.length < 256);
@@ -96,4 +96,8 @@ public class GIFTableDecoderTest {
         Map<Integer, List<Integer>> map = decoder.getColorCouples(table);
         Assertions.assertEquals(0,map.size());
     }
+
+    @Test
+    public void getColorCouples_Null_NullPointerException() {
+        Assertions.assertThrows(NullPointerException.class, () -> decoder.getColorCouples(null));    }
 }

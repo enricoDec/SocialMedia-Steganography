@@ -37,31 +37,6 @@ public class GIFTableDecoder {
     //private static final byte MASK_LENGTH = Byte.parseByte("11111000",2);
     byte[] header = {ByteHex.hexToByte("47"),ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),
                         ByteHex.hexToByte("38"), ByteHex.hexToByte("39"), ByteHex.hexToByte("61")};
-    public void changeAllPixels() {
-        try {
-            File file = new File("src/main/resources/changed.gif");
-           /* BufferedImage test = ImageIO.read(file);
-            System.out.println(test.getType());
-            for (int i = 0; i < test.getHeight(); i++) {
-                for (int j = 0; j < test.getWidth(); j++) {
-                    int color = 0x0000FF00;
-                    color = test.getRGB(j,i);
-                    System.out.print(Integer.toHexString(color) + ", ");
-                    if(color == 0) {
-                        test.setRGB(j,i,(0x00FF0000));
-                    }
-
-                }
-            }
-            FileOutputStream out = new FileOutputStream("src/main/resources/changed.gif");
-            ImageIO.write(test, "gif",out);
-            out.close(); */
-            byte[] gifByte = Files.readAllBytes(file.toPath());
-            saveColorTable(gifByte);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * This Method extracts the color table of a gif and transforms it into an int-array.
@@ -123,11 +98,12 @@ public class GIFTableDecoder {
                     int redI = getRed(colorTable[i]);
                     int redJ = getRed(colorTable[j]);
                     //System.out.println("red I: " + redI + ", red J: " + redJ);
-                    if (Math.abs(redI - redJ) <= 4) {
+                    if (Math.abs(redI - redJ) <= 8 ) {
                         //System.out.println("green I: " + getGreen(colorTable[i]) +  ", green J:" + getGreen(colorTable[j]));
-                        if (Math.abs(getGreen(colorTable[i]) - getGreen(colorTable[j])) <= 4) {
+                        int greenI = getGreen(colorTable[i]);
+                        if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
                             //System.out.println("blue I: " + getBlue(colorTable[i]) +  ", blue J:" + getBlue(colorTable[j]));
-                            if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 4) {
+                            if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
                                 if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
                                     couples.add(colorTable[j]);
                                 }
@@ -144,23 +120,15 @@ public class GIFTableDecoder {
         return colorCouples;
     }
 
-    public static void main(String[] args) {
-        GIFTableDecoder test = new GIFTableDecoder();
-        test.changeAllPixels();
-    }
-
-    private int getRed(int color) {
-        int red = color << 8;
-        return (red >> 24);
+        private int getRed(int color) {
+        return (color >> 16) & 0xFF;
     }
 
     private int getGreen(int color) {
-        int green = color << 16;
-        return (green >> 24);
+        return (color >> 8) & 0xFF;
     }
 
     private int getBlue(int color) {
-        int blue = color << 24;
-        return  (blue >> 24);
+        return  color & 0xFF;
     }
 }

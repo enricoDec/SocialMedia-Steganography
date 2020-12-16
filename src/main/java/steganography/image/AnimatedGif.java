@@ -58,7 +58,7 @@ public class AnimatedGif implements Steganography{
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
-        return encode(carrier, payload, ImageSteg.DEFAULT_SEED);
+        return encode(payload,carrier, ImageSteg.DEFAULT_SEED);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class AnimatedGif implements Steganography{
             return output;
         }
 
-        public byte[][] splitGifDecoder(byte[] animatedGif) throws NullPointerException{
+        public byte[][] splitGifDecoder(byte[] animatedGif) throws NullPointerException, UnsupportedImageTypeException {
             try {
                 GifDecoder.GifImage gif = GifDecoder.read(animatedGif);
                 nop = gif.getFrameCount();
@@ -151,9 +151,9 @@ public class AnimatedGif implements Steganography{
                 }
                 return output;
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new UnsupportedImageTypeException("This method only supports gif files");
             }
-            return null;
+
         }
 
         public byte[] sequenceGifDecoder(byte[][] gifs) {
@@ -166,7 +166,7 @@ public class AnimatedGif implements Steganography{
                 writer.setOutput(out);
                 writer.prepareWriteSequence(null);
 
-                for (int i = 0; i < nop; i++) {
+                for (int i = 0; i < gifs.length; i++) {
                     ByteArrayInputStream readInput = new ByteArrayInputStream(gifs[i]);
                     BufferedImage bufferedImage = ImageIO.read(readInput);
                     ImageTypeSpecifier specifier = ImageTypeSpecifier.createFromBufferedImageType(bufferedImage.getType());
@@ -175,9 +175,14 @@ public class AnimatedGif implements Steganography{
                     ImageInputStream ciis = ImageIO.createImageInputStream(ioInput);
                     reader.setInput(ciis, false);
                     IIOImage frame = reader.readAll(0,null);
-                    newMetadata = createMetadata(delay[i], frame, newMetadata);
-                    // Cannot change Metadata since its read-only at the moment.
-                    writer.writeToSequence(new IIOImage(bufferedImage,null,newMetadata),param);
+                    if (delay != null) {
+                        newMetadata = createMetadata(delay[i], frame, newMetadata);
+                        // Cannot change Metadata since its read-only at the moment.
+                        writer.writeToSequence(new IIOImage(bufferedImage, null, newMetadata), param);
+                    } else
+                    {
+                        writer.writeToSequence(frame,param);
+                    }
 
                 }
                 writer.endWriteSequence();
@@ -244,7 +249,7 @@ public class AnimatedGif implements Steganography{
         try(FileOutputStream out = new FileOutputStream(new File(path + "steg.txt"));) {
             byte[] gif = ByteArrayUtils.read(input);
             byte[] payload = ByteArrayUtils.read(payloadFile);
-            byte[] hiddenGif = giffer.encode(payload, gif);
+            byte[] hiddenGif = giffer.encode(gif, payload);
             byte[] message = giffer.decode(hiddenGif);
            out.write(message);
 
