@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.audio.util;
+package steganography.audio;
 
 import steganography.audio.exception.AudioCapacityException;
 import steganography.audio.overlays.AudioOverlay;

@@ -18,7 +18,7 @@
 
 package steganography.audio.mp3;
 
-import steganography.audio.util.BitByteConverter;
+import steganography.audio.BitByteConverter;
 
 import java.util.ArrayList;
 import java.util.List;

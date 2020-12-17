@@ -25,12 +25,9 @@ import steganography.audio.overlays.AudioOverlay;
 import steganography.audio.overlays.MP3Overlays;
 import steganography.audio.overlays.MP3SequenceOverlay;
 import steganography.audio.overlays.MP3ShuffleOverlay;
-import steganography.audio.util.LSBChanger;
-import steganography.exceptions.MediaCapacityException;
-import steganography.exceptions.MediaNotFoundException;
+import steganography.audio.LSBChanger;
 import steganography.exceptions.UnknownStegFormatException;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 

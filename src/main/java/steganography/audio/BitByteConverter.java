@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package steganography.audio.util;
+package steganography.audio;
 
 /**
  * This class provides methods that make working with bits and bytes easier.
@@ -26,12 +26,22 @@ public class BitByteConverter {
 
     /**
      * Converts a byte array to a 2d-array containing the bit representation of each byte.
+     * An empty Array will be treated as 0.
      * @param bytes Byte array to convert into bits
      * @return Byte array:<br/>
      *         First dim = number of byte<br/>
      *         Second dim = the 8 bits for that byte
+     * @throws NullPointerException if bytes is null
      */
     public static byte[][] byteToBits(byte[] bytes) {
+        if (bytes == null)
+            throw new NullPointerException("Byte array can't be null");
+
+        if (bytes.length == 0)
+            return new byte[][] {
+                    new byte[] {0, 0, 0, 0, 0, 0, 0, 0}
+            };
+
         byte[][] bitArray = new byte[bytes.length][8];
         for (int byteNo = 0; byteNo < bytes.length; byteNo++) {
             bitArray[byteNo] = byteToBits(bytes[byteNo]);
@@ -62,8 +72,12 @@ public class BitByteConverter {
      * @return byte - Byte representation of the bits
      * @throws IllegalArgumentException If the length of the array is not 8
      * or an element of the array is neither 0 nor 1
+     * @throws NullPointerException if the given array is null
      */
     public static byte bitsToByte(byte[] bits) {
+        if (bits == null)
+            throw new NullPointerException("Bit array can't be null");
+
         if (bits.length != 8)
             throw new IllegalArgumentException("Can't convert into byte because there are not 8 bits");
 
@@ -76,7 +90,7 @@ public class BitByteConverter {
 
         int counter = 0;
         byte newByte = 0;
-        for (int i = 7; i >= 0; i--) {
+        for (int i = 7; i > 0; i--) {
             if (bits[i] == 1)
                 newByte += Math.pow(2, counter);
             counter++;
