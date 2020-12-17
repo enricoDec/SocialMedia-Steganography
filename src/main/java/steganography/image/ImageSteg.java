@@ -230,7 +230,7 @@ public class ImageSteg implements Steganography {
             case BufferedImage.TYPE_USHORT_565_RGB:
             case BufferedImage.TYPE_USHORT_GRAY:
             default:
-                throw new UnsupportedImageTypeException("Image type is not supported");
+                throw new UnsupportedImageTypeException("Image type (BufferedImage.TYPE = " + type + ") is not supported");
         }
     }
 
@@ -249,6 +249,8 @@ public class ImageSteg implements Steganography {
                     reader.setInput(imageInputStream);
 
                     buffImgAndFormat = new BuffImgAndFormat(reader.read(0), reader.getFormatName());
+                    // TODO: throw error, if bmp && alphaRaster != null
+                    // buffImgAndFormat.bufferedImage.getAlphaRaster();
 
                 } finally {
                     reader.dispose();

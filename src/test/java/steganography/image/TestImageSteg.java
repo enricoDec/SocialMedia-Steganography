@@ -25,26 +25,22 @@ import steganography.exceptions.*;
 import steganography.image.encoders.PixelBit;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class TestImageSteg {
 
     @Test
-    void testEncodingAndDecodingStringWithDefaultHeaderWithSeed()
+    void testPNGEncodingAndDecodingStringWithDefaultHeaderWithSeed()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
         System.out.println("testEncodingAndDecodingStringWithDefaultHeader:");
-        String pathToImage = "../testFiles/camera_lens.png";
+        String pathToImage = "src/test/resources/steganography/image/baum.png";
 
-        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labor";
-        // better ?:
-        //loremIpsum.getBytes();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        try {
-            dos.writeUTF(loremIpsum);
-        } catch (IOException e) {
-            // pff
-        }
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
 
         byte[] imageIntermediate = null;
 
@@ -61,7 +57,7 @@ public class TestImageSteg {
                 imgStream.write(fis.read());
 
             long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), baos.toByteArray(), seed);
+            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes(), seed);
             System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,42 +80,34 @@ public class TestImageSteg {
 
             long startTime = System.currentTimeMillis();
 
-            DataInputStream dis = new DataInputStream(
-                    new ByteArrayInputStream(
-                            steganography.decode(imageIntermediate, seed)));
+            byte[] result = steganography.decode(imageIntermediate, seed);
 
             System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(dis.readUTF(), loremIpsum);
+            Assertions.assertEquals(new String(result), loremIpsum);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    void testEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
+    void testPNGEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
 
         System.out.println("testEncodingAndDecodingStringWithDefaultHeaderAndSeed:");
-        String pathToImage = "../testFiles/camera_lens.png";
+        String pathToImage = "src/test/resources/steganography/image/baum.png";
 
-        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labor";
-        // better ?:
-        //loremIpsum.getBytes();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        try {
-            dos.writeUTF(loremIpsum);
-        } catch (IOException e) {
-            // pff
-        }
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
 
         byte[] imageIntermediate = null;
 
         /////// ENCODE
         PixelBit encoder;
-        long seed = 121212L;
         try (
                 FileInputStream fis = new FileInputStream(pathToImage)
         ){
@@ -130,7 +118,7 @@ public class TestImageSteg {
                 imgStream.write(fis.read());
 
             long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), baos.toByteArray());
+            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes());
             System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
         } catch (IOException e) {
             e.printStackTrace();
@@ -153,13 +141,133 @@ public class TestImageSteg {
 
             long startTime = System.currentTimeMillis();
 
-            DataInputStream dis = new DataInputStream(
-                    new ByteArrayInputStream(
-                            steganography.decode(imageIntermediate)));
+            byte[] result = steganography.decode(imageIntermediate);
 
             System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(dis.readUTF(), loremIpsum);
+            Assertions.assertEquals(new String(result), loremIpsum);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testBMPEncodingAndDecodingStringWithDefaultHeaderWithSeed()
+            throws UnsupportedMediaTypeException, MediaNotFoundException,
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
+        System.out.println("testEncodingAndDecodingStringWithDefaultHeader:");
+        String pathToImage = "src/test/resources/steganography/image/baum.bmp";
+
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
+
+        byte[] imageIntermediate = null;
+
+        /////// ENCODE
+        PixelBit encoder;
+        long seed = 121212L;
+        try (
+                FileInputStream fis = new FileInputStream(pathToImage)
+        ){
+            Steganography steganography = new ImageSteg();
+            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
+
+            while (fis.available() > 0)
+                imgStream.write(fis.read());
+
+            long startTime = System.currentTimeMillis();
+            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes(), seed);
+            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+/*
+
+        ////// WRITE IMAGE
+        try (FileOutputStream fos = new FileOutputStream("../testFiles/camera_lens_String_noTP.png")) {
+            assert imageIntermediate != null;
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageIntermediate));
+            ImageIO.write(bufferedImage, "png", fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
+
+        ////// DECODE
+        try {
+            Steganography steganography = new ImageSteg();
+
+            long startTime = System.currentTimeMillis();
+
+            byte[] result = steganography.decode(imageIntermediate, seed);
+
+            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+
+            Assertions.assertEquals(new String(result), loremIpsum);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testBMPEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
+            throws UnsupportedMediaTypeException, MediaNotFoundException,
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
+
+        System.out.println("testEncodingAndDecodingStringWithDefaultHeaderAndSeed:");
+        String pathToImage = "src/test/resources/steganography/image/baum.bmp";
+
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
+
+        byte[] imageIntermediate = null;
+
+        /////// ENCODE
+        PixelBit encoder;
+        try (
+                FileInputStream fis = new FileInputStream(pathToImage)
+        ){
+            Steganography steganography = new ImageSteg();
+            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
+
+            while (fis.available() > 0)
+                imgStream.write(fis.read());
+
+            long startTime = System.currentTimeMillis();
+            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes());
+            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+/*
+
+        ////// WRITE IMAGE
+        try (FileOutputStream fos = new FileOutputStream("../testFiles/camera_lens_String_noTP.png")) {
+            assert imageIntermediate != null;
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageIntermediate));
+            ImageIO.write(bufferedImage, "png", fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
+
+        ////// DECODE
+        try {
+            Steganography steganography = new ImageSteg();
+
+            long startTime = System.currentTimeMillis();
+
+            byte[] result = steganography.decode(imageIntermediate);
+
+            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+
+            Assertions.assertEquals(new String(result), loremIpsum);
         } catch (IOException e) {
             e.printStackTrace();
         }
