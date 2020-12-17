@@ -18,6 +18,7 @@
 
 package apis.reddit;
 
+import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.APINames;
 import apis.models.Token;
@@ -90,7 +91,7 @@ public class Reddit extends SocialMedia {
     }
 
     @Override
-    public boolean postToSocialNetwork(byte[] media, String hashtag) {
+    public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String hashtag) {
         if (this.token == null) {
             logger.info("User not logged in.");
             return false;
@@ -210,6 +211,11 @@ public class Reddit extends SocialMedia {
         } catch (Exception e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public void setBlogName(String blogname) {
+        //Only used in tumblr implementation
     }
 
     @Override

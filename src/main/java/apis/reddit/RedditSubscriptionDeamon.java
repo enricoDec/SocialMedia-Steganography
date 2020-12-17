@@ -154,7 +154,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         logger.info("No new media found.");
         latestPostEntries = Collections.emptyList();
         newPostAvailable = false;
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

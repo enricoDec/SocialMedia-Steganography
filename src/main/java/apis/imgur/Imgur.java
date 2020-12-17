@@ -100,7 +100,7 @@ public class Imgur extends SocialMedia {
     }
 
     @Override
-    public boolean postToSocialNetwork(byte[] media, String keyword) {
+    public boolean postToSocialNetwork(byte[] media, apis.MediaType mediaType, String keyword) {
         if (this.getToken() == null || this.getToken().getToken() == null) {
             logger.info("No Token was set!");
         }
@@ -293,6 +293,11 @@ public class Imgur extends SocialMedia {
         } catch (Exception e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public void setBlogName(String blogname) {
+        //Only used in tumblr implementation
     }
 
     @Override

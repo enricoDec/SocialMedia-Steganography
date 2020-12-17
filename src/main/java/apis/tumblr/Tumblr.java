@@ -69,7 +69,7 @@ public class Tumblr extends SocialMedia {
     }
 
     @Override
-    public boolean postToSocialNetwork(byte[] media, String keyword) {
+    public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
         Long postId = null;
         switch(mediaType){
             case MP3:
@@ -118,11 +118,6 @@ public class Tumblr extends SocialMedia {
     @Override
     public void setBlogName(String blogName){
         this.blogName = blogName;
-    }
-
-    @Override
-    public void setMediaType(MediaType mediaType) {
-        this.mediaType = mediaType;
     }
 
     /**

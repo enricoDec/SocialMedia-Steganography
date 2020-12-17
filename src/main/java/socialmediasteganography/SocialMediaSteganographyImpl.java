@@ -18,6 +18,7 @@
 
 package socialmediasteganography;
 
+import apis.MediaType;
 import apis.SocialMedia;
 import steganography.Steganography;
 import steganography.exceptions.MediaNotFoundException;
@@ -57,8 +58,9 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
             BufferedImage bImg = ImageIO.read(is);
             ImageIO.write(bImg, "png", new File("myfileEncoded.png"));
 
+            //TODO richtiges keyword setzen
 
-            return socialMedia.postToSocialNetwork(bytes, "test");
+            return socialMedia.postToSocialNetwork(bytes, MediaType.PNG, "test");
         } catch (Exception e) {
             e.printStackTrace();
             return false;

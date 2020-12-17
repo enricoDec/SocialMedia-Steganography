@@ -56,7 +56,11 @@ public class BaseUtil {
      */
     public void setLatestPostTimestamp(APINames network, MyDate latestPostTimestamp) {
         logger.info("Set timestamp in ms: " + latestPostTimestamp.getTime());
-        JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(network, latestPostTimestamp.getTime());
+        try{
+            JSONPersistentManager.getInstance().setLastTimeCheckedForAPI(network, latestPostTimestamp.getTime());
+        }catch (Exception e){
+            logger.info("No timestamp was set. Exception was: " + e.getClass().getSimpleName());
+        }
     }
 
     /**

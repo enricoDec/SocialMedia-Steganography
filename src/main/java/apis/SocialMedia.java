@@ -56,7 +56,7 @@ public abstract class SocialMedia {
      * @param keyword keyword to search this post by
      * @return true if successful
      */
-    public abstract boolean postToSocialNetwork(byte[] media, String keyword);
+    public abstract boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword);
 
     /**
      * Subscribe to a keyword (Hashtag / Title / ...)
@@ -78,7 +78,5 @@ public abstract class SocialMedia {
 
     public abstract List<String> getAllSubscribedKeywords();
 
-
     public abstract void setBlogName(String blogname);
-    public abstract void setMediaType(MediaType mediaType);
 }

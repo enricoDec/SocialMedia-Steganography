@@ -1,5 +1,6 @@
 package apis.imgur;
 
+import apis.MediaType;
 import apis.SocialMedia;
 import apis.imgur.models.ImgurPostResponse;
 import apis.models.MyDate;
@@ -47,7 +48,7 @@ class ImgurTest {
         Imgur imgur = new Imgur();
         byte[] file = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
         imgur.setToken(new Token("dummy", 123));
-        assertFalse(imgur.postToSocialNetwork(file, "test"));
+        assertFalse(imgur.postToSocialNetwork(file, MediaType.PNG, "test"));
     }
 
     @Test
