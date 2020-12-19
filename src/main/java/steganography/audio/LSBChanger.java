@@ -28,39 +28,43 @@ import steganography.exceptions.UnknownStegFormatException;
  */
 public class LSBChanger {
 
-    private final AudioOverlay OVERLAY;
+    private final AudioOverlay overlay;
 
     public LSBChanger(AudioOverlay overlay) {
-        this.OVERLAY = overlay;
+        this.overlay = overlay;
     }
 
     /**
      * Takes the byte array message and writes the message into the least significant bits of the byte array carrier
-     * using the overlay given in the constructor.
+     * using the overlay given in the constructor.<br/>
+     * If the message is null, nothing will change.
      * @param message bytes to encode
      * @return the given byte array with the message encoded into the least significant bits
      * @throws AudioCapacityException if the message does not fit into the overlays bytes
      */
     public byte[] encode(byte[] message) throws AudioCapacityException {
-        byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
+        if (message != null) {
+            if (message.length * 8 > this.overlay.available())
+                throw new AudioCapacityException("Message (requires " + message.length +
+                        " bytes) does not fit into overlay (" + (this.overlay.available() / 8) + " bytes available).");
 
-        if (messageBytesAndBits.length > this.OVERLAY.available())
-            throw new AudioCapacityException("Message (requires " + messageBytesAndBits.length +
-                    " bytes) does not fit into overlay (" + this.OVERLAY.available() + " bytes available).");
+            byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
 
-        for (byte[] messageBytes : messageBytesAndBits) {
-            for (byte messageBit : messageBytes) {
-                // get the next byte
-                byte currentByte = this.OVERLAY.next();
-                // get the bit representation and change the last bit
-                byte[] currentBits = BitByteConverter.byteToBits(currentByte);
-                if (currentBits[7] != messageBit)
-                    currentBits[7] = messageBit;
-                // set the changed byte in this overlay
-                this.OVERLAY.setByte(BitByteConverter.bitsToByte(currentBits));
+            for (byte[] messageBytes : messageBytesAndBits) {
+                for (byte messageBit : messageBytes) {
+                    // get the next byte
+                    byte currentByte = this.overlay.next();
+                    // get the bit representation and change the last bit
+                    byte[] currentBits = BitByteConverter.byteToBits(currentByte);
+                    if (currentBits[7] != messageBit)
+                        currentBits[7] = messageBit;
+                    // set the changed byte in this overlay
+                    this.overlay.setByte(BitByteConverter.bitsToByte(currentBits));
+                }
             }
         }
-        return this.OVERLAY.getBytes();
+
+        return this.overlay.getBytes();
     }
 
     /**
@@ -68,25 +72,31 @@ public class LSBChanger {
      * @param length amount of bytes in the message
      * @return the message as a byte array
      * @throws UnknownStegFormatException if there are not enough bytes to read the message from
+     * @throws IllegalArgumentException if the length is less than 1
      */
     public byte[] decode(int length) throws UnknownStegFormatException {
-        if (length * 8 > this.OVERLAY.available())
+        if (length < 1)
+            throw new IllegalArgumentException("Can't read message of length less than 1 (length was " + length + ").");
+
+        if (length * 8 > this.overlay.available()) {
             throw new UnknownStegFormatException("Message could not be read from byte array because only " +
-                    (this.OVERLAY.available() / 8) + " bytes are available in the MP3 file, but " + length +
+                    (this.overlay.available() / 8) + " bytes are available in the MP3 file, but " + length +
                     " bytes are required to get the whole message.");
+        }
 
         byte[] message = new byte[length];
         byte[] tempByte = new byte[8];
         int tempByteCounter = 0;
         int messageCounter = 0;
         for (int i = 0; i < length * 8; i++) {
-            byte[] currentBits = BitByteConverter.byteToBits(this.OVERLAY.next());
+            byte[] currentBits = BitByteConverter.byteToBits(this.overlay.next());
             tempByte[tempByteCounter++] = currentBits[7];
             if (tempByteCounter == 8) {
                 message[messageCounter++] = BitByteConverter.bitsToByte(tempByte);
                 tempByteCounter = 0;
             }
         }
+
         return message;
     }
 }

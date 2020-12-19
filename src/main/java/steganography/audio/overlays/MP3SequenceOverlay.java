@@ -70,6 +70,9 @@ public class MP3SequenceOverlay implements AudioOverlay {
 
     @Override
     public void setByte(byte value) throws NoSuchElementException {
+        if (this.currentPosition == -1 || this.currentPosition >= this.dataByteOrder.size())
+            throw new NoSuchElementException("Current Position is invalid.");
+
         this.mp3Bytes[this.dataByteOrder.get(this.currentPosition)] = value;
     }
 
