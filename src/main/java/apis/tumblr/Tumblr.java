@@ -96,12 +96,27 @@ public class Tumblr extends SocialMedia {
     }
 
     @Override
+    public boolean unsubscribeKeyword(String keyword) {
+        return false;
+    }
+
+    @Override
+    public void changeSchedulerPeriod(Integer interval) {
+
+    }
+
+    @Override
+    public void startSearch() {
+
+    }
+
+    @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
         return null;
     }
 
     @Override
-    public void unsubscribe() {
+    public void stopSearch() {
 
     }
 

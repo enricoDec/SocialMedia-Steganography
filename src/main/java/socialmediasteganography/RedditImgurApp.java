@@ -4,6 +4,8 @@ import apis.SocialMedia;
 import apis.models.Token;
 import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
+import persistence.JSONPersistentManager;
+import persistence.PersistenceDummy;
 import steganography.image.ImageSteg;
 
 import java.util.List;
@@ -11,6 +13,20 @@ import java.util.List;
 public class RedditImgurApp {
 
     public static void main(String[] args){
+
+        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
+
+        Reddit sm = new Reddit();
+        sm.setToken(new Token("abc", 100));
+        sm.subscribeToKeyword("nature");
+        sm.startSearch();
+
+        sm.changeSchedulerPeriod(1);
+        sm.stopSearch();
+
+
+        if(false){
+
         //Setup
         SocialMedia socialMedia = new Reddit();
         socialMedia.setToken(new Token("abc", 100));
@@ -26,7 +42,7 @@ public class RedditImgurApp {
         //Search in social media for pictures and try to decode
         List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
         //socialMedia.subscribeToKeyword("nature");
-
+        }
         /////////////////////////////////////////////////
 
         //Setup
