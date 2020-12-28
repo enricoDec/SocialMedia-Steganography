@@ -30,15 +30,14 @@ import java.util.Random;
 public class MP3ShuffleOverlay extends MP3SequenceOverlay {
 
     /**
-     * Adds a shuffle overlay to a given MP3 file. This overlay retrieves only the data bytes of the MP3 file and
-     * returns the bytes randomized according to a seed.
+     * Adds a shuffle overlay to a given byte array containing an MP3 file.
+     * This overlay retrieves only the data bytes of the MP3 file and returns the bytes randomized according to a seed.
      * @param bytes byte array containing an MP§ file
      * @param seed seed to shuffle the byte order by
-     * @throws AudioNotFoundException if the given byte array does not contain an MP3 file
+     * @throws AudioNotFoundException if the given byte array is null or does not contain an MP3 file
      */
     public MP3ShuffleOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
         super(bytes, seed);
-        createOverlay(seed);
     }
 
     @Override
