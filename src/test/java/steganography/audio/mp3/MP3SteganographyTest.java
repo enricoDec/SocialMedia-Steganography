@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class MP3Test {
+public class MP3SteganographyTest {
 
     private Steganography mp3Steg;
     private String pathToTestFile;

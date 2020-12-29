@@ -391,17 +391,13 @@ public class MP3File {
         // --------------------------------------------- LOOK UP VALUES --------------------------------------------- \\
         // ---------------------------------------------------------------------------------------------------------- \\
 
-        // Bitrate
         try {
-            // cast float to int for convenience (2f and 2.5f will cast to 2)
-            // and look up bitrate
+            // Bitrate
+            // cast float to int for convenience (2f and 2.5f will cast to 2
+            // since there is no difference between the versions) and look up bitrate
             frame.setBitrate(BitRateLookUp.getValueForBitrate((int) mpegVersion, layer, bitrateValue));
-        } catch (IllegalArgumentException | NoSuchElementException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
 
-        // Sampling rate
-        try {
+            // Sampling rate
             frame.setSamplingRate(SamplingRateLookUp.getValueForSamplingRate(mpegVersion, samplingRateValue));
         } catch (IllegalArgumentException | NoSuchElementException e) {
             throw new IllegalArgumentException(e.getMessage());
@@ -411,16 +407,28 @@ public class MP3File {
         // ---------------------------------------- VALIDATING FRAME LENGTH ---------------------------------------- \\
         // --------------------------------------------------------------------------------------------------------- \\
 
-        // length = (12 * (bitrate * 1000) / samplingRate + padding) * 4     // includes header
-        // bitrate * 1000 because the formula requires bits per ms
         if (layer == 1) {
-            frame.setLength((12 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 4 : 0)) * 4);
+            // length = (12 * (bitrate * 1000) / samplingRate + padding) * 4     // includes header
+            // bitrate * 1000 because the formula requires bits per ms
+            frame.setLength(
+                    (12 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 4 : 0)) * 4
+            );
+        } else if (layer == 2 || layer == 3) {
+            // length = (144 * (bitrate * 1000) / samplingRate ) + padding       // includes header
+            frame.setLength(
+                    144 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 1 : 0)
+            );
+        } else {
+            frame.setValid(false);
+            throw new IllegalArgumentException("Length is invalid");
         }
 
-        // length = (144 * (bitrate * 1000) / samplingRate ) + padding       // includes header
-        if (layer == 2 || layer == 3) {
-            frame.setLength(144 * (frame.getBitrate() * 1000) / frame.getSamplingRate() + (frame.isPadded() ? 1 : 0));
+        // check if frame length is valid
+        if (frame.getStartingByte() + frame.getLength() > this.mp3Bytes.length) {
+            frame.setValid(false);
+            throw new IllegalArgumentException("Length is invalid");
         }
+
         return frame;
     }
 }
