@@ -280,7 +280,7 @@ public class VideoStegTest {
 
             randomFile = new File("largePayload");
             largePayload = new RandomAccessFile(randomFile, "rw");
-            long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier), true, false);
+            long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier));
             largePayload.setLength(maxPayloadBytes);
             byte[] buffer = new byte[(int) maxPayloadBytes - 1];
             largePayload.readFully(buffer);
@@ -309,14 +309,14 @@ public class VideoStegTest {
      * Bad Test
      */
     @Test
-    public void encoderIntegrationVeryLargePayloadTest() throws IOException, NoImageException {
+    public void encoderIntegrationVeryLargePayloadTest() throws IOException, NoImageException, UnsupportedImageTypeException {
         VideoSteg videoSteg = new VideoSteg();
         videoSteg.setDebug(true);
         ImageIO.setUseCache(false);
         videoSteg.setMaxEncodingThreads(4);
         videoSteg.setMaxDecodingThreads(4);
 
-        long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier), true, false);
+        long maxPayloadBytes = videoSteg.getVideoCapacity(ByteArrayUtils.read(carrier));
 
         File randomFile = new File("largePayload");
         RandomAccessFile largePayload = new RandomAccessFile(randomFile, "rw");

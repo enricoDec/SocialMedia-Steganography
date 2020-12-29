@@ -20,6 +20,7 @@ package steganography.util;
 
 import steganography.image.ImageSteg;
 import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class ImageSequenceUtils {
      * @throws IOException if IO Exception is thrown during read operations
      * @throws NoImageException read failed
      */
-    public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException, NoImageException {
+    public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException, NoImageException, UnsupportedImageTypeException {
         int chunkCursor = 0;
         List<byte[]> payloadSplitted = new ArrayList<>();
         ImageSteg steganography = new ImageSteg();
@@ -48,7 +49,7 @@ public class ImageSequenceUtils {
                 payloadSplitted.add(null);
             } else {
                 //Distribute payload into frames
-                int maxImagePayload = steganography.getImageCapacity(image, true, false);
+                int maxImagePayload = steganography.getImageCapacity(image);
                 //New copy of payload array that holds max amount of payload the current image can hold
                 byte[] payloadChunk;
                 if (maxImagePayload <= 0) {

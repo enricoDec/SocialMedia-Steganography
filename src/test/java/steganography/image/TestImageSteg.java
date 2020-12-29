@@ -405,7 +405,7 @@ public class TestImageSteg {
     // ------------------------------------
 
     @Test
-    void given_80PixelPNG_when_getCapacity_expect_10() throws IOException, UnsupportedImageTypeException, NoImageException {
+    void given_80PixelPNGNoDefaultHeader_when_getCapacity_expect_10() throws IOException, UnsupportedImageTypeException, NoImageException {
 
         BufferedImage bufferedImage = new BufferedImage(8, 10, BufferedImage.TYPE_3BYTE_BGR);
 
@@ -414,8 +414,8 @@ public class TestImageSteg {
 
         Assertions.assertEquals(
                 10,
-                new ImageSteg().getImageCapacity(
-                        baos.toByteArray(), false, true
+                new ImageSteg(false, false).getImageCapacity(
+                        baos.toByteArray()
                 )
         );
 

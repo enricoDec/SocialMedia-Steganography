@@ -267,13 +267,12 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Returns the maximum number of bytes that can be encoded in the given image.
+     * Returns the maximum number of bytes that can be encoded in the given image using the settings
+     * given to the constructor of ImageSteg.
      * @param image image to potentially encode bytes in
-     * @param subtractDefaultHeader should the length of the default header be subtracted from the capacity?
-     * @param useTransparent should transparent pixels be added to the capacity?
      * @return the payload-capacity of image
      */
-    public int getImageCapacity(byte[] image, boolean subtractDefaultHeader, boolean useTransparent)
+    public int getImageCapacity(byte[] image)
             throws IOException, NoImageException, UnsupportedImageTypeException {
 
         BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();

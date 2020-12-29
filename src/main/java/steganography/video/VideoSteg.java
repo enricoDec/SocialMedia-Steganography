@@ -48,7 +48,7 @@ public class VideoSteg implements Steganography {
     private boolean debug = false;
     private long startTime = System.currentTimeMillis();
     private File ffmpegBin = new File("src/main/resources");
-    private final int seed = ImageSteg.DEFAULT_SEED;
+    private final long seed = ImageSteg.DEFAULT_SEED;
 
     /**
      * Use {@link #setMaxEncodingThreads(int)} and {@link #setMaxDecodingThreads(int)} to enable multithreading (by default single threaded).
@@ -98,7 +98,7 @@ public class VideoSteg implements Steganography {
      * @return Encoded list of Pictures
      */
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
-        long maxVideoCapacity = getVideoCapacity(imageList, true, false);
+        long maxVideoCapacity = getVideoCapacity(imageList);
         if (payload.length > maxVideoCapacity)
             throw new ImageCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes. "
                     + "Payload Bytes: " + payload.length);
@@ -134,7 +134,7 @@ public class VideoSteg implements Steganography {
      * @return list of encoded images
      * @throws IOException if any IO errors
      */
-    private List<byte[]> multiThreadingEncode(List<byte[]> imageList, byte[] payload, long seed) throws IOException, NoImageException {
+    private List<byte[]> multiThreadingEncode(List<byte[]> imageList, byte[] payload, long seed) throws IOException, NoImageException, UnsupportedImageTypeException {
         ExecutorService taskExecutor = Executors.newFixedThreadPool(maxEncodingThreads);
         List<byte[]> payloadChunk = ImageSequenceUtils.sequenceDistribution(imageList, payload);
 
@@ -352,18 +352,17 @@ public class VideoSteg implements Steganography {
      * Returns the maximum number of bytes that can be encoded in the given video.
      *
      * @param carrier         carrier to be used (Video)
-     * @param withTransparent should transparent pixel be counted for
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
      */
-    public long getVideoCapacity(byte[] carrier, boolean subtractDefaultHeader, boolean withTransparent) throws IOException, NoImageException {
+    public long getVideoCapacity(byte[] carrier) throws IOException, NoImageException, UnsupportedImageTypeException {
         VideoDecoder videoDecoder = new VideoDecoder(new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
         List<byte[]> pictureList = videoDecoder.toPictureByteArray(maxDecodingThreads);
         ImageSteg imageSteg = new ImageSteg();
 
         long totalCapacity = 0;
         for (byte[] picture : pictureList) {
-            totalCapacity += imageSteg.getImageCapacity(picture, subtractDefaultHeader, withTransparent);
+            totalCapacity += imageSteg.getImageCapacity(picture);
         }
         return totalCapacity;
     }
@@ -372,16 +371,15 @@ public class VideoSteg implements Steganography {
      * Returns the maximum number of bytes that can be encoded in the given video.
      *
      * @param pictureList     list of pictures that will be encoded
-     * @param withTransparent should transparent pixel be counted for
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
      */
-    public long getVideoCapacity(List<byte[]> pictureList, boolean subtractDefaultHeader, boolean withTransparent) throws IOException, NoImageException {
+    public long getVideoCapacity(List<byte[]> pictureList) throws IOException, NoImageException, UnsupportedImageTypeException {
         ImageSteg imageSteg = new ImageSteg();
 
         long totalCapacity = 0;
         for (byte[] picture : pictureList) {
-            totalCapacity += imageSteg.getImageCapacity(picture, subtractDefaultHeader, withTransparent);
+            totalCapacity += imageSteg.getImageCapacity(picture);
         }
         return totalCapacity;
     }
