@@ -359,10 +359,10 @@ public class TestImageSteg {
     // ------------------------------------
 
     @Test
-    void given_imageIsNull_when_encoding_expect_NoImageException() {
+    void given_imageIsNull_when_encoding_expect_NullPointerException() {
 
         Assertions.assertThrows(
-                NoImageException.class,
+                NullPointerException.class,
                 () -> new ImageSteg().encode(null, "Hello World".getBytes())
         );
     }
@@ -377,10 +377,10 @@ public class TestImageSteg {
     }
 
     @Test
-    void given_imageIsNull_when_decoding_expect_NoImageException() {
+    void given_imageIsNull_when_decoding_expect_NullPointerException() {
 
         Assertions.assertThrows(
-                NoImageException.class,
+                NullPointerException.class,
                 () -> new ImageSteg().decode(null)
         );
     }
