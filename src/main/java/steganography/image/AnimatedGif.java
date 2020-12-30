@@ -202,6 +202,12 @@ public class AnimatedGif implements Steganography{
 
             IIOMetadataNode graphicsControlExtensionNote = getNode(root,"GraphicControlExtension");
             graphicsControlExtensionNote.setAttribute("delayTime", Integer.toString(delay));
+            IIOMetadataNode child = new IIOMetadataNode("ApplicationExtension");
+            IIOMetadataNode appExtensionsNode = getNode(root, "ApplicationExtensions");
+            child.setAttribute("applicationID", "NETSCAPE");
+            child.setAttribute("authenticationCode", "2.0");
+            child.setUserObject(new byte[] { 0x1, (byte) (0 & 0xFF), (byte) ((0 >> 8) & 0xFF)});
+            appExtensionsNode.appendChild(child);
             newMetadata.setFromTree(name, root);
             return newMetadata;
         }
