@@ -36,10 +36,14 @@ public class ShuffleOverlay extends SerialOverlay {
 
         this.random = new Random(seed);
         createOverlay();
+        shufflePixelOrder();
     }
 
     protected void createOverlay() {
         super.createOverlay();
+    }
+
+    private void shufflePixelOrder() {
         Collections.shuffle(this.pixelOrder, this.random);
     }
 }

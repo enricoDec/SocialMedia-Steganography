@@ -34,8 +34,8 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     /**
-     * Returns the number of color channels this algorithm is currently choosing random from
-     * to encode data.
+     * Returns the number of color channels this algorithm is currently choosing from
+     * to encode data. Cannot be greater than 4 or smaller than 1.
      * @return the number of color channels currently used
      */
     public int getNumberOfChannels() {
@@ -43,6 +43,9 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     public void setNumberOfChannels(int numberOfChannels) {
+        if (numberOfChannels > 4 || numberOfChannels < 1)
+            throw new IllegalArgumentException("Number of channels can only be a number between " +
+                    "1 (inclusive) and 4 (inclusive)");
         this.numOfChannels = numberOfChannels;
     }
 
@@ -74,27 +77,15 @@ public class PixelBit extends BuffImgEncoder {
 
     @Override
     public byte[] decode(int bLength) {
+
+        if (bLength > this.overlay.available() / 8)
+            throw new IndexOutOfBoundsException("bLength cannot be greater than the images capacity of " +
+                    this.overlay.available() / 8 + " bytes");
+
         // true = 1; false = 0;
         List<Boolean> pixelBitList = new ArrayList<>();
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         for (int i = 0; i < bLength; i++) {
-            for (int j = 0; j < 8; j++) {
-                pixelBitList.add(pixelIsOne(this.overlay.next()));
-            }
-            result.write(
-                    bits2Byte(
-                            pixelBitList.toArray(new Boolean[0])
-                    )
-            );
-            pixelBitList.clear();
-        }
-        return result.toByteArray();
-    }
-
-    public byte[] decodeEverything() {
-        List<Boolean> pixelBitList = new ArrayList<>();
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        while (overlay.available() >= 8) {
             for (int j = 0; j < 8; j++) {
                 pixelBitList.add(pixelIsOne(this.overlay.next()));
             }
@@ -125,18 +116,6 @@ public class PixelBit extends BuffImgEncoder {
         }
         // for safety, byte-cast should be enough
         return (byte) (result & 0xff);
-    }
-
-    /**
-     * "Flips" every pixel of the given bufferedImage.
-     * Flipping means to change the outcome of (A+R+G+B) & 1 == 0.
-     * In other words:
-     * Flipping means to change the outcome of ((A+R+G+B) mod 2) == 0.
-     */
-    public void flipEveryPixel() {
-        while (this.overlay.available() > 0) {
-            this.overlay.setPixel(changePixelValue(this.overlay.next()));
-        }
     }
 
     /**

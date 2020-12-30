@@ -35,14 +35,17 @@ public class MP3SequenceOverlay implements AudioOverlay {
     protected int currentPosition = -1;
 
     /**
-     * Adds a sequence overlay to a given MP3 file. This overlay retrieves only the data bytes of the MP3 file and
-     * returns the bytes in order.
-     * @param bytes byte array containing an MP§ file
+     * Adds a sequence overlay to a given byte array containing an MP3 file.
+     * This overlay retrieves only the data bytes of the MP3 file and returns them in order.
+     * @param bytes byte array containing an MP3 file
      * @param seed would normally be used to influence the overlay (e.g. shuffling).
      *             Obviously, this cannot be used in the a sequence overlay.
-     * @throws AudioNotFoundException if the given byte array does not contain an MP3 file
+     * @throws AudioNotFoundException if the given byte array is null or does not contain an MP3 file
      */
     public MP3SequenceOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
+        if (bytes == null)
+            throw new AudioNotFoundException("The given byte array is null and therefore not a valid MP3 file.");
+
         MP3File mp3File = new MP3File(bytes);
         if (!mp3File.findAllFrames())
             throw new AudioNotFoundException("The given byte array is not a valid MP3 file.");
@@ -52,8 +55,7 @@ public class MP3SequenceOverlay implements AudioOverlay {
         createOverlay(seed);
     }
 
-    protected void createOverlay(long seed) {
-    }
+    protected void createOverlay(long seed) {}
 
     @Override
     public byte next() throws NoSuchElementException {
@@ -70,6 +72,9 @@ public class MP3SequenceOverlay implements AudioOverlay {
 
     @Override
     public void setByte(byte value) throws NoSuchElementException {
+        if (this.currentPosition == -1 || this.currentPosition >= this.dataByteOrder.size())
+            throw new NoSuchElementException("Current Position is invalid.");
+
         this.mp3Bytes[this.dataByteOrder.get(this.currentPosition)] = value;
     }
 

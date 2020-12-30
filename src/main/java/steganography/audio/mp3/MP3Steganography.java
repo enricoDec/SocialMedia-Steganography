@@ -25,12 +25,9 @@ import steganography.audio.overlays.AudioOverlay;
 import steganography.audio.overlays.MP3Overlays;
 import steganography.audio.overlays.MP3SequenceOverlay;
 import steganography.audio.overlays.MP3ShuffleOverlay;
-import steganography.audio.util.LSBChanger;
-import steganography.exceptions.MediaCapacityException;
-import steganography.exceptions.MediaNotFoundException;
+import steganography.audio.LSBChanger;
 import steganography.exceptions.UnknownStegFormatException;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -43,14 +40,14 @@ public class MP3Steganography implements Steganography {
     private static final String HEADER_IDENTIFIER = "HAIM";
     private static final long DEFAULT_SEED = 5571009188606006082L;
 
-    private final MP3Overlays OVERLAY;
+    private final MP3Overlays overlay;
 
     /**
      * Set the {@link MP3Overlays MP3Overlay} to use.
      * @param overlay overlay to use
      */
     public MP3Steganography(MP3Overlays overlay) {
-        this.OVERLAY = overlay;
+        this.overlay = overlay;
     }
 
     /**
@@ -63,7 +60,7 @@ public class MP3Steganography implements Steganography {
 
     private AudioOverlay getOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
         AudioOverlay overlay;
-        switch (this.OVERLAY) {
+        switch (this.overlay) {
             case SHUFFLE_OVERLAY:
                 overlay = new MP3ShuffleOverlay(bytes, seed);
                 break;

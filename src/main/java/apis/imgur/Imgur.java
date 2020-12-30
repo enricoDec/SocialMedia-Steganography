@@ -77,6 +77,11 @@ public class Imgur extends SocialMedia {
     private ScheduledFuture scheduledFuture;
 
     /**
+     * Intervall of searching for new posts
+     */
+    private Integer interval;
+
+    /**
      * Utilities
      */
     private ImgurUtil imgurUtil;
@@ -236,15 +241,15 @@ public class Imgur extends SocialMedia {
      *
      * @param interval Interval in minutes
      */
+    @Override
     public void changeSchedulerPeriod(Integer interval) {
-        if (scheduledFuture != null && !scheduledFuture.isCancelled())
-            scheduledFuture.cancel(false);
+        if(isSchedulerRunning())
+            stopSearch();
 
-        if (interval == null) {
-            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, 5, TimeUnit.MINUTES);
-        } else {
-            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, interval, TimeUnit.MINUTES);
-        }
+        this.interval = interval;
+
+        if(isSchedulerRunning())
+            startSearch();
     }
 
     /**
@@ -257,9 +262,7 @@ public class Imgur extends SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        this.imgurUtil.storeKeyword(IMGUR, keyword);
-        changeSchedulerPeriod(DEFAULT_INTERVALL);
-        return true;
+        return this.imgurUtil.storeKeyword(IMGUR, keyword);
     }
 
     @Override
@@ -301,8 +304,43 @@ public class Imgur extends SocialMedia {
     }
 
     @Override
-    public void unsubscribe() {
-        if (!executor.isShutdown())
-            executor.shutdown();
+    public void stopSearch() {
+        logger.info("Stop searched was executed.");
+        if (scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
+    }
+
+    @Override
+    public void startSearch() {
+        logger.info("Start search was executed.");
+        if (interval == null) {
+            System.out.println(executor);
+            scheduledFuture = executor.scheduleAtFixedRate(this.imgurSubscriptionDeamon,0, DEFAULT_INTERVALL, TimeUnit.MINUTES);
+            System.out.println(executor);
+
+        } else {
+            scheduledFuture = executor.schedule(this.imgurSubscriptionDeamon, interval, TimeUnit.MINUTES);
+        }
+    }
+
+    @Override
+    public boolean unsubscribeKeyword(String keyword) {
+        if(isSchedulerRunning())
+            stopSearch();
+
+        try{
+            if(JSONPersistentManager.getInstance().getKeywordListForAPI(IMGUR).stream().anyMatch(s -> s.equals(keyword))){
+                JSONPersistentManager.getInstance().removeKeywordForAPI(IMGUR, keyword);
+                logger.info("Removed keyword '" + keyword + "' from Imgur.");
+            }
+        }catch (Exception e){
+            logger.info(keyword + " was not found in keywordlist.");
+            return false;
+        }
+
+        if(isSchedulerRunning())
+            startSearch();
+
+        return true;
     }
 }

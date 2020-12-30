@@ -82,12 +82,17 @@ public class Reddit extends SocialMedia {
     private ScheduledFuture scheduledFuture;
 
     /**
+     * Intervall of searching for new posts
+     */
+    private Integer interval;
+
+    /**
      * Default constructor. Prepares the subscription deamon, utils and the executor.
      */
     public Reddit() {
         this.redditUtil = new RedditUtil();
         this.redditSubscriptionDeamon = new RedditSubscriptionDeamon();
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
     }
 
     @Override
@@ -154,15 +159,15 @@ public class Reddit extends SocialMedia {
      * Asynchron.
      * @param interval Interval in minutes
      */
+    @Override
     public void changeSchedulerPeriod(Integer interval) {
-        if (scheduledFuture != null && !scheduledFuture.isCancelled())
-            scheduledFuture.cancel(false);
+        if(isSchedulerRunning())
+            stopSearch();
 
-        if (interval == null) {
-            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, 5, TimeUnit.MINUTES);
-        } else {
-            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, interval, TimeUnit.MINUTES);
-        }
+        this.interval = interval;
+
+        if(isSchedulerRunning())
+            startSearch();
     }
 
     /**
@@ -175,9 +180,7 @@ public class Reddit extends SocialMedia {
 
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        this.redditUtil.storeKeyword(REDDIT, keyword);
-        changeSchedulerPeriod(DEFAULT_INTERVALL);
-        return true;
+        return this.redditUtil.storeKeyword(REDDIT, keyword);
     }
 
     @Override
@@ -219,8 +222,43 @@ public class Reddit extends SocialMedia {
     }
 
     @Override
-    public void unsubscribe() {
-        if (!executor.isShutdown())
-            executor.shutdown();
+    public void stopSearch() {
+        logger.info("Stop searched was executed.");
+        if (scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
+    }
+
+    @Override
+    public void startSearch() {
+        logger.info("Start search was executed.");
+        if (interval == null) {
+            System.out.println(executor);
+            scheduledFuture = executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0, DEFAULT_INTERVALL, TimeUnit.MINUTES);
+            System.out.println(executor);
+
+        } else {
+            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, interval, TimeUnit.MINUTES);
+        }
+    }
+
+    @Override
+    public boolean unsubscribeKeyword(String keyword) {
+        if(isSchedulerRunning())
+            stopSearch();
+
+        try{
+            if(JSONPersistentManager.getInstance().getKeywordListForAPI(REDDIT).stream().anyMatch(s -> s.equals(keyword))){
+                JSONPersistentManager.getInstance().removeKeywordForAPI(REDDIT, keyword);
+                logger.info("Removed keyword '" + keyword + "' from Reddit.");
+            }
+        }catch (Exception e){
+            logger.info(keyword + " was not found in keywordlist.");
+            return false;
+        }
+
+        if(isSchedulerRunning())
+            startSearch();
+
+        return true;
     }
 }

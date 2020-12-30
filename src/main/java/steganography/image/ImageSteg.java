@@ -27,6 +27,7 @@ import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
+import steganography.image.overlays.RemoveTransparentShuffleOverlay;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.overlays.BufferedImageCoordinateOverlay;
@@ -38,15 +39,67 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class ImageSteg implements Steganography {
 
-    public static final int DEFAULT_SEED = 1732341558;
+    public static final long DEFAULT_SEED = 1732341558;
     private static final int HEADER_SIGNATURE = 1349075561;
-    private boolean useDefaultHeader = true;
+    private final boolean useTransparent;
+    private final boolean useDefaultHeader;
+
+    private static final Set<String> supportedFormats = new HashSet<>(
+            Arrays.asList("bmp", "BMP", "gif", "GIF", "png", "PNG")
+    );
+
+    /**
+     * Creates a new ImageSteg with settings:
+     * <ul>
+     *     <li>useDefaultHeader = true</li>
+     *     <li>useTransparent = false</li>
+     * </ul>
+     *
+     * This means, a default header will be encoded in the image to simplify decoding and
+     * fully transparent pixels will not be used for encoding or decoding.
+     *
+     * Is equivalent to ImageSteg(true, false).
+     */
+    public ImageSteg() {
+        this.useDefaultHeader = true;
+        this.useTransparent = false;
+    }
+
+    /**
+     * Creates a new ImageSteg with the given settings.
+     * <ul>
+     *     <li>
+     *         useDefaultHeader - <br/>
+     *         if true, the default header will be encoded in the image. The hidden message can then be
+     *         decoded using ImageSteg.decode(...). <br/>
+     *         if false, no header will be encoded in the image. The hidden message can only be decoded
+     *         using ImageSteg.decodeRaw(length, ...)
+     *     </li>
+     *     <li>
+     *         useTransparent - <br/>
+     *         if true, fully transparent pixels will be used for encoding and decoding <br/>
+     *         if false, fully transparent pixels will not be used for encoding and decoding <br/>
+     *         This value must be equal while encoding and decoding to successfully decode the hidden message.
+     *         This value can only affect PNGs that contain fully transparent pixels.
+     *         If an image has no fully transparent pixels, this value will be ignored.
+     *         If the image is a GIF, this value will be ignored.
+     *         BMPs with transparent pixels are not supported by this class.
+     *     </li>
+     * </ul>
+     * @param useDefaultHeader should the default header be used for encoding?
+     * @param useTransparent should fully transparent pixels be used for encoding and decoding?
+     */
+    public ImageSteg(boolean useDefaultHeader, boolean useTransparent) {
+        this.useDefaultHeader = useDefaultHeader;
+        this.useTransparent = useTransparent;
+    }
+
+    // All formats: JPG, jpg, tiff, bmp, BMP, gif, GIF, WBMP, png, PNG, JPEG, tif, TIF, TIFF, wbmp, jpeg
 
     // @Override
     // public void useDefaultHeader(boolean useDefaultHeader) {
@@ -66,6 +119,11 @@ public class ImageSteg implements Steganography {
     public byte[] encode(byte[] carrier, byte[] payload, long seed)
             throws IOException, NoImageException, UnsupportedImageTypeException,
                     ImageWritingException, ImageCapacityException {
+
+        if (carrier == null)
+            throw new NullPointerException("Parameter 'carrier' must not be null");
+        if (payload == null)
+            throw new NullPointerException("Parameter 'payload' must not be null");
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
@@ -89,9 +147,30 @@ public class ImageSteg implements Steganography {
         return decode(steganographicData, DEFAULT_SEED);
     }
 
+    /**
+     * Retrieves hidden message from a steganographic file. This method will fail, if the message
+     * was hidden without using the default header. Use ImageSteg.decodeRaw() for this purpose.
+     * Reasons for failing with an UnknownStegFormatExceptions are:
+     * <ul>
+     *      <li>there is no hidden message</li>
+     *      <li>the message was hidden with 'useDefaultHeader = false'</li>
+     *      <li>the value for 'useTransparent' was different when hiding the message</li>
+     *      <li>the message was hidden using an unknown algorithm</li>
+     * </ul>
+     * @param steganographicData Data containing data to extract
+     * @param seed seed that was used to encode the given stenographicData
+     * @return
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @throws UnknownStegFormatException if the default header could not be found
+     */
     @Override
     public byte[] decode(byte[] steganographicData, long seed)
             throws IOException, NoImageException, UnsupportedImageTypeException, UnknownStegFormatException {
+
+        if (steganographicData == null)
+            throw new NullPointerException("Parameter 'steganographicData' must not be null");
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
 
@@ -109,6 +188,62 @@ public class ImageSteg implements Steganography {
         return encoder.decode(length);
     }
 
+    /**
+     * Retrieves hidden message from a steganographic file. This method will not search for a header
+     * or validate the retrieved data in any form. If 'steganographicData' contains a supported image,
+     * this method will always return a result. Whether this result is the hidden message, depends on the
+     * settings used:
+     * <ul>
+     *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
+     *     <li>'payload.length' during encoding == 'length' during decoding</li>
+     *     <li>No seed used during encoding (thereby using ImageSteg.DEFAULT_SEED)</li>
+     *     <li>'useDefaultHeader' == false during encoding</li>
+     * </ul>
+     * @param length Length (in bytes) of the hidden message
+     * @param steganographicData Data containing data to extract
+     * @return
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     */
+    public byte[] decodeRaw(int length, byte[] steganographicData)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
+        return decodeRaw(length, steganographicData, DEFAULT_SEED);
+    }
+
+    /**
+     * Retrieves hidden message from a steganographic file. This method will not search for a header
+     * or validate the retrieved data in any form. If 'steganographicData' contains a supported image,
+     * this method will always return a result. Whether this result is the hidden message, depends on the
+     * settings used:
+     * <ul>
+     *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
+     *     <li>'payload.length' during encoding == 'length' during decoding</li>
+     *     <li>'seed' during encoding == 'seed' during decoding</li>
+     *     <li>'useDefaultHeader' == false during encoding</li>
+     * </ul>
+     * @param length Length (in bytes) of the hidden message
+     * @param steganographicData Data containing data to extract
+     * @param seed seed that was used to encode the given stenographicData
+     * @return
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     */
+    public byte[] decodeRaw(int length, byte[] steganographicData, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
+        if (steganographicData == null)
+            throw new NullPointerException("Parameter 'steganographicData' must not be null");
+
+        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
+
+        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
+
+        return encoder.decode(length);
+    }
+
     @Override
     public boolean isSteganographicData(byte[] data)
             throws IOException, NoImageException, UnsupportedImageTypeException {
@@ -120,6 +255,9 @@ public class ImageSteg implements Steganography {
     public boolean isSteganographicData(byte[] data, long seed)
             throws IOException, NoImageException, UnsupportedImageTypeException {
 
+        if (data == null)
+            throw new NullPointerException("Parameter 'data' must not be null");
+
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
 
         BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
@@ -129,51 +267,20 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Returns the maximum number of bytes that can be encoded in the given image.
+     * Returns the maximum number of bytes that can be encoded in the given image using the settings
+     * given to the constructor of ImageSteg.
      * @param image image to potentially encode bytes in
-     * @param subtractDefaultHeader should the length of the default header be subtracted from the capacity?
-     * @param withTransparent should transparent pixels account to the capacity?
      * @return the payload-capacity of image
      */
-    public int getImageCapacity(byte[] image, boolean subtractDefaultHeader, boolean withTransparent)
-            throws IOException, NoImageException {
+    public int getImageCapacity(byte[] image)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
 
         BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
-        int capacity;
-        if (bufferedImage.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
-            try {
-                BuffImgEncoder encoder = getEncoder(bufferedImage,DEFAULT_SEED);
-                capacity = encoder.getOverlay().available() / 8;
 
-                return (subtractDefaultHeader) ? capacity - 8 : capacity;
-            } catch (UnsupportedImageTypeException e) {
-                e.printStackTrace();
-                System.out.println("Cannot handle format");
-            }
-        }
-        if (!withTransparent) {
-            capacity = bufferedImage.getWidth() * bufferedImage.getHeight();
-        } else {
-            capacity = countIntransparent(bufferedImage);
-        }
-        capacity /= 8;
+        int capacity = getEncoder(bufferedImage, DEFAULT_SEED).getOverlay().available() / 8;
 
-        return (subtractDefaultHeader && capacity >= 8) ? (capacity - 8) : capacity;
+        return this.useDefaultHeader ? (capacity - 8) : capacity;
     }
-
-    private int countIntransparent(BufferedImage bufferedImage) {
-        int count = 0;
-        for(int y = 0; y < bufferedImage.getHeight(); y++) {
-            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                int pixel = bufferedImage.getRGB(x, y);
-                if(((pixel >> 24) & 0xff) != 0)
-                    count++;
-            }
-        }
-        return count;
-    }
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     //                                       UTIL
@@ -193,22 +300,24 @@ public class ImageSteg implements Steganography {
 
         switch (type) {
 
-            // Types for PixelBit Algorithm TODO: Add IgnoreAreaOverlay as optional by enum?
+            // Types for PixelBit Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_4BYTE_ABGR:
             case BufferedImage.TYPE_3BYTE_BGR:
             case BufferedImage.TYPE_INT_ARGB:
             case BufferedImage.TYPE_INT_RGB:
             case BufferedImage.TYPE_INT_BGR:
-                return new PixelBit(new ShuffleOverlay(bufferedImage, seed));
+                return new PixelBit(getOverlay(bufferedImage, seed));
 
             // Type(s) for ColorCouple Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
                 GIFTableDecoder tableDecoder = new GIFTableDecoder();
                 try {
-                    Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(tableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage,"gif")));
-                    return new PixelIndex(new TableOverlay(bufferedImage,seed,colorCouple),colorCouple,seed);
+                    Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(
+                            tableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage,"gif"))
+                    );
+                    return new PixelIndex(new TableOverlay(bufferedImage, seed, colorCouple), colorCouple, seed);
                 } catch (IOException | ImageWritingException e) {
                     e.printStackTrace();
                 }
@@ -218,7 +327,7 @@ public class ImageSteg implements Steganography {
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_4BYTE_ABGR_PRE:
             case BufferedImage.TYPE_INT_ARGB_PRE:
-                // TODO: Test those types (find them first)
+                // TODO: Test those types (could not find them)
                 throw new UnsupportedImageTypeException("Image type is not supported because untested.");
 
             // Types that will (probably) not be supported - explicit for completion reasons
@@ -234,8 +343,21 @@ public class ImageSteg implements Steganography {
         }
     }
 
+    /**
+     * Returns overlay according to global variable useTransparent
+     * @param bufferedImage BufferedImage to hand to overlay
+     * @param seed Seed to hand to overlay
+     * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
+     * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
+     */
+    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
+        return this.useTransparent ?
+                new ShuffleOverlay(bufferedImage, seed) :
+                new RemoveTransparentShuffleOverlay(bufferedImage, seed);
+    }
+
     private BuffImgAndFormat carrier2BufferedImage(byte[] carrier)
-            throws IOException, NoImageException {
+            throws IOException, NoImageException, UnsupportedImageTypeException {
 
         BuffImgAndFormat buffImgAndFormat;
 
@@ -245,12 +367,24 @@ public class ImageSteg implements Steganography {
             if (readers.hasNext()) {
                 ImageReader reader = readers.next();
 
+                if (!formatSupported(reader.getFormatName()))
+                    throw new UnsupportedImageTypeException(
+                                    "The Image format (" +
+                                    reader.getFormatName() +
+                                    ") is not supported."
+                    );
+
                 try {
                     reader.setInput(imageInputStream);
 
-                    buffImgAndFormat = new BuffImgAndFormat(reader.read(0), reader.getFormatName());
-                    // TODO: throw error, if bmp && alphaRaster != null
-                    // buffImgAndFormat.bufferedImage.getAlphaRaster();
+                    BufferedImage buffImg = reader.read(0);
+
+                    if (reader.getFormatName().equalsIgnoreCase("bmp") && buffImg.getColorModel().hasAlpha())
+                        throw new UnsupportedImageTypeException(
+                                "Image format (bmp containing transparency) is not supported."
+                        );
+
+                    buffImgAndFormat = new BuffImgAndFormat(buffImg, reader.getFormatName());
 
                 } finally {
                     reader.dispose();
@@ -289,6 +423,10 @@ public class ImageSteg implements Steganography {
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;
+    }
+
+    private boolean formatSupported(String formatName) {
+        return ImageSteg.supportedFormats.contains(formatName);
     }
 
     private static class BuffImgAndFormat {

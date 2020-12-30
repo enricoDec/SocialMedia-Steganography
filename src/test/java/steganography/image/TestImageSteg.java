@@ -18,22 +18,39 @@
 
 package steganography.image;
 
+import com.google.gson.internal.bind.util.ISO8601Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import steganography.Steganography;
 import steganography.exceptions.*;
-import steganography.image.encoders.PixelBit;
+import steganography.image.exceptions.ImageCapacityException;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
 
-import java.io.*;
-import java.util.Arrays;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class TestImageSteg {
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                          EN-DECODING
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // SUCCESS
+    // ------------------------------------
+
     @Test
-    void testPNGEncodingAndDecodingStringWithDefaultHeaderWithSeed()
+    void given_PNGAndSeedNoHeader_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
-            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
-        System.out.println("testEncodingAndDecodingStringWithDefaultHeader:");
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
+        System.out.println("given_PNGAndSeedNoHeader_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.png";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -42,30 +59,21 @@ public class TestImageSteg {
                 "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
                 "tempor invidunt ut labor";
 
-        byte[] imageIntermediate = null;
+        byte[] imageIntermediate;
 
         /////// ENCODE
-        PixelBit encoder;
         long seed = 121212L;
-        try (
-                FileInputStream fis = new FileInputStream(pathToImage)
-        ){
             Steganography steganography = new ImageSteg();
-            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
-
-            while (fis.available() > 0)
-                imgStream.write(fis.read());
+            byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
 
             long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes(), seed);
+            imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
             System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
 /*
 
         ////// WRITE IMAGE
-        try (FileOutputStream fos = new FileOutputStream("../testFiles/camera_lens_String_noTP.png")) {
+        try (FileOutputStream fos = new FileOutputStream("src/test/resources/steganography/image/baumENC.png")) {
             assert imageIntermediate != null;
             BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageIntermediate));
             ImageIO.write(bufferedImage, "png", fos);
@@ -74,28 +82,25 @@ public class TestImageSteg {
         }
 */
 
+
         ////// DECODE
-        try {
-            Steganography steganography = new ImageSteg();
+        steganography = new ImageSteg();
 
-            long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
 
-            byte[] result = steganography.decode(imageIntermediate, seed);
+        byte[] result = steganography.decode(imageIntermediate, seed);
 
-            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+        System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(new String(result), loremIpsum);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Assertions.assertEquals(new String(result), loremIpsum);
     }
 
     @Test
-    void testPNGEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
+    void given_PNGNoHeaderNoSeed_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
-            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
 
-        System.out.println("testEncodingAndDecodingStringWithDefaultHeaderAndSeed:");
+        System.out.println("given_PNGNoHeaderNoSeed_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.png";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -104,25 +109,15 @@ public class TestImageSteg {
                 "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
                 "tempor invidunt ut labor";
 
-        byte[] imageIntermediate = null;
+        byte[] imageIntermediate;
 
         /////// ENCODE
-        PixelBit encoder;
-        try (
-                FileInputStream fis = new FileInputStream(pathToImage)
-        ){
-            Steganography steganography = new ImageSteg();
-            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
+        Steganography steganography = new ImageSteg();
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
 
-            while (fis.available() > 0)
-                imgStream.write(fis.read());
-
-            long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes());
-            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        long startTime = System.currentTimeMillis();
+        imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes());
+        System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
 /*
 
         ////// WRITE IMAGE
@@ -136,26 +131,22 @@ public class TestImageSteg {
 */
 
         ////// DECODE
-        try {
-            Steganography steganography = new ImageSteg();
+        steganography = new ImageSteg();
 
-            long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
 
-            byte[] result = steganography.decode(imageIntermediate);
+        byte[] result = steganography.decode(imageIntermediate);
 
-            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+        System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(new String(result), loremIpsum);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Assertions.assertEquals(new String(result), loremIpsum);
     }
 
     @Test
-    void testBMPEncodingAndDecodingStringWithDefaultHeaderWithSeed()
+    void given_BMPAndSeedNoHeader_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
-            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
-        System.out.println("testEncodingAndDecodingStringWithDefaultHeader:");
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
+        System.out.println("given_BMPAndSeedNoHeader_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.bmp";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -164,26 +155,18 @@ public class TestImageSteg {
                 "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
                 "tempor invidunt ut labor";
 
-        byte[] imageIntermediate = null;
+        byte[] imageIntermediate;
 
         /////// ENCODE
-        PixelBit encoder;
         long seed = 121212L;
-        try (
-                FileInputStream fis = new FileInputStream(pathToImage)
-        ){
-            Steganography steganography = new ImageSteg();
-            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
 
-            while (fis.available() > 0)
-                imgStream.write(fis.read());
+        Steganography steganography = new ImageSteg();
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
 
-            long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes(), seed);
-            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        long startTime = System.currentTimeMillis();
+        imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
+        System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
+
 /*
 
         ////// WRITE IMAGE
@@ -197,27 +180,23 @@ public class TestImageSteg {
 */
 
         ////// DECODE
-        try {
-            Steganography steganography = new ImageSteg();
+        steganography = new ImageSteg();
 
-            long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
 
-            byte[] result = steganography.decode(imageIntermediate, seed);
+        byte[] result = steganography.decode(imageIntermediate, seed);
 
-            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+        System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(new String(result), loremIpsum);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Assertions.assertEquals(new String(result), loremIpsum);
     }
 
     @Test
-    void testBMPEncodingAndDecodingStringWithDefaultHeaderWithoutSeed()
+    void given_BMPNoHeaderNoSeed_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
-            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException {
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
 
-        System.out.println("testEncodingAndDecodingStringWithDefaultHeaderAndSeed:");
+        System.out.println("given_BMPNoHeaderNoSeed_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.bmp";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -226,25 +205,15 @@ public class TestImageSteg {
                 "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
                 "tempor invidunt ut labor";
 
-        byte[] imageIntermediate = null;
+        byte[] imageIntermediate;
 
         /////// ENCODE
-        PixelBit encoder;
-        try (
-                FileInputStream fis = new FileInputStream(pathToImage)
-        ){
-            Steganography steganography = new ImageSteg();
-            ByteArrayOutputStream imgStream = new ByteArrayOutputStream();
+        Steganography steganography = new ImageSteg();
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
 
-            while (fis.available() > 0)
-                imgStream.write(fis.read());
-
-            long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imgStream.toByteArray(), loremIpsum.getBytes());
-            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        long startTime = System.currentTimeMillis();
+        imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes());
+        System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
 /*
 
         ////// WRITE IMAGE
@@ -258,18 +227,197 @@ public class TestImageSteg {
 */
 
         ////// DECODE
-        try {
-            Steganography steganography = new ImageSteg();
+        steganography = new ImageSteg();
 
-            long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
 
-            byte[] result = steganography.decode(imageIntermediate);
+        byte[] result = steganography.decode(imageIntermediate);
 
-            System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+        System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
 
-            Assertions.assertEquals(new String(result), loremIpsum);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Assertions.assertEquals(new String(result), loremIpsum);
+    }
+
+
+    // UNSUPPORTED_FORMATS
+    // ------------------------------------
+
+    @Test
+    void given_BMPWithTransparency_when_encoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        String pathToImage = "src/test/resources/steganography/image/baumTP.bmp";
+
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
+
+        long seed = 121212L;
+        Steganography steganography = new ImageSteg();
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> steganography.encode(imageInput, loremIpsum.getBytes(), seed)
+        );
+    }
+
+    @Test
+    void given_JPG_when_encoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+
+        String loremIpsum = "Hello World";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "jpg", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().encode(baos.toByteArray(), loremIpsum.getBytes())
+        );
+    }
+
+    @Test
+    void given_JPG_when_decoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "jpg", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().decode(baos.toByteArray())
+        );
+    }
+
+    @Test
+    void given_TIFF_when_encoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+
+        String loremIpsum = "Hello World";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "tiff", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().encode(baos.toByteArray(), loremIpsum.getBytes())
+        );
+
+    }
+
+    @Test
+    void given_TIFF_when_decoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "tiff", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().decode(baos.toByteArray())
+        );
+
+    }
+
+    @Test
+    void given_WBMP_when_encoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
+
+        String loremIpsum = "Hello World";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "wbmp", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().encode(baos.toByteArray(), loremIpsum.getBytes())
+        );
+
+    }
+
+    @Test
+    void given_WBMP_when_decoding_expect_UnsupportedImageTypeException() throws IOException {
+
+        BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "wbmp", baos);
+
+        Assertions.assertThrows(
+                UnsupportedImageTypeException.class,
+                () -> new ImageSteg().decode(baos.toByteArray())
+        );
+
+    }
+
+
+    // NULL_VALUES
+    // ------------------------------------
+
+    @Test
+    void given_imageIsNull_when_encoding_expect_NullPointerException() {
+
+        Assertions.assertThrows(
+                NullPointerException.class,
+                () -> new ImageSteg().encode(null, "Hello World".getBytes())
+        );
+    }
+
+    @Test
+    void given_imageIsEmpty_when_encoding_expect_NoImageException() {
+
+        Assertions.assertThrows(
+                NoImageException.class,
+                () -> new ImageSteg().encode(new byte[0], "Hello World".getBytes())
+        );
+    }
+
+    @Test
+    void given_imageIsNull_when_decoding_expect_NullPointerException() {
+
+        Assertions.assertThrows(
+                NullPointerException.class,
+                () -> new ImageSteg().decode(null)
+        );
+    }
+
+    @Test
+    void given_payloadIsNull_when_encoding_expect_NullPointerException() {
+
+        String pathToImage = "src/test/resources/steganography/image/baum.bmp";
+
+        Assertions.assertThrows(
+                NullPointerException.class,
+                () -> new ImageSteg().encode(Files.readAllBytes(new File(pathToImage).toPath()), null)
+        );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                          IMAGE CAPACITY
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // SUCCESS
+    // ------------------------------------
+
+    @Test
+    void given_80PixelPNGNoDefaultHeader_when_getCapacity_expect_10() throws IOException, UnsupportedImageTypeException, NoImageException {
+
+        BufferedImage bufferedImage = new BufferedImage(8, 10, BufferedImage.TYPE_3BYTE_BGR);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "png", baos);
+
+        Assertions.assertEquals(
+                10,
+                new ImageSteg(false, false).getImageCapacity(
+                        baos.toByteArray()
+                )
+        );
+
     }
 }

@@ -65,6 +65,8 @@ public abstract class SocialMedia {
      */
     public abstract boolean subscribeToKeyword(String keyword);
 
+    public abstract boolean unsubscribeKeyword(String keyword);
+
     /**
      * Get Medias posted under keyword
      * @param keyword hashtag
@@ -72,7 +74,11 @@ public abstract class SocialMedia {
      */
     public abstract List<byte[]> getRecentMediaForKeyword(String keyword);
 
-    public abstract void unsubscribe();
+    public abstract void stopSearch();
+
+    public abstract void startSearch();
+
+    public abstract void changeSchedulerPeriod(Integer interval);
 
     public abstract String getApiName();
 

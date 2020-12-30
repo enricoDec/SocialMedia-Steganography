@@ -18,29 +18,23 @@
 
 package steganography.image.overlays;
 
+import steganography.image.exceptions.UnsupportedImageTypeException;
+
 import java.awt.image.BufferedImage;
 import java.util.*;
 
-public class RemoveTransparentShuffleOverlay implements BufferedImageCoordinateOverlay {
+public class RemoveTransparentShuffleOverlay extends ShuffleOverlay {
 
-    private BufferedImage bufferedImage;
-    private List<Integer> pixelOrder;
-    private int currentPosition = -1;
-    private int currentX = 0;
-    private int currentY = 0;
-
-    public RemoveTransparentShuffleOverlay(BufferedImage bufferedImage, long seed) {
-        this.bufferedImage = bufferedImage;
-        createOverlay();
-        removeTransparent();
-        Collections.shuffle(this.pixelOrder, new Random(seed));
+    protected RemoveTransparentShuffleOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
+        super(bufferedImage);
     }
 
-    private void removeTransparent() {
-
+    public RemoveTransparentShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
+        super(bufferedImage, seed);
     }
 
-    private void createOverlay() {
+    @Override
+    protected void createOverlay() {
         this.pixelOrder = new ArrayList<>();
         for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
             for (int x = 0; x < this.bufferedImage.getWidth(); x++) {
@@ -49,38 +43,5 @@ public class RemoveTransparentShuffleOverlay implements BufferedImageCoordinateO
                     this.pixelOrder.add(x + (y * this.bufferedImage.getWidth()));
             }
         }
-    }
-
-    public void useColors(int[][] colors) {
-
-    }
-
-    @Override
-    public int next() throws NoSuchElementException {
-        if (++currentPosition >= this.pixelOrder.size())
-            throw new NoSuchElementException("No pixels left.");
-
-        this.currentX = this.pixelOrder.get(this.currentPosition) % this.bufferedImage.getWidth();
-        this.currentY = this.pixelOrder.get(this.currentPosition) / this.bufferedImage.getWidth();
-        int pixel = this.bufferedImage.getRGB(this.currentX, this.currentY);
-        return pixel;
-    }
-
-    @Override
-    public void setPixel(int value) {
-        if (currentPosition < 0 || this.currentPosition >= this.pixelOrder.size())
-            throw new NoSuchElementException("No pixel at current position.");
-
-        this.bufferedImage.setRGB(this.currentX, this.currentY, value);
-    }
-
-    @Override
-    public int available() {
-        return this.pixelOrder.size() - this.currentPosition -1;
-    }
-
-    @Override
-    public BufferedImage getBufferedImage() {
-        return this.bufferedImage;
     }
 }

@@ -96,7 +96,7 @@ public class BaseUtil {
     public List<String> getKeywordList(APINames network, String onceUsedKeyword){
         List<String> keywords = new ArrayList<>();
 
-        if(onceUsedKeyword != null || !(onceUsedKeyword.length() == 0)){
+        if(onceUsedKeyword != null && onceUsedKeyword.length() > 0){
             keywords.add(onceUsedKeyword);
         }else{
             try {

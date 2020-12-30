@@ -10,8 +10,8 @@ import java.util.Random;
 
 
 public class PixelIndex extends PixelBit {
-    private  Map<Integer,List<Integer>> colorCouple;
-    private Random random;
+    private final Map<Integer,List<Integer>> colorCouple;
+    private final Random random;
 
     public PixelIndex(BufferedImageCoordinateOverlay overlay, Map<Integer,List<Integer>> colorCouple, long seed) throws IllegalArgumentException {
         super(overlay);
