@@ -100,7 +100,7 @@ public class AnimatedGifTest {
     }
 
     @Test
-    public void sequenceGIFDecoder_null_NullpointerWxception() {
+    public void sequenceGIFDecoder_null_NullpointerException() {
         Assertions.assertThrows(NullPointerException.class, () -> splicer.sequenceGifDecoder(null));
     }
 
@@ -145,7 +145,7 @@ public class AnimatedGifTest {
     }
 
     @Test
-    public void decode_Null_NullpointerWxception() {
+    public void decode_Null_NullpointerException() {
         Assertions.assertThrows(NullPointerException.class, () -> splicer.decode(null));
     }
 
