@@ -137,7 +137,7 @@ public class RedditUtil extends BaseUtil {
     public boolean isImageUploadAllowed(String subreddit){
         //key allows_images isnt supported anymore
         return true;
-        try {
+        /*try {
             URL url = new URL(RedditConstants.BASE +
                     RedditConstants.SUBREDDIT_PREFIX + subreddit +
                     "/about" + RedditConstants.AS_JSON);
@@ -166,6 +166,6 @@ public class RedditUtil extends BaseUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
+        return false;*/
     }
 }
