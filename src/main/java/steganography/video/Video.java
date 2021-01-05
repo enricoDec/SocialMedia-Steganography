@@ -22,6 +22,8 @@ import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -51,12 +53,12 @@ public class Video {
     private boolean hasAudioStream = false;
     private List<Long> ptsList = null;
 
-    public Video(byte[] videoByteArray, File ffmpegBin) throws UnsupportedEncodingException {
+    public Video(byte[] videoByteArray, File ffmpegBin) throws VideoNotFoundException, UnsupportedVideoTypeException {
         this.videoByteArray = videoByteArray;
         this.ffmpegBin = ffmpegBin;
         //analyse the data (check if data has Video)
         if (videoByteArray == null || videoByteArray.length < 10)
-            throw new IllegalArgumentException("videoByteArray can't be empty");
+            throw new UnsupportedVideoTypeException("Video can't be empty");
         if (!ffmpegBin.exists())
             throw new IllegalArgumentException("FFmpegBin is invalid");
         analyseVideo();
@@ -66,7 +68,7 @@ public class Video {
     /**
      * Uses FFProbe to read information about a Video and saves them as attributes
      */
-    private void analyseVideo() throws UnsupportedEncodingException {
+    private void analyseVideo() throws VideoNotFoundException {
         InputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
         FFprobe ffprobe;
@@ -79,7 +81,7 @@ public class Video {
 
         //Check if given Video has no Streams
         if (result.getStreams().isEmpty())
-            throw new UnsupportedEncodingException("Video has no streams");
+            throw new VideoNotFoundException("Video has no streams");
 
         //Check if Video stream is present
         boolean hasVideoStream = false;
@@ -90,7 +92,7 @@ public class Video {
                 hasAudioStream = true;
         }
         if (!hasVideoStream)
-            throw new UnsupportedEncodingException("No Video Stream in given Video");
+            throw new VideoNotFoundException("No Video Stream in given Video");
 
         //Saving some info on frames
         this.frameCount = result.getStreams().get(0).getNbFrames();

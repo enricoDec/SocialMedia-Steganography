@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
 import steganography.video.encoders.VideoDecoder;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -44,7 +46,7 @@ public class VideoDecoderTest {
             this.video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             Assertions.assertTrue(video.getFrameCount() >= decoder.toPictureByteArray(4).size());
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail("Couldn't decode Video");
         }
     }
@@ -62,7 +64,7 @@ public class VideoDecoderTest {
 
             Assertions.assertNotNull(pictureList);
 
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail("Couldn't decode Video");
         }
     }
@@ -83,7 +85,7 @@ public class VideoDecoderTest {
                 Assertions.assertNotNull(bufferedImage.getData());
             }
 
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail(e.toString());
         }
     }

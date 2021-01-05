@@ -30,6 +30,9 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
 import steganography.video.encoders.VideoDecoder;
 import steganography.video.encoders.VideoEncoder;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoCapacityException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -57,7 +60,10 @@ public class VideoSteg implements Steganography {
      * This will make the decoding way faster since the images will be stored in-memory and not cached on disk (will be Memory demanding)
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
+    public byte[] encode(byte[] carrier, byte[] payload)
+            throws IOException, UnsupportedImageTypeException, NoImageException,
+            ImageWritingException, ImageCapacityException, VideoCapacityException,
+            VideoNotFoundException, UnsupportedVideoTypeException {
         return encode(carrier, payload, this.seed);
     }
 
@@ -68,7 +74,9 @@ public class VideoSteg implements Steganography {
      * This will make the decoding way faster since the images will be stored in-memory and not cached on disk (will be Memory demanding)
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException, UnsupportedImageTypeException, NoImageException, ImageWritingException, ImageCapacityException {
+    public byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws IOException, VideoCapacityException, UnsupportedImageTypeException,
+            NoImageException, ImageWritingException, ImageCapacityException, VideoNotFoundException, UnsupportedVideoTypeException {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
         //List used to save the single frames decoded from the carrier
@@ -97,10 +105,12 @@ public class VideoSteg implements Steganography {
      * @param seed      seed to be used for distribution
      * @return Encoded list of Pictures
      */
-    private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed) throws IOException, ImageWritingException, NoImageException, UnsupportedImageTypeException, ImageCapacityException {
+    private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed)
+            throws IOException, VideoCapacityException, UnsupportedImageTypeException,
+            NoImageException, ImageWritingException, ImageCapacityException {
         long maxVideoCapacity = getVideoCapacity(imageList);
         if (payload.length > maxVideoCapacity)
-            throw new ImageCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes. "
+            throw new VideoCapacityException("Payload is too big for carrier. " + "Max Carrier capacity: " + maxVideoCapacity + " Bytes. "
                     + "Payload Bytes: " + payload.length);
 
         //Single Threaded
@@ -112,7 +122,6 @@ public class VideoSteg implements Steganography {
                 if (payloadChunk.get(i) != null) {
                     ImageSteg imageSteg = new ImageSteg();
                     stegImageList.add(imageSteg.encode(image, payloadChunk.get(i), seed));
-                    log("Decoded Frame (" + i + "/" + imageList.size() + ")");
                     i++;
                 } else {
                     stegImageList.add(image);
@@ -134,7 +143,8 @@ public class VideoSteg implements Steganography {
      * @return list of encoded images
      * @throws IOException if any IO errors
      */
-    private List<byte[]> multiThreadingEncode(List<byte[]> imageList, byte[] payload, long seed) throws IOException, NoImageException, UnsupportedImageTypeException {
+    private List<byte[]> multiThreadingEncode(List<byte[]> imageList, byte[] payload, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
         ExecutorService taskExecutor = Executors.newFixedThreadPool(maxEncodingThreads);
         List<byte[]> payloadChunk = ImageSequenceUtils.sequenceDistribution(imageList, payload);
 
@@ -166,11 +176,8 @@ public class VideoSteg implements Steganography {
         try {
             futureList = taskExecutor.invokeAll(taskList);
             //Wait for all results
-            int i = 0;
             for (Future<byte[]> result : futureList) {
                 resultList.add(result.get());
-                log("Decoded Frame (" + i + "/" + imageList.size() + ")");
-                i++;
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -184,7 +191,8 @@ public class VideoSteg implements Steganography {
      * Extract the hidden Payload from a Steganographic Video
      */
     @Override
-    public byte[] decode(byte[] steganographicData) throws IOException {
+    public byte[] decode(byte[] steganographicData)
+            throws IOException, VideoNotFoundException, UnsupportedVideoTypeException {
         return decode(steganographicData, this.seed);
     }
 
@@ -192,7 +200,8 @@ public class VideoSteg implements Steganography {
      * Extract the hidden Payload from a Steganographic Video using a custom seed
      */
     @Override
-    public byte[] decode(byte[] steganographicData, long seed) throws IOException {
+    public byte[] decode(byte[] steganographicData, long seed)
+            throws IOException, VideoNotFoundException, UnsupportedVideoTypeException {
         Video video = new Video(steganographicData, ffmpegBin);
 
         //Decode Video Frames to pictures
@@ -257,7 +266,7 @@ public class VideoSteg implements Steganography {
                             if (debug)
                                 log("Decoded Frame (" + finalI + "/" + imageList.size() + ")");
                             return steganography.decode(imageList.get(finalI), seed);
-                        } catch (UnsupportedEncodingException e) {
+                        } catch (UnknownStegFormatException e) {
                             if (debug)
                                 log("Decoded Frame (" + finalI + "/" + imageList.size() + ")");
                             return null;
@@ -278,16 +287,15 @@ public class VideoSteg implements Steganography {
             //Wait for all results
             for (Future<byte[]> result : futureList) {
                 byte[] futureByte = result.get();
-                if (futureByte == null)
-                    return byteArrayOutputStream.toByteArray();
-                byteArrayOutputStream.write(result.get());
+                if (futureByte != null) //Empty Frame
+                    byteArrayOutputStream.write(futureByte);
+                else
+                    System.out.println("Empty Frame");
             }
+            return byteArrayOutputStream.toByteArray();
+
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            if (debug)
-                log("Blank Frame found.");
-            return byteArrayOutputStream.toByteArray();
         } finally {
             taskExecutor.shutdown();
         }
@@ -296,12 +304,14 @@ public class VideoSteg implements Steganography {
     }
 
     @Override
-    public boolean isSteganographicData(byte[] data) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException {
+    public boolean isSteganographicData(byte[] data)
+            throws IOException, UnsupportedMediaTypeException, MediaNotFoundException {
         return isSteganographicData(data, ImageSteg.DEFAULT_SEED);
     }
 
     @Override
-    public boolean isSteganographicData(byte[] data, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
+    public boolean isSteganographicData(byte[] data, long seed)
+            throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
         //List used to save the single frames decoded from the carrier
         List<byte[]> imageList;
 
@@ -351,11 +361,12 @@ public class VideoSteg implements Steganography {
     /**
      * Returns the maximum number of bytes that can be encoded in the given video.
      *
-     * @param carrier         carrier to be used (Video)
+     * @param carrier carrier to be used (Video)
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
      */
-    public long getVideoCapacity(byte[] carrier) throws IOException, NoImageException, UnsupportedImageTypeException {
+    public long getVideoCapacity(byte[] carrier)
+            throws IOException, NoImageException, UnsupportedImageTypeException, VideoNotFoundException, UnsupportedVideoTypeException {
         VideoDecoder videoDecoder = new VideoDecoder(new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
         List<byte[]> pictureList = videoDecoder.toPictureByteArray(maxDecodingThreads);
         ImageSteg imageSteg = new ImageSteg();
@@ -370,11 +381,12 @@ public class VideoSteg implements Steganography {
     /**
      * Returns the maximum number of bytes that can be encoded in the given video.
      *
-     * @param pictureList     list of pictures that will be encoded
+     * @param pictureList list of pictures that will be encoded
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
      */
-    public long getVideoCapacity(List<byte[]> pictureList) throws IOException, NoImageException, UnsupportedImageTypeException {
+    public long getVideoCapacity(List<byte[]> pictureList)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
         ImageSteg imageSteg = new ImageSteg();
 
         long totalCapacity = 0;

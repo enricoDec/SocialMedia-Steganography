@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import java.io.*;
 
@@ -46,7 +48,7 @@ public class VideoTest {
 
         try {
             new Video(randomData, ffmpegBin);
-        } catch (RuntimeException | UnsupportedEncodingException e) {
+        } catch (RuntimeException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             //do nothing
         }
     }
@@ -67,7 +69,7 @@ public class VideoTest {
             Assertions.assertNotEquals(0, video.getFrameHeight());
             Assertions.assertNotNull(video.getVideoByteArray());
             Assertions.assertNotNull(video.getPixelformat());
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail();
         }
@@ -81,9 +83,9 @@ public class VideoTest {
     public void decodeToPictureEmptyData() {
         try {
             new Video(new byte[0], ffmpegBin);
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedVideoTypeException e) {
             //do nothing
-        } catch (UnsupportedEncodingException e) {
+        } catch (VideoNotFoundException e) {
             e.printStackTrace();
             Assertions.fail();
         }
@@ -98,7 +100,7 @@ public class VideoTest {
             new Video(ByteArrayUtils.read(carrier), new File(""));
         } catch (IllegalArgumentException e) {
             // do nothing
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail();
         }

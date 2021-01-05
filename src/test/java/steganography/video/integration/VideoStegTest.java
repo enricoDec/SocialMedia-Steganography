@@ -27,9 +27,13 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
 import steganography.video.VideoSteg;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoCapacityException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import javax.imageio.ImageIO;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -39,7 +43,7 @@ import java.util.Arrays;
  * @since : 28-11-2020
  **/
 public class VideoStegTest {
-    private final byte[] payload = "Hallo Welt".getBytes();
+    private final byte[] payload = "Hallo Welt".getBytes(StandardCharsets.UTF_8);
     private final File carrier = new File("src/test/java/steganography/video/resources/Carrier.mp4");
     private final File carrier_no_audio = new File("src/test/java/steganography/video/resources/Carrier_no_Audio.mp4");
 
@@ -69,11 +73,10 @@ public class VideoStegTest {
 
             //Assert decoded payload is same as original payload
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException e) {
+        } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException | UnsupportedVideoTypeException | VideoNotFoundException | VideoCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
-
     }
 
     /**
@@ -100,8 +103,9 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 87143654783654L);
 
             //Assert decoded payload is same as original payload
+            System.out.println(new String(decodedPayload, StandardCharsets.UTF_8) + " test");
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -127,7 +131,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -137,7 +141,6 @@ public class VideoStegTest {
      * Multi Thread Test
      * No Audio in Video
      * Good Test
-     * TODO: Fix bug
      */
     @Test
     public void encoderIntegrationNoAudioTest() {
@@ -154,7 +157,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -179,7 +182,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo);
 
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException e) {
+        } catch (IOException | ImageWritingException | NoImageException | UnsupportedImageTypeException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -205,7 +208,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 87143654783654L);
 
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -230,7 +233,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo, 0);
 
             Assertions.assertTrue(Arrays.equals(payload, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoNotFoundException | UnsupportedVideoTypeException | VideoCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -257,7 +260,7 @@ public class VideoStegTest {
 
             byte[] decodedPayload = videoSteg.decode(encodedVideo);
             Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(carrier_no_audio), decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail("Video could ne be read");
         }
@@ -292,7 +295,7 @@ public class VideoStegTest {
             byte[] decodedPayload = videoSteg.decode(encodedVideo);
 
             Assertions.assertTrue(Arrays.equals(buffer, decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException e) {
+        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoNotFoundException | UnsupportedVideoTypeException | VideoCapacityException e) {
             e.printStackTrace();
             Assertions.fail("Video could not be read");
         }
@@ -309,7 +312,7 @@ public class VideoStegTest {
      * Bad Test
      */
     @Test
-    public void encoderIntegrationVeryLargePayloadTest() throws IOException, NoImageException, UnsupportedImageTypeException {
+    public void encoderIntegrationVeryLargePayloadTest() throws IOException, NoImageException, UnsupportedImageTypeException, VideoNotFoundException, UnsupportedVideoTypeException {
         VideoSteg videoSteg = new VideoSteg();
         videoSteg.setDebug(true);
         ImageIO.setUseCache(false);
@@ -323,7 +326,7 @@ public class VideoStegTest {
         largePayload.setLength(maxPayloadBytes + 1);
         byte[] buffer = new byte[(int) maxPayloadBytes + 1];
         largePayload.readFully(buffer);
-        Assertions.assertThrows(ImageCapacityException.class, () -> videoSteg.encode(ByteArrayUtils.read(carrier), buffer)
+        Assertions.assertThrows(VideoCapacityException.class, () -> videoSteg.encode(ByteArrayUtils.read(carrier), buffer)
         );
         largePayload.close();
         randomFile.deleteOnExit();
