@@ -135,6 +135,8 @@ public class RedditUtil extends BaseUtil {
      * @return true if is allowed.
      */
     public boolean isImageUploadAllowed(String subreddit){
+        //key allows_images isnt supported anymore
+        return true;
         try {
             URL url = new URL(RedditConstants.BASE +
                     RedditConstants.SUBREDDIT_PREFIX + subreddit +
