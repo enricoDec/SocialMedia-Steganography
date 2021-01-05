@@ -127,8 +127,6 @@ public class ImageSteg implements Steganography {
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
 
-        int type = buffImgAndFormat.getBufferedImage().getType();
-
         BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
 
         if (this.useDefaultHeader) {
