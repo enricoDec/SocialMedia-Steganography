@@ -15,7 +15,7 @@ public class RedditImgurApp {
     public static void main(String[] args){
 
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
-
+/*
         Reddit sm = new Reddit();
         sm.setToken(new Token("abc", 100));
         sm.subscribeToKeyword("nature");
@@ -24,8 +24,8 @@ public class RedditImgurApp {
         sm.changeSchedulerPeriod(1);
         sm.stopSearch();
 
-
-        if(false){
+*/
+        if(true){
 
         //Setup
         SocialMedia socialMedia = new Reddit();
@@ -37,10 +37,10 @@ public class RedditImgurApp {
         String payload = "Hallo, wie gehts heute so?";
 
         //Encode and Post
-        //sms.encodeAndPost(socialMedia, bytes, payload.getBytes());
+        sms.encodeAndPost(socialMedia, bytes, payload.getBytes());
 
         //Search in social media for pictures and try to decode
-        List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
+        //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
         //socialMedia.subscribeToKeyword("nature");
         }
         /////////////////////////////////////////////////
