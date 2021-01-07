@@ -46,16 +46,4 @@ public class BlobConverterImpl {
         }
     }
 
-    /**
-     * Converts an bytearray to a file
-     * @param data Media
-     * @param filename Storatelocation
-     * @throws IOException
-     * @return Created file
-     */
-    public static File byteToFile(byte[] data, String filename) throws IOException {
-        File f = new File(filename);
-        FileUtils.writeByteArrayToFile(f, data);
-        return f;
-    }
 }
