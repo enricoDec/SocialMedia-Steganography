@@ -49,10 +49,7 @@ import java.util.List;
  */
 public class AnimatedGif implements Steganography{
         private static String  path = "src/main/resources/";
-        private static IIOMetadata[] metadataArray;
-        private static int noi = 0;
         private int[] delay;
-        private int nop = 0;
         private IIOMetadata[] metadataForImages;
 
 
@@ -63,18 +60,18 @@ public class AnimatedGif implements Steganography{
 
     @Override
         public byte[] encode(byte[] payload, byte[] animatedGif, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
-            Steganography steg = new ImageSteg();
+            Steganography steg = new ImageSteg(); //ImageStegIO
             if (animatedGif != null && payload != null) {
                 byte[][] gifFrames = splitGifDecoder(animatedGif);
-                List<byte[]> frames = Arrays.asList(gifFrames);
-                List<byte[]> payloads = ImageSequenceUtils.sequenceDistribution(frames,payload);
+                byte[][] encoded = gifFrames;
+                List<byte[]> payloads = ImageSequenceUtils.sequenceDistribution(Arrays.asList(gifFrames),payload);
                 for(int i = 0; i < payloads.size();i++) {
                     if(payloads.get(i) != null) {
-                        gifFrames[i] = steg.encode(gifFrames[i], payloads.get(i), seed);
+                        encoded[i] = steg.encode(gifFrames[i], payloads.get(i), seed);
                     }
 
                 }
-                return sequenceGifDecoder(gifFrames);
+                return sequenceGifDecoder(encoded);
             }
             throw new NullPointerException("Image or payload are null");
         }
@@ -108,21 +105,16 @@ public class AnimatedGif implements Steganography{
             }
         }
 
-    /**
-     *
-     * @param animatedGif a byte array with the animated gif, that needs to be splitted
-     * @return {byte[][]} output an two dimensional array which contains all gif data
-     * @throws IOException
-     */
+        @Deprecated
         public byte[][] splitGif(byte[] animatedGif) throws IOException {
-            ImageReader reader = (ImageReader)ImageIO.getImageReadersByFormatName("gif").next();
+            ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
             ByteArrayInputStream input = new ByteArrayInputStream(animatedGif);
             ImageInputStream ciis = ImageIO.createImageInputStream(input);
             reader.setInput(ciis, false);
-            nop = reader.getNumImages(true);
+            int nop = reader.getNumImages(true);
             metadataForImages = new IIOMetadata[nop];
             byte[][] output = new byte[nop][];
-            BufferedImage master = null;
+
 
             for (int i = 0; i < nop; i++) {
                 BufferedImage image = reader.read(i);
@@ -135,10 +127,16 @@ public class AnimatedGif implements Steganography{
             return output;
         }
 
-        public byte[][] splitGifDecoder(byte[] animatedGif) throws NullPointerException, UnsupportedImageTypeException {
+    /**
+     *
+     * @param animatedGif a byte array with the animated gif, that needs to be splitted
+     * @return {byte[][]} output an two dimensional array which contains all gif data
+     * @throws IOException
+     */
+        public byte[][] splitGifDecoder(byte[] animatedGif) throws NullPointerException, UnsupportedImageTypeException {// Das ganze Ding muss ausgelagert werden
             try {
                 GifDecoder.GifImage gif = GifDecoder.read(animatedGif);
-                nop = gif.getFrameCount();
+                int nop = gif.getFrameCount();
                 delay = new int[nop];
                 byte[][] output = new byte[nop][];
                 for (int i = 0; i < nop; i++) {
@@ -156,12 +154,16 @@ public class AnimatedGif implements Steganography{
 
         }
 
+    /**
+     * Creates a GIF from several single gif. If a delay exists it will be set in the Metadata
+     * @param gifs Single Gif images
+     * @return byte[] Single GIF that loops
+     */
         public byte[] sequenceGifDecoder(byte[][] gifs) {
-            ImageWriter writer = (ImageWriter)ImageIO.getImageWritersByFormatName("gif").next();
+            ImageWriter writer = ImageIO.getImageWritersByFormatName("gif").next();
             ImageWriteParam param = writer.getDefaultWriteParam();
-            ImageReader reader = (ImageReader)ImageIO.getImageReadersByFormatName("gif").next();
-            FileInputStream in;
-            try( ByteArrayOutputStream bos = new ByteArrayOutputStream();ImageOutputStream out = new FileImageOutputStream(new File(path + "sequenz.gif"));) {
+            ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
+            try( ImageOutputStream out = new FileImageOutputStream(new File(path + "sequenz.gif"));) {
 
                 writer.setOutput(out);
                 writer.prepareWriteSequence(null);
@@ -171,13 +173,13 @@ public class AnimatedGif implements Steganography{
                     BufferedImage bufferedImage = ImageIO.read(readInput);
                     ImageTypeSpecifier specifier = ImageTypeSpecifier.createFromBufferedImageType(bufferedImage.getType());
                     IIOMetadata newMetadata = writer.getDefaultImageMetadata(specifier,param);
+
                     ByteArrayInputStream ioInput = new ByteArrayInputStream(gifs[i]);
                     ImageInputStream ciis = ImageIO.createImageInputStream(ioInput);
                     reader.setInput(ciis, false);
                     IIOImage frame = reader.readAll(0,null);
                     if (delay != null) {
-                        newMetadata = createMetadata(delay[i], frame, newMetadata);
-                        // Cannot change Metadata since its read-only at the moment.
+                        createMetadata(delay[i], frame, newMetadata);
                         writer.writeToSequence(new IIOImage(bufferedImage, null, newMetadata), param);
                     } else
                     {
@@ -195,7 +197,14 @@ public class AnimatedGif implements Steganography{
             return null;
         }
 
-        private  IIOMetadata createMetadata(int delay, IIOImage gifFrame, IIOMetadata newMetadata) throws IIOInvalidTreeException {
+    /**
+     * Creates Metadata for new sequenzed GIF. Uses the Metadata from the Single GIF as base
+     * @param delay The delay of the Image in the GIF
+     * @param gifFrame The current Frame for which Metadata needs to be created
+     * @param newMetadata The metadata that is created
+     * @throws IIOInvalidTreeException
+     */
+        private  void createMetadata(int delay, IIOImage gifFrame, IIOMetadata newMetadata) throws IIOInvalidTreeException {
             IIOMetadata metadata = gifFrame.getMetadata();
             String name = metadata.getNativeMetadataFormatName();
             IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(name);
@@ -208,10 +217,16 @@ public class AnimatedGif implements Steganography{
             child.setAttribute("authenticationCode", "2.0");
             child.setUserObject(new byte[] { 0x1, (byte) (0 & 0xFF), (byte) ((0 >> 8) & 0xFF)});
             appExtensionsNode.appendChild(child);
+
             newMetadata.setFromTree(name, root);
-            return newMetadata;
         }
 
+    /**
+     * Gets a Node from root by name
+     * @param root Root Node
+     * @param nodeName Name of the Node that is searched for.
+     * @return IIOMetadataNode Node with given Name, that is part (Might delete)
+     */
         private static IIOMetadataNode getNode(IIOMetadataNode root, String nodeName) {
             int nNodes = root.getLength();
             for (int i = 0; i < nNodes; i++) {
@@ -224,10 +239,12 @@ public class AnimatedGif implements Steganography{
             return (node);
         }
 
+        @Deprecated
         public byte[] sequenzGIF(byte[][] gifs)  {
             ImageWriter writer = (ImageWriter)ImageIO.getImageWritersByFormatName("gif").next();
             ImageWriteParam param = writer.getDefaultWriteParam();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            int nop = gifs.length;
             try {
 
 
@@ -247,26 +264,6 @@ public class AnimatedGif implements Steganography{
             }
             return bos.toByteArray();
         }
-    public static void main(String[] args) {
-            AnimatedGif giffer = new AnimatedGif();
-            File input = new File("src/test/resources/steganography/image/insta.gif");
-            File payloadFile = new File(path + "test.txt");
-            BufferedImage payloadPicture;
-        try(FileOutputStream out = new FileOutputStream(new File(path + "steg.txt"));) {
-            byte[] gif = ByteArrayUtils.read(input);
-            byte[] payload = ByteArrayUtils.read(payloadFile);
-            byte[] hiddenGif = giffer.encode(gif, payload);
-            byte[] message = giffer.decode(hiddenGif);
-           out.write(message);
-
-        } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | MediaReassemblingException | MediaCapacityException e) {
-            e.printStackTrace();
-        } catch (UnknownStegFormatException e) {
-            e.printStackTrace();
-        }
-
-    }
-
 
     @Override
     public boolean isSteganographicData(byte[] data) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {

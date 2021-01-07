@@ -35,7 +35,7 @@ public class AnimatedGifTest {
 
     private byte[] animatedGif;
     private AnimatedGif splicer;
-    private int numberOfimg = 0;
+
 
     @BeforeEach
     public void before() throws IOException {
@@ -46,7 +46,7 @@ public class AnimatedGifTest {
         splicer = new AnimatedGif();
     }
 
-
+    @Deprecated
     public void splitGif_correctInput_byte2Array() {
         try {
             byte[][] result = splicer.splitGif(animatedGif);
@@ -120,7 +120,7 @@ public class AnimatedGifTest {
 
     }
 
-
+    // needs to be reviseted
     public void encode_payloadToLong_UnsupportedImageException() {
         Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.encode(animatedGif, animatedGif));
 

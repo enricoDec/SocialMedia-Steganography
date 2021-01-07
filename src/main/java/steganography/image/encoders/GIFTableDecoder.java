@@ -20,8 +20,7 @@ package steganography.image.encoders;
 
 import steganography.util.ByteHex;
 
-import java.io.*;
-import java.nio.file.Files;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +32,6 @@ import java.util.Map;
  * It's based on the official GIF source
  */
 public class GIFTableDecoder {
-    private int[] colorTable;
-    //private static final byte MASK_LENGTH = Byte.parseByte("11111000",2);
     byte[] header = {ByteHex.hexToByte("47"),ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),
                         ByteHex.hexToByte("38"), ByteHex.hexToByte("39"), ByteHex.hexToByte("61")};
 
@@ -54,6 +51,7 @@ public class GIFTableDecoder {
                 throw new IllegalArgumentException("Data is not a gif89a");
             }
         }
+        int[] colorTable = null;
         //check if globalcolorTable exists
         System.out.println(ByteHex.byteToHex(gif[10]));
         if((gif[10] & 0x80) == 0) {
@@ -62,16 +60,22 @@ public class GIFTableDecoder {
             System.out.println("GlobalColorTabel exists");
             System.out.println(ByteHex.byteToHex(gif[9]));
             int length =  (gif[10] & 0x7);
-            colorTable = globalColorTable(gif,length);
+             colorTable = globalColorTable(gif,length);
         }
         return colorTable;
     }
 
+    /**
+     * Writes color Values from gif color Table into an array
+     * @param gif An gif that has a color table
+     * @param length Length of the color Table
+     * @return int[] table with ARGB values
+     */
     private int[] globalColorTable(byte[] gif, int length) {
         int i = 13;
         int[] table = new int[(int) Math.pow(2,length + 1)];
         for (int j = 0; j < table.length;j++) {
-            int color = 0 | 0xFF;
+            int color = 0xFF;
             color = (color << 8) | gif[i];
             i++;
             color = (color << 8) | gif[i];
@@ -84,25 +88,24 @@ public class GIFTableDecoder {
     }
 
     /**
-     * Unterteilt die Farbtabelle in Farbpaare die einen ähnlichen Farbwert haben.
-     * @return ColorCoupel[] HashMap mit allen Farbwerten, die min. ein Farbpaar haben.
+     * Splits the colorTable into Color Couples which have similar color Values. Alpha is
+     * allways 00xF.
+     * @param colorTable A color Table containing ARGB values
+     * @return ColorCoupel[] Hash Map with a color as key and similar Colors as List values
      */
     public Map<Integer,List<Integer>> getColorCouples(int[] colorTable) {
+        if(colorTable.length <= Math.pow(2,8)) {
         Map<Integer, List<Integer>> colorCouples = new HashMap<>();
         for (int i = 0; i < colorTable.length;i++) {
             List<Integer> couples = new ArrayList<>();
             boolean pixelIsOne = PixelBit.pixelIsOne(colorTable[i]);
             for (int j = 0; j < colorTable.length; j++) {
                 if (i != j && colorTable[i] != colorTable[j]) {
-                    //Red, green and blue Value;
                     int redI = getRed(colorTable[i]);
                     int redJ = getRed(colorTable[j]);
-                    //System.out.println("red I: " + redI + ", red J: " + redJ);
                     if (Math.abs(redI - redJ) <= 8 ) {
-                        //System.out.println("green I: " + getGreen(colorTable[i]) +  ", green J:" + getGreen(colorTable[j]));
                         int greenI = getGreen(colorTable[i]);
                         if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
-                            //System.out.println("blue I: " + getBlue(colorTable[i]) +  ", blue J:" + getBlue(colorTable[j]));
                             if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
                                 if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
                                     couples.add(colorTable[j]);
@@ -118,6 +121,8 @@ public class GIFTableDecoder {
             }
         }
         return colorCouples;
+        }
+        throw new IllegalArgumentException("Array is not a color Table");
     }
 
         private int getRed(int color) {
