@@ -67,7 +67,6 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
      * Subcription for a Keyword in a Social Media
      */
     public ImgurSubscriptionDeamon() {
-        this.imgurUtil = new ImgurUtil();
     }
 
     public void injectImgurUtil(ImgurUtil util){
@@ -76,7 +75,6 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
 
     @Override
     public void run() {
-        //bool newPostAvailable will be setted in getRecentMediaForSubscribedKeywords()
         this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
     }
 
@@ -151,7 +149,8 @@ public class ImgurSubscriptionDeamon implements SubscriptionDeamon {
                 imgurUtil.setLatestPostTimestamp(IMGUR, tmp.get(tmp.size()-1).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
-                return tmp;
+                this.imgurUtil.updateListeners(latestPostEntries.stream().map(PostEntry::getUrl).collect(Collectors.toList()));
+                return latestPostEntries;
             }
         }
 

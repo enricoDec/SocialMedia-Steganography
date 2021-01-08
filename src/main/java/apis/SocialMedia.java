@@ -20,13 +20,19 @@ package apis;
 
 import apis.models.APINames;
 import apis.models.Token;
+import apis.reddit.Reddit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public abstract class SocialMedia {
+
+    private static final Logger logger = Logger.getLogger(SocialMedia.class.getName());
+
     private List<String> message;
+
     public static final Integer DEFAULT_INTERVALL = 5;
 
     List<SocialMediaListener> socialMediaListeners = new ArrayList<SocialMediaListener>();
@@ -39,12 +45,16 @@ public abstract class SocialMedia {
         socialMediaListeners.remove(socialMediaListener);
     }
 
-    private void updateListeners(){
+    public void updateListeners(List<String> msgList){
+        this.message = msgList;
+        message.stream().forEach(msg -> logger.info("Update contains: " + msg));
         for(SocialMediaListener socialMediaListener : socialMediaListeners){
+            logger.info("Update Listener");
             socialMediaListener.updateSocialMediaMessage(message);
         }
     }
 
+    //TODO setMessage?
 
     public abstract Token getToken();
 

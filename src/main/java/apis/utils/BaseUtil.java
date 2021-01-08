@@ -18,6 +18,7 @@
 
 package apis.utils;
 
+import apis.SocialMedia;
 import apis.models.APINames;
 import apis.models.MyDate;
 import apis.models.PostEntry;
@@ -39,6 +40,15 @@ import java.util.stream.Collectors;
  */
 public class BaseUtil {
     private static final Logger logger = Logger.getLogger(BaseUtil.class.getName());
+    private SocialMedia socialMedia;
+
+    public void setListeners(SocialMedia social){
+        socialMedia = social;
+    }
+
+    public void updateListeners(List<String> msgList){
+        this.socialMedia.updateListeners(msgList);
+    }
 
     /**
      * Sorts a list of post entries, based on their timestamp

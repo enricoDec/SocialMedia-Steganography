@@ -19,6 +19,7 @@
 package apis.reddit;
 
 import apis.SubscriptionDeamon;
+import apis.imgur.ImgurUtil;
 import apis.utils.BaseUtil;
 import apis.models.PostEntry;
 
@@ -66,7 +67,10 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
      * Subcription for a Keyword in a Social Media
      */
     public RedditSubscriptionDeamon() {
-        this.redditUtil = new RedditUtil();
+    }
+
+    public void injectRedditUtil(RedditUtil util){
+        this.redditUtil = util;
     }
 
     @Override
@@ -74,6 +78,7 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
         logger.info("Run subs.deamon reddit");
         this.latestPostEntries = this.getRecentMediaForSubscribedKeywords(null);
     }
+
 
     /**
      * Searches for the latest upload medias in this social media network for the given keyword.
@@ -148,7 +153,8 @@ public class RedditSubscriptionDeamon implements SubscriptionDeamon {
                 redditUtil.setLatestPostTimestamp(REDDIT, tmp.get(tmp.size()-1).getDate());
                 latestPostEntries = tmp;
                 logger.info("New media found.");
-                return tmp;
+                redditUtil.updateListeners(latestPostEntries.stream().map(PostEntry::getUrl).collect(Collectors.toList()));
+                return latestPostEntries;
             }
         }
 

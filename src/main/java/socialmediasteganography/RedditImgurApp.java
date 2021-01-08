@@ -1,6 +1,8 @@
 package socialmediasteganography;
 
 import apis.SocialMedia;
+import apis.SocialMediaListener;
+import apis.imgur.Imgur;
 import apis.models.Token;
 import apis.reddit.Reddit;
 import apis.utils.BlobConverterImpl;
@@ -15,17 +17,19 @@ public class RedditImgurApp {
     public static void main(String[] args){
 
         JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
-/*
-        Reddit sm = new Reddit();
+
+        SocialMedia sm = new Imgur();
         sm.setToken(new Token("abc", 100));
         sm.subscribeToKeyword("nature");
         sm.startSearch();
+        sm.addAsListener(messages -> messages.stream().forEach(msg -> System.out.println("Message 1: " + msg)));
+        sm.addAsListener(messages -> messages.stream().forEach(msg -> System.out.println("Message 2: " + msg)));
 
-        sm.changeSchedulerPeriod(1);
-        sm.stopSearch();
+        //sm.changeSchedulerPeriod(1);
+        //sm.stopSearch();
 
-*/
-        if(true){
+
+        if(false){
 
         //Setup
         SocialMedia socialMedia = new Reddit();

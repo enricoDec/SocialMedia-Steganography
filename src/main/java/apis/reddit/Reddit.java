@@ -91,7 +91,9 @@ public class Reddit extends SocialMedia {
      */
     public Reddit() {
         this.redditUtil = new RedditUtil();
+        this.redditUtil.setListeners(this);
         this.redditSubscriptionDeamon = new RedditSubscriptionDeamon();
+        this.redditSubscriptionDeamon.injectRedditUtil(redditUtil);
         executor = Executors.newScheduledThreadPool(1);
     }
 
@@ -166,7 +168,7 @@ public class Reddit extends SocialMedia {
 
         this.interval = interval;
 
-        if(isSchedulerRunning())
+        if(!isSchedulerRunning())
             startSearch();
     }
 
@@ -224,20 +226,18 @@ public class Reddit extends SocialMedia {
     @Override
     public void stopSearch() {
         logger.info("Stop searched was executed.");
-        if (scheduledFuture != null && !scheduledFuture.isCancelled())
-            scheduledFuture.cancel(false);
+        if (scheduledFuture != null){
+            scheduledFuture.cancel(true);
+        }
     }
 
     @Override
     public void startSearch() {
         logger.info("Start search was executed.");
         if (interval == null) {
-            System.out.println(executor);
             scheduledFuture = executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0, DEFAULT_INTERVALL, TimeUnit.MINUTES);
-            System.out.println(executor);
-
         } else {
-            scheduledFuture = executor.schedule(this.redditSubscriptionDeamon, interval, TimeUnit.MINUTES);
+            scheduledFuture = executor.scheduleAtFixedRate(this.redditSubscriptionDeamon,0 , interval, TimeUnit.MINUTES);
         }
     }
 
