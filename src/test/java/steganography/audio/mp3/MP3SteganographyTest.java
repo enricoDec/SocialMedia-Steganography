@@ -66,7 +66,11 @@ public class MP3SteganographyTest {
 
         // read bytes and delete file
         byte[] encodedBytesFromFile = ByteArrayUtils.read(testFileEncoded);
-        testFileEncoded.delete();
+        boolean isDeleted = testFileEncoded.delete();
+
+        if (!isDeleted)
+            System.out.println("WARNING: MP3-Test file could not be deletes." +
+                    "Delete it manually at: " + pathToEncodedFile);
 
         // decode message
         byte[] messageFromFile = this.mp3Steg.decode(encodedBytesFromFile);
