@@ -88,6 +88,7 @@ public class LSBChanger {
         byte[] tempByte = new byte[8];
         int tempByteCounter = 0;
         int messageCounter = 0;
+
         for (int i = 0; i < length * 8; i++) {
             byte[] currentBits = BitByteConverter.byteToBits(this.overlay.next());
             tempByte[tempByteCounter++] = currentBits[7];

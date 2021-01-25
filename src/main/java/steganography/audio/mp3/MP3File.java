@@ -30,17 +30,17 @@ import java.util.NoSuchElementException;
  */
 public class MP3File {
     /**
-     * Bytes of an MP3 file
+     * The byte array containing an MP3 file
      */
     private final byte[] mp3Bytes;
 
     /**
-     * Number of frames
+     * The number of frames
      */
     private int frameCount = -1;
 
     /**
-     * List of every Frame in this MP3File
+     * The list containing every Frame in this MP3File
      */
     private List<Frame> frames = null;
 
@@ -70,7 +70,7 @@ public class MP3File {
     }
 
     /**
-     * Returns the information of every frame in this MP3 file. The header is included in each frame.
+     * Returns the information of each frame in this MP3 file. The header is included in each frame.
      * @return - null, if findAllFrames() has not been called or there are no frames<br/>
      *         - List containing Frames
      */
@@ -149,11 +149,14 @@ public class MP3File {
     private int findFrames() {
         int lastPosition = 0;
         int framesFound = 0;
+
         while (lastPosition != -1) {
             try {
                 // find the next frame
                 Frame frame = findNextFrame(lastPosition);
-                // if there is another frame, save the last (since length is needed)
+
+                // if there is another frame, save the previous
+                // it can only be saved now, because the length has to be determined
                 this.frames.add(frame);
 
                 // set counting variables accordingly
@@ -164,6 +167,7 @@ public class MP3File {
                 lastPosition = -1;
             }
         }
+
         return framesFound;
     }
 
@@ -224,18 +228,19 @@ public class MP3File {
      * Checks if the given frame is valid.
      * If it is, this method corrects the frames fields
      * @param frame MP3 frame to validate
-     * @return {@link Frame} - The given Frame with its fields adjusted
+     * @return {@link Frame} - The given Frame with adjusted fields
      * @throws IllegalArgumentException if the frame is not supported or invalid
      */
     private Frame validateFrame(Frame frame) throws IllegalArgumentException {
         frame.setValid(true);
+
         // get the bits, that have to be checked
         byte[] bytesToValidate = new byte[6];
         System.arraycopy(this.mp3Bytes, frame.getStartingByte(), bytesToValidate, 0, 6);
         byte[][] bitsToValidate = BitByteConverter.byteToBits(bytesToValidate);
 
         // --------------------------------------------------------------------------------------------------------- \\
-        // ------------------------------------------- VALIDATING HEADER ------------------------------------------- \\
+        // ------------------------------------------- VALIDATE HEADER --------------------------------------------- \\
         // --------------------------------------------------------------------------------------------------------- \\
 
         // check for frame synchronizer
@@ -257,6 +262,7 @@ public class MP3File {
             frame.setValid(false);
             throw new IllegalArgumentException("MPEG version is invalid");
         }
+
         float mpegVersion = -1f;
         if (bitsToValidate[1][3] == 0 && bitsToValidate[1][4] == 0) {
             mpegVersion = 2.5f;
@@ -278,6 +284,7 @@ public class MP3File {
             frame.setValid(false);
             throw new IllegalArgumentException("Layer is invalid");
         }
+
         int layer = -1;
         if (bitsToValidate[1][5] == 0 && bitsToValidate[1][6] == 1) {
             layer = 3;
@@ -296,7 +303,7 @@ public class MP3File {
         frame.setCrcProtected(bitsToValidate[1][7] == 0);
         if (frame.isCrcProtected()) {
             frame.setValid(false);
-            throw new IllegalArgumentException("CRC16 is not (yet) supported");
+            throw new IllegalArgumentException("CRC16 is not supported");
         }
 
         // bitrate
@@ -356,12 +363,15 @@ public class MP3File {
 
         // mode extension
         // ******** ******** ******** **##****
-        // if joint stereo is set
-        // bits = Intensity Stereo  - MS Stereo
-        // 00   = off               - off
-        // 01   = on                - off
-        // 10   = off               - on
-        // 11   = on                - on
+        // is only relevant if channel is joint stereo
+        //
+        // bits | Intensity Stereo  | MS Stereo
+        // -----|-------------------|------------
+        // 00   | off               | off
+        // 01   | on                | off
+        // 10   | off               | on
+        // 11   | on                | on
+        //
         // can be safely ignored
 
         // copyright
@@ -393,8 +403,9 @@ public class MP3File {
 
         try {
             // Bitrate
-            // cast float to int for convenience (2f and 2.5f will cast to 2
-            // since there is no difference between the versions) and look up bitrate
+            // cast float to int for convenience
+            // (2f and 2.5f will cast to 2 since there is no difference between the versions)
+            // and look up bitrate
             frame.setBitrate(BitRateLookUp.getValueForBitrate((int) mpegVersion, layer, bitrateValue));
 
             // Sampling rate
@@ -404,7 +415,7 @@ public class MP3File {
         }
 
         // --------------------------------------------------------------------------------------------------------- \\
-        // ---------------------------------------- VALIDATING FRAME LENGTH ---------------------------------------- \\
+        // ---------------------------------------- VALIDATE FRAME LENGTH ------------------------------------------ \\
         // --------------------------------------------------------------------------------------------------------- \\
 
         if (layer == 1) {
@@ -420,7 +431,8 @@ public class MP3File {
             );
         } else {
             frame.setValid(false);
-            throw new IllegalArgumentException("Length is invalid");
+            throw new IllegalArgumentException("Layer is invalid." +
+                    "This should have been thrown earlier, most likely a bug");
         }
 
         // check if frame length is valid

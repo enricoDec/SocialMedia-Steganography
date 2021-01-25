@@ -30,9 +30,19 @@ import java.util.NoSuchElementException;
  */
 public class MP3SequenceOverlay implements AudioOverlay {
 
+    /**
+     * The byte array containing the mp3 file
+     */
     protected byte[] mp3Bytes;
+    /**
+     * The (modified) order of data bytes
+     */
     protected List<Integer> dataByteOrder;
+    /**
+     * The current data bytes position according to the dataByteOrder
+     */
     protected int currentPosition = -1;
+
 
     /**
      * Adds a sequence overlay to a given byte array containing an MP3 file.
@@ -55,6 +65,10 @@ public class MP3SequenceOverlay implements AudioOverlay {
         createOverlay(seed);
     }
 
+    /**
+     * A hook method that is responsible for creating the dataByteOrder.
+     * @param seed the seed that influences the dataByteOrder
+     */
     protected void createOverlay(long seed) {}
 
     @Override

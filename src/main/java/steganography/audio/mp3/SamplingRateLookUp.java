@@ -25,12 +25,13 @@ import java.util.NoSuchElementException;
  * @author Richard Rudek
  */
 class SamplingRateLookUp {
+
     /**
      * Tries to find the Sampling rate of an MP3 frame.
-     * @param mpegVersion MPEG Version of the frame</br>
-     *                    MPEG Version 1 = 1</br>
-     *                    MPEG Version 2 = 2</br>
-     *                    MPEG Version 2.5 = 2.5
+     * @param mpegVersion MPEG Version of the frame<br/>
+     *                    MPEG Version 1 = 1f<br/>
+     *                    MPEG Version 2 = 2f<br/>
+     *                    MPEG Version 2.5 = 2.5f
      * @param index Sampling rate index of the frame (should be between 0 and 2 inclusive)
      * @return int - Sampling rate according to MPEG Version and Sampling rate index of the frame
      * @throws IllegalArgumentException if any of the parameters are invalid
@@ -38,20 +39,26 @@ class SamplingRateLookUp {
      */
     static int getValueForSamplingRate(float mpegVersion, int index)
             throws IllegalArgumentException, NoSuchElementException {
+        // check if parameters are valid
         if (mpegVersion != 1f && mpegVersion != 2f && mpegVersion != 2.5f)
             throw new IllegalArgumentException("MPEG version " + mpegVersion + " not supported");
 
         if (index < 0 || index > 2)
             throw new IllegalArgumentException("Invalid Sampling rate index (value was " + index + ")");
 
+        // find sampling rate for given mpeg version
         int samplingRate = -1;
+
         if (mpegVersion == 1f)
             samplingRate = getValueForV1(index);
+
         if (mpegVersion == 2f)
             samplingRate = getValueForV2(index);
+
         if (mpegVersion == 2.5f)
             samplingRate = getValueForV2Point5(index);
 
+        // if sampling rate  is still not assigned, something went wrong
         if (samplingRate == -1)
             throw new NoSuchElementException("Could not resolve Sampling rate for MPEG version " + mpegVersion
                     + " and index " + index + ". This is most likely a bug.");
