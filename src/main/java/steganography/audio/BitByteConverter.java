@@ -26,12 +26,12 @@ public class BitByteConverter {
 
     /**
      * Converts a byte array to a 2d-array containing the bit representation of each byte.
-     * An empty Array will be treated as 0.
+     * An empty array will be treated as a byte array containing only a zero.
      * @param bytes Byte array to convert into bits
      * @return Byte array:<br/>
-     *         First dim = number of byte<br/>
-     *         Second dim = the 8 bits for that byte
-     * @throws NullPointerException if bytes is null
+     *         First dimension = the number of the current byte<br/>
+     *         Second dimension = the bit representation for that byte
+     * @throws NullPointerException if the given byte array is null
      */
     public static byte[][] byteToBits(byte[] bytes) {
         if (bytes == null)
@@ -43,23 +43,27 @@ public class BitByteConverter {
             };
 
         byte[][] bitArray = new byte[bytes.length][8];
+
         for (int byteNo = 0; byteNo < bytes.length; byteNo++) {
             bitArray[byteNo] = byteToBits(bytes[byteNo]);
         }
+
         return bitArray;
     }
 
     /**
      * Converts a byte into an array with length 8 that contains the bit representation of that byte.
      * @param byteToConvert Byte to convert into bits
-     * @return Byte array - the 8 bits for that byte
+     * @return Byte array - the bit representation for that byte
      */
     public static byte[] byteToBits(byte byteToConvert) {
         byte[] bitArray = new byte[8];
         int counter = 7;
+
         for (int bitNo = 0; bitNo < 7; bitNo++) {
             bitArray[counter--] = (byte) (((byteToConvert & (byte) (1 << bitNo)) > 0) ? 1 : 0);
         }
+
         // set first bit manually because java only knows 2's complement,
         // otherwise the first bit would always be set to 0
         bitArray[0] = (byte) (byteToConvert < 0 ? 1 : 0);
@@ -70,8 +74,8 @@ public class BitByteConverter {
      * Converts 8 bits into a the byte they are representing.
      * @param bits Array of 8 bits to convert into a byte
      * @return byte - Byte representation of the bits
-     * @throws IllegalArgumentException If the length of the array is not 8
-     * or an element of the array is neither 0 nor 1
+     * @throws IllegalArgumentException If the length of the array is not 8 or
+     *                                  an element of the array is neither 0 nor 1
      * @throws NullPointerException if the given array is null
      */
     public static byte bitsToByte(byte[] bits) {
@@ -90,11 +94,13 @@ public class BitByteConverter {
 
         int counter = 0;
         byte newByte = 0;
+
         for (int i = 7; i > 0; i--) {
             if (bits[i] == 1)
                 newByte += Math.pow(2, counter);
             counter++;
         }
+
         if (bits[0] == 1)
             newByte -= 128;
 

@@ -24,12 +24,12 @@ package steganography.audio.overlays;
  */
 public enum MP3Overlays {
     /**
-     * Goes through MP3 files and reads/writes from/to data bytes in order
+     * Goes through MP3 files and reads from (or writes to) data bytes <b>in order</b>
      */
     SEQUENCE_OVERLAY,
 
     /**
-     * Goes through MP3 files and reads/writes from/to shuffled data bytes according to a seed
+     * Goes through MP3 files and reads from (or writes to) <b>shuffled</b> data bytes according to a seed
      */
     SHUFFLE_OVERLAY
 }
