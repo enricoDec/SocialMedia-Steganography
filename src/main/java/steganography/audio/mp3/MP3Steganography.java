@@ -169,8 +169,6 @@ public class MP3Steganography implements Steganography {
      * @param steganographicData a byte array containing an mp3 file that has a message hidden within
      * @return a byte array containing the hidden message
      * @throws UnknownStegFormatException if the message could not be read from the given byte array.
-     *                                    This can happen if the file got changed after encoding
-     *                                    (e.g. file gets compressed when uploading it to a social media).
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
      *                                the mp3 file is not supported by this algorithm
      * @throws NullPointerException If the given byte array is null or has length 0
@@ -193,7 +191,7 @@ public class MP3Steganography implements Steganography {
         // decode the header
         byte[] header = lsbChanger.decode(4);
         if (!new String(header, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER))
-            throw new IllegalArgumentException("No hidden Message found.");
+            throw new UnknownStegFormatException("No hidden Message found.");
 
         // if header was found, decode message length
         int length = ByteBuffer.wrap(lsbChanger.decode(4)).getInt();
