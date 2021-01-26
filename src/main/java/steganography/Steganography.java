@@ -28,6 +28,11 @@ public interface Steganography {
      * @param carrier carrier used to hide the data
      * @param payload data to hide
      * @return steganographic data
+     * @throws IOException if a problem occurs during reading of carrier or payload
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from carrier
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
+     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaCapacityException if the payload doesn't fit in the carrier
      */
     byte[] encode(byte[] carrier, byte[] payload)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException,
@@ -39,6 +44,11 @@ public interface Steganography {
      * @param payload data to hide
      * @param seed affects the resulting steganographic data (similar to a password)
      * @return steganographic data
+     * @throws IOException if a problem occurs during reading of carrier or payload
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from carrier
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
+     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaCapacityException if the payload doesn't fit in the carrier
      */
     byte[] encode(byte[] carrier, byte[] payload, long seed)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException,
@@ -48,6 +58,9 @@ public interface Steganography {
      * Retrieves hidden message from a steganographic file.
      * @param steganographicData Data containing data to extract
      * @return hidden message
+     * @throws IOException if a problem occurs during reading of steganographicData
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from steganographicData
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
      */
     byte[] decode(byte[] steganographicData)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
@@ -57,6 +70,9 @@ public interface Steganography {
      * @param steganographicData Data containing data to extract
      * @param seed seed that was used to encode the given stenographicData
      * @return hidden message
+     * @throws IOException if a problem occurs during reading of steganographicData
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from steganographicData
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
      */
     byte[] decode(byte[] steganographicData, long seed)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, UnknownStegFormatException;
@@ -65,6 +81,9 @@ public interface Steganography {
      * Tests if the given data has a hidden message encoded in it
      * @param data data to test
      * @return true if the given data has a hidden message encoded in it
+     * @throws IOException if a problem occurs during reading of data
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from data
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
      */
     boolean isSteganographicData(byte[] data)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException;
@@ -74,6 +93,9 @@ public interface Steganography {
      * @param data data to test
      * @param seed seed the hidden message was encoded with
      * @return true if the given data has a hidden message encoded in it
+     * @throws IOException if a problem occurs during reading of data
+     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from data
+     * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
      */
     boolean isSteganographicData(byte[] data, long seed)
             throws IOException, MediaNotFoundException, UnsupportedMediaTypeException;
