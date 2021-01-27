@@ -90,7 +90,6 @@ public class TestImageSteg {
         }
 */
 
-
         ////// DECODE
         steganography = new ImageSteg();
 

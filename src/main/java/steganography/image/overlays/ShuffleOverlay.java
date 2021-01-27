@@ -47,11 +47,15 @@ public class ShuffleOverlay extends SequenceOverlay {
 */
 
     protected void createOverlay() {
-        super.createOverlay();
+        initOverlay();
         shufflePixelOrder();
     }
 
-    private void shufflePixelOrder() {
+    protected void initOverlay() {
+        super.createOverlay();
+    }
+
+    protected void shufflePixelOrder() {
         Collections.shuffle(this.pixelOrder, this.random);
     }
 }

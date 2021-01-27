@@ -34,7 +34,7 @@ public class RemoveTransparentShuffleOverlay extends ShuffleOverlay {
     }
 
     @Override
-    protected void createOverlay() {
+    protected void initOverlay() {
         this.pixelOrder = new ArrayList<>();
         for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
             for (int x = 0; x < this.bufferedImage.getWidth(); x++) {

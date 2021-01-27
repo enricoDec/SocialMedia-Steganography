@@ -41,7 +41,7 @@ public class TableOverlay extends ShuffleOverlay {
     }
 
     @Override
-    protected void createOverlay() {
+    protected void initOverlay() {
         this.pixelOrder = new ArrayList<>();
         for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
             for (int x = 0; x < this.bufferedImage.getWidth(); x++) {
@@ -51,7 +51,5 @@ public class TableOverlay extends ShuffleOverlay {
                 }
             }
         }
-
-        Collections.shuffle(this.pixelOrder, this.random);
     }
 }
