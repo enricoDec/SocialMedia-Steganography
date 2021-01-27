@@ -26,14 +26,11 @@ import java.util.Random;
 
 
 public class TableOverlay extends ShuffleOverlay {
-    private Map<Integer, List<Integer>> colorCouple;
-    private Random position;
+    private final Map<Integer, List<Integer>> colorCouple;
 
     public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple ) throws UnsupportedImageTypeException {
-        super(bufferedImage);
-        this.position = new Random(seed);
+        super(bufferedImage, seed);
         this.colorCouple = colorCouple;
-        createOverlay();
     }
 
     @Override
@@ -55,6 +52,6 @@ public class TableOverlay extends ShuffleOverlay {
             }
         }
 
-        Collections.shuffle(this.pixelOrder, position);
+        Collections.shuffle(this.pixelOrder, this.random);
     }
 }

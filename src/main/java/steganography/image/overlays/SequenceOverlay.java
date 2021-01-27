@@ -25,7 +25,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SerialOverlay implements BufferedImageCoordinateOverlay {
+/**
+ * This class returns Pixels of the underlying Bitmap in order from top left (x=0, y=0)
+ * to bottom right (x=bitmap.getWidth(), y=bitmap.getHeight()).
+ */
+public class SequenceOverlay implements PixelCoordinateOverlay {
 
     protected final BufferedImage bufferedImage;
     protected List<Integer> pixelOrder;
@@ -33,18 +37,20 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
     protected int currentX = 0;
     protected int currentY = 0;
 
-    protected SerialOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
+    public SequenceOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
         this.bufferedImage = bufferedImage;
 
         int type = this.bufferedImage.getType();
         if (!this.typeAccepted(type))
             throw new UnsupportedImageTypeException("This overlay doesn't support images of type " + type);
     }
+/*
 
-    public SerialOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
+    public SequenceOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         this(bufferedImage);
         createOverlay();
     }
+*/
 
     protected boolean typeAccepted(int type) {
         // boolean accept;
@@ -66,16 +72,17 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
     }
 
     protected void createOverlay() {
-        if (this.pixelOrder == null) {
-            this.pixelOrder =
-                    IntStream.range(0, bufferedImage.getHeight() * bufferedImage.getWidth())
-                            .boxed()
-                            .collect(Collectors.toList());
-        }
+        this.pixelOrder =
+                IntStream.range(0, bufferedImage.getHeight() * bufferedImage.getWidth())
+                        .boxed()
+                        .collect(Collectors.toList());
     }
 
     @Override
     public int next() throws NoSuchElementException {
+        if (this.pixelOrder == null)
+            createOverlay();
+
         if (++currentPosition >= this.pixelOrder.size())
             throw new NoSuchElementException("No pixels left.");
 
@@ -86,6 +93,9 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
 // Overflow bei berechnung des Color Couple und kleine unterschiede zwischen Get und set Pixel
     @Override
     public void setPixel(int value) {
+        if (this.pixelOrder == null)
+            createOverlay();
+
         if (currentPosition < 0 || this.currentPosition >= this.pixelOrder.size())
             throw new NoSuchElementException("No pixel at current position.");
         int getColor = (this.bufferedImage.getRGB(this.currentX, this.currentY));
@@ -98,6 +108,9 @@ public class SerialOverlay implements BufferedImageCoordinateOverlay {
 
     @Override
     public int available() {
+        if (this.pixelOrder == null)
+            createOverlay();
+
         return this.pixelOrder.size() - this.currentPosition -1;
     }
 

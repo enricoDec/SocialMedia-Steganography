@@ -23,11 +23,11 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
+/**
+ * This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+ * that is given to its constructor. It will only return Pixels with an alpha value greater than 0.
+ */
 public class RemoveTransparentShuffleOverlay extends ShuffleOverlay {
-
-    protected RemoveTransparentShuffleOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
-        super(bufferedImage);
-    }
 
     public RemoveTransparentShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         super(bufferedImage, seed);

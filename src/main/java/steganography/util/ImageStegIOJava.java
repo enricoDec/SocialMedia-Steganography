@@ -1,6 +1,5 @@
 package steganography.util;
 
-import steganography.image.ImageSteg;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.encoders.GIFTableDecoder;
 import steganography.image.encoders.PixelBit;
@@ -8,7 +7,7 @@ import steganography.image.encoders.PixelIndex;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
-import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.PixelCoordinateOverlay;
 import steganography.image.overlays.RemoveTransparentShuffleOverlay;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.overlays.TableOverlay;
@@ -116,7 +115,7 @@ public class ImageStegIOJava implements ImageStegIO{
      /**
      * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
      * @param seed to hand to the overlay
-     * @return BuffImgEncoder with set BufferedImageCoordinateOverlay, chosen accordingly to the images type
+     * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
      * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
      */
     @Override
@@ -177,7 +176,7 @@ public class ImageStegIOJava implements ImageStegIO{
      * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
      * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
      */
-    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed)
+    private PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed)
             throws UnsupportedImageTypeException {
 
         return this.useTransparent ?

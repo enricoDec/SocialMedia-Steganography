@@ -23,13 +23,19 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
-public class ShuffleOverlay extends SerialOverlay {
+/**
+ * This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+ * that is given to its constructor
+ */
+public class ShuffleOverlay extends SequenceOverlay {
 
     protected Random random;
 
-    protected ShuffleOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
+    public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         super(bufferedImage);
+        this.random = new Random(seed);
     }
+/*
 
     public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         super(bufferedImage);
@@ -38,9 +44,11 @@ public class ShuffleOverlay extends SerialOverlay {
         createOverlay();
         shufflePixelOrder();
     }
+*/
 
     protected void createOverlay() {
         super.createOverlay();
+        shufflePixelOrder();
     }
 
     private void shufflePixelOrder() {

@@ -1,7 +1,6 @@
 package steganography.image.encoders;
 
-import steganography.image.encoders.PixelBit;
-import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.PixelCoordinateOverlay;
 
 
 import java.util.List;
@@ -13,7 +12,7 @@ public class PixelIndex extends PixelBit {
     private final Map<Integer,List<Integer>> colorCouple;
     private final Random random;
 
-    public PixelIndex(BufferedImageCoordinateOverlay overlay, Map<Integer,List<Integer>> colorCouple, long seed) throws IllegalArgumentException {
+    public PixelIndex(PixelCoordinateOverlay overlay, Map<Integer,List<Integer>> colorCouple, long seed) throws IllegalArgumentException {
         super(overlay);
         this.colorCouple = colorCouple;
         random = new Random(seed);
