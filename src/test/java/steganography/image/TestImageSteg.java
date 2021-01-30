@@ -30,11 +30,9 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
+import java.util.Set;
 
 public class TestImageSteg {
 
@@ -47,7 +45,7 @@ public class TestImageSteg {
     // ------------------------------------
 
     @Test
-    void given_PNGAndSeedNoHeader_when_encodingAndDecodingString_expect_success()
+    void given_PNGAndSeedNoTransparency_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
         System.out.println("given_PNGAndSeedNoHeader_when_encodingAndDecodingString_expect_success:");
@@ -70,6 +68,16 @@ public class TestImageSteg {
             imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
             System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
 
+        /////// CHECK FOR NO TRANSPARENCY USED
+        BufferedImage imgBefore = ImageIO.read(new ByteArrayInputStream(imageInput));
+        BufferedImage imgAfter = ImageIO.read(new ByteArrayInputStream(imageIntermediate));
+        for (int y = 0; y < imgBefore.getHeight(); y++) {
+            for (int x = 0; x < imgBefore.getWidth(); x++) {
+                if (((imgBefore.getRGB(x, y) >> 24) & 0xff) == 0)
+                    Assertions.assertEquals(imgBefore.getRGB(x, y), imgAfter.getRGB(x, y));
+            }
+        }
+
 /*
 
         ////// WRITE IMAGE
@@ -81,7 +89,6 @@ public class TestImageSteg {
             e.printStackTrace();
         }
 */
-
 
         ////// DECODE
         steganography = new ImageSteg();
@@ -96,11 +103,79 @@ public class TestImageSteg {
     }
 
     @Test
-    void given_PNGNoHeaderNoSeed_when_encodingAndDecodingString_expect_success()
+    void given_PNGAndSeedUseTransparency_when_encodingAndDecodingString_expect_success()
+            throws UnsupportedMediaTypeException, MediaNotFoundException,
+            MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
+        System.out.println("given_PNGAndSeedUseTransparency_when_encodingAndDecodingString_expect_success:");
+        String pathToImage = "src/test/resources/steganography/image/baum.png";
+
+        String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
+                "invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et " +
+                "justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum " +
+                "dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                "tempor invidunt ut labor";
+
+        byte[] imageIntermediate;
+
+        /////// ENCODE
+        long seed = 121212L;
+        Steganography steganography = new ImageSteg(true, true);
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
+
+        long startTime = System.currentTimeMillis();
+        imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
+        System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
+
+        /////// CHECK FOR Any TRANSPARENT PIXELS USED
+        Assertions.assertTrue(findChangedTransparentPixels(imageInput, imageIntermediate));
+
+/*
+
+        ////// WRITE IMAGE
+        try (FileOutputStream fos = new FileOutputStream("src/test/resources/steganography/image/baumENC.png")) {
+            assert imageIntermediate != null;
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageIntermediate));
+            ImageIO.write(bufferedImage, "png", fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
+
+
+        ////// DECODE
+        steganography = new ImageSteg(true, true);
+
+        startTime = System.currentTimeMillis();
+
+        byte[] result = steganography.decode(imageIntermediate, seed);
+
+        System.out.println("Decoding time (ms): " + (System.currentTimeMillis() - startTime));
+
+        Assertions.assertEquals(new String(result), loremIpsum);
+    }
+
+    private boolean findChangedTransparentPixels(byte[] imageBefore, byte[] imageAfter) throws IOException {
+        BufferedImage imgBefore = ImageIO.read(new ByteArrayInputStream(imageBefore));
+        BufferedImage imgAfter = ImageIO.read(new ByteArrayInputStream(imageAfter));
+        for (int y = 0; y < imgBefore.getHeight(); y++) {
+            for (int x = 0; x < imgBefore.getWidth(); x++) {
+                if (
+                        ((imgBefore.getRGB(x, y) >> 24) & 0xff) == 0 &&
+                        imgBefore.getRGB(x, y) != imgAfter.getRGB(x, y)
+                ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void given_PNGNoSeed_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
 
-        System.out.println("given_PNGNoHeaderNoSeed_when_encodingAndDecodingString_expect_success:");
+        System.out.println("given_PNGNoSeed_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.png";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -143,10 +218,10 @@ public class TestImageSteg {
     }
 
     @Test
-    void given_BMPAndSeedNoHeader_when_encodingAndDecodingString_expect_success()
+    void given_BMPAndSeed_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
-        System.out.println("given_BMPAndSeedNoHeader_when_encodingAndDecodingString_expect_success:");
+        System.out.println("given_BMPAndSeed_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.bmp";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +
@@ -192,11 +267,11 @@ public class TestImageSteg {
     }
 
     @Test
-    void given_BMPNoHeaderNoSeed_when_encodingAndDecodingString_expect_success()
+    void given_BMPNoSeed_when_encodingAndDecodingString_expect_success()
             throws UnsupportedMediaTypeException, MediaNotFoundException,
             MediaReassemblingException, UnknownStegFormatException, MediaCapacityException, IOException {
 
-        System.out.println("given_BMPNoHeaderNoSeed_when_encodingAndDecodingString_expect_success:");
+        System.out.println("given_BMPNoSeed_when_encodingAndDecodingString_expect_success:");
         String pathToImage = "src/test/resources/steganography/image/baum.bmp";
 
         String loremIpsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor " +

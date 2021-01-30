@@ -30,7 +30,7 @@ import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.image.overlays.RemoveTransparentShuffleOverlay;
 import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
-import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.PixelCoordinateOverlay;
 import steganography.image.overlays.TableOverlay;
 
 import javax.imageio.ImageIO;
@@ -258,7 +258,7 @@ public class ImageSteg implements Steganography {
 
         BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
 
-        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
+        PixelCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
         BuffImgEncoder encoder = new PixelBit(overlay);
 
         return bytesToInt(encoder.decode(4)) == HEADER_SIGNATURE;
@@ -288,7 +288,7 @@ public class ImageSteg implements Steganography {
      * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
      * @param bufferedImage image to get the encoder for
      * @param seed to hand to the overlay
-     * @return BuffImgEncoder with set BufferedImageCoordinateOverlay, chosen accordingly to the images type
+     * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
      * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
      */
     private BuffImgEncoder getEncoder(BufferedImage bufferedImage, long seed)
@@ -348,7 +348,7 @@ public class ImageSteg implements Steganography {
      * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
      * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
      */
-    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
+    private PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         return this.useTransparent ?
                 new ShuffleOverlay(bufferedImage, seed) :
                 new RemoveTransparentShuffleOverlay(bufferedImage, seed);

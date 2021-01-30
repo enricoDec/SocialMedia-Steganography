@@ -40,6 +40,10 @@ public class MP3ShuffleOverlay extends MP3SequenceOverlay {
         super(bytes, seed);
     }
 
+    /**
+     * Shuffles the data byte order randomly according to the seed.
+     * @param seed the seed that influences the dataByteOrder
+     */
     @Override
     protected void createOverlay(long seed) {
         Random r = new Random(seed);

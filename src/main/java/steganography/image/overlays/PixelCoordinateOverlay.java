@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
  * given BufferedImage in an order independent from the coordinate system
  * of BufferedImage (Overlay).
  */
-public interface BufferedImageCoordinateOverlay {
+public interface PixelCoordinateOverlay {
 
     /**
      * Returns the next pixel value as an int (representing ARGB as its bytes).

@@ -18,12 +18,12 @@
 
 package steganography.image.mocks;
 
-import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.PixelCoordinateOverlay;
 
 import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;
 
-public class MockOverlay implements BufferedImageCoordinateOverlay {
+public class MockOverlay implements PixelCoordinateOverlay {
 
     private final int[] mockPixels;
     private int position = -1;

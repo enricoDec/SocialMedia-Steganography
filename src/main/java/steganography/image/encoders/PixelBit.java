@@ -19,7 +19,7 @@
 package steganography.image.encoders;
 
 import steganography.image.exceptions.ImageCapacityException;
-import steganography.image.overlays.BufferedImageCoordinateOverlay;
+import steganography.image.overlays.PixelCoordinateOverlay;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.Random;
 public class PixelBit extends BuffImgEncoder {
     private int numOfChannels = 3;
 
-    public PixelBit(BufferedImageCoordinateOverlay overlay) throws IllegalArgumentException{
+    public PixelBit(PixelCoordinateOverlay overlay) throws IllegalArgumentException{
         super(overlay);
     }
 
