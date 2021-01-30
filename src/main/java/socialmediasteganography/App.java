@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+/*
 package socialmediasteganography;
 
 
@@ -37,32 +37,32 @@ import java.util.List;
  * @author Mario Teklic
  */
 
-
+/*
 public class App {
     public static void main(String[] args) throws IOException {
         //JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
         /**
          * Setup Tumblr Client
-         */
+         */ /*
         SocialMedia socialMedia = new Tumblr();
         socialMedia.setBlogName("mariofenzl");
 
         /**
          * encode and post png on tumblr
-         */
-        /*socialMedia.setMediaType(MediaType.PNG);
+         */ /*
+        socialMedia.setMediaType(MediaType.PNG);
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
         //Carrier, Payload
         byte[] bytes = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
         String payload = "hallo";
         //Encode and Post
-        sms.encodeAndPost(socialMedia, bytes, payload.getBytes());*/
+        sms.encodeAndPost(socialMedia, bytes, payload.getBytes());
 
 
         /**
          * encode and post gif on Tumblr
-         */
+         */ /*
         // TODO MediaType in SocialMediaSteganography.encodeAndPost als parameter übergeben
         //  socialMedia.setMediaType(MediaType.GIF);
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
@@ -87,7 +87,7 @@ public class App {
         String payload = "hallo";
         //Encode and Post
         sms.encodeAndPost(socialMedia, gifData, payload.getBytes());
-*/
+
 
         /**
          * encode and post mp4 on Tumblr
@@ -106,6 +106,7 @@ public class App {
         /**
          * test to decode uploaded picture
          */
-
+/*
     }
 }
+*/

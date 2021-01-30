@@ -24,5 +24,5 @@ package apis;
 
 
 public enum MediaType {
-    JPEG,JPG,BMP,PNG,GIF,TIFF,MP3;
+    JPEG,JPG,BMP,PNG,GIF,TIFF,MP3,AVI;
 }
