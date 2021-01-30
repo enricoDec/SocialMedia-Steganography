@@ -243,7 +243,7 @@ public class VideoStegTest {
      * Single Thread Test
      * No Audio in Video
      */
-    @Test
+
     public void encoderIntegrationNoAudioSingleThreadTest() {
         try {
             VideoSteg videoSteg = new VideoSteg();
