@@ -101,6 +101,6 @@ public class AnimatedGif implements Steganography{
 
     @Override
     public boolean isSteganographicData(byte[] data, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException {
-        return false;
+        return isSteganographicData(data,seed);
     }
 }

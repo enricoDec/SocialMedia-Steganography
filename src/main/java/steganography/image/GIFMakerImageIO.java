@@ -25,8 +25,8 @@ public class GIFMakerImageIO implements IGIFMaker{
     /**
      *
      * @param animatedGIF a byte array with the animated gif, that needs to be splitted
-     * @return {byte[][]} output an two dimensional array which contains all gif data
-     * @throws IOException
+     * @return byte[][] output an two dimensional array which contains all gif data
+     * @throws UnsupportedImageTypeException When image is not a gif
      */
     @Override
     public byte[][] splitGIF(byte[] animatedGIF) throws UnsupportedImageTypeException {
@@ -98,7 +98,7 @@ public class GIFMakerImageIO implements IGIFMaker{
      * @param delay The delay of the Image in the GIF
      * @param gifFrame The current Frame for which Metadata needs to be created
      * @param newMetadata The metadata that is created
-     * @throws IIOInvalidTreeException
+     * @throws IIOInvalidTreeException When metadata can't be correctly created
      */
     private  void createMetadata(int delay, IIOImage gifFrame, IIOMetadata newMetadata) throws IIOInvalidTreeException {
         IIOMetadata metadata = gifFrame.getMetadata();

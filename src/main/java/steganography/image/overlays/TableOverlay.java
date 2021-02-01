@@ -24,7 +24,10 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.Random;
 
-
+/**
+ * @author Henk-Joas Lubig, Selina Wernike
+ * Overlayy Class for images using the Color-Couple-Algorithem
+ */
 public class TableOverlay extends ShuffleOverlay {
     private final Map<Integer, List<Integer>> colorCouple;
 
@@ -33,6 +36,10 @@ public class TableOverlay extends ShuffleOverlay {
         this.colorCouple = colorCouple;
     }
 
+    /**
+     * @param type pixel deth of image
+     * @return true when image is a pixel depth of 8
+     */
     @Override
     protected boolean typeAccepted(int type) {
         int pixelSize = this.bufferedImage.getColorModel().getPixelSize();
