@@ -24,11 +24,20 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 /**
- * This class returns Pixels of the underlying Bitmap in a random order determined by the seed
- * that is given to its constructor. It will only return Pixels with an alpha value greater than 0.
+ * <p>This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+ * that is given to its constructor.</p>
+ * <p>It will only return Pixels with an alpha value greater than 0.</p>
  */
 public class RemoveTransparentShuffleOverlay extends ShuffleOverlay {
 
+    /**
+     * <p>This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+     * that is given to its constructor.</p>
+     * <p>It will only return Pixels with an alpha value greater than 0.</p>
+     * @param bufferedImage BufferedImage to represent the pixels of
+     * @param seed Long to be used to affect the randomization of pixelorder.
+     * @throws UnsupportedImageTypeException if the images type is not supported by this overlay
+     */
     public RemoveTransparentShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
         super(bufferedImage, seed);
     }

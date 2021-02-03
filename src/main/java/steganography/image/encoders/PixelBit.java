@@ -42,6 +42,18 @@ public class PixelBit extends BuffImgEncoder {
         return this.numOfChannels;
     }
 
+    /**
+     * <p>Sets the number of color channels this algorithm is choosing from
+     * to encode data. Cannot be greater than 4 or smaller than 1.</p>
+     * <p>If the value is 1, this algorithm acts as a normal LSB-Encoder.</p>
+     * <ul>
+     *     <li>1: Blue channel</li>
+     *     <li>2: Green and Blue channel</li>
+     *     <li>3: Red, Green and Blue channel</li>
+     *     <li>4: Alpha, Red, Green and Blue channel</li>
+     * </ul>
+     * @param numberOfChannels number of channels to use
+     */
     public void setNumberOfChannels(int numberOfChannels) {
         if (numberOfChannels > 4 || numberOfChannels < 1)
             throw new IllegalArgumentException("Number of channels can only be a number between " +
@@ -106,7 +118,7 @@ public class PixelBit extends BuffImgEncoder {
      */
     private byte bits2Byte(Boolean[] pixelByte) {
         if (pixelByte.length != 8)
-            throw new ArrayIndexOutOfBoundsException("bits2byte: Array must have length exactly 8");
+            throw new ArrayIndexOutOfBoundsException("bits2byte: Array must have length of exactly 8");
 
         int result = 0;
         for (Boolean pixelBit : pixelByte) {
@@ -140,8 +152,9 @@ public class PixelBit extends BuffImgEncoder {
      * <p>Changes the value of a random color channel (ARGB) of the given pixel
      * by +1 or -1 (randomly, but w/o overflow).</p>
      * <p>Since a pixel represents a bit, this method "flips" it.
-     * (By changing the outcome of (A+R+G+B) & 1 == 0)</p>
+     * (By changing the outcome of (A+R+G+B) &amp; 1 == 0)</p>
      * @param pixelARGB the pixelValue to change
+     * @return the changed pixelValue
      */
     protected int changePixelValue(int pixelARGB) {
         Random rng = new Random();
@@ -150,8 +163,22 @@ public class PixelBit extends BuffImgEncoder {
         int channelPick = rng.nextInt(this.numOfChannels) * 8;
         // extract the byte of picked channel
         int channel = ((pixelARGB >> channelPick) & 0xff);
-        // Flip LSB: LSB == 1 ? LSB = 0 : LSB = 1
-        channel = channel ^ 1;
+
+        // check if addition or subtraction would cause overflow and prevent it
+        // (not channel ^ 1, because change would not be random)
+        int addition;
+        // if all bits are 1, subtract 1
+        if ((channel & 0xff) == 0xff) {
+            addition = -1;
+            // if all bits are 0, add 1
+        } else if (channel == 0) {
+            addition = 1;
+        } else {
+            // if there is no overflow add or subtract 1 at random
+            addition = (rng.nextBoolean() ? 1 : -1);
+        }
+        channel += addition;
+
         // put modified byte back to its place in the int
         return (pixelARGB | (0xff << channelPick)) & ~((~channel & 0xff) << channelPick);
         // overwrite previous picked byte in original int (pxInt) with 1111 1111

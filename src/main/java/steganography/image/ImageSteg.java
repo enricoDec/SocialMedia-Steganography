@@ -32,6 +32,8 @@ import steganography.image.overlays.ShuffleOverlay;
 import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.overlays.PixelCoordinateOverlay;
 import steganography.image.overlays.TableOverlay;
+import steganography.util.ImageStegIO;
+import steganography.util.ImageStegIOJava;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -71,26 +73,28 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Creates a new ImageSteg with the given settings.
+     * <p>Creates a new ImageSteg with the given settings.</p>
+     * <b>useDefaultHeader</b>
      * <ul>
+     *     <li>if true, the default header will be encoded in the image. The hidden message can then be
+     *         decoded using ImageSteg.decode(...).
+     *     </li>
      *     <li>
-     *         useDefaultHeader - <br/>
-     *         if true, the default header will be encoded in the image. The hidden message can then be
-     *         decoded using ImageSteg.decode(...). <br/>
      *         if false, no header will be encoded in the image. The hidden message can only be decoded
      *         using ImageSteg.decodeRaw(length, ...)
      *     </li>
-     *     <li>
-     *         useTransparent - <br/>
-     *         if true, fully transparent pixels will be used for encoding and decoding <br/>
-     *         if false, fully transparent pixels will not be used for encoding and decoding <br/>
-     *         This value must be equal while encoding and decoding to successfully decode the hidden message.
-     *         This value can only affect PNGs that contain fully transparent pixels.
-     *         If an image has no fully transparent pixels, this value will be ignored.
-     *         If the image is a GIF, this value will be ignored.
-     *         BMPs with transparent pixels are not supported by this class.
-     *     </li>
      * </ul>
+     *
+     * <b>useTransparent</b>
+     * <ul>
+     *      <li>if true, fully transparent pixels will be used for encoding and decoding</li>
+     *      <li>if false, fully transparent pixels will not be used for encoding and decoding</li>
+     * </ul>
+     * <p>This value must be equal while encoding and decoding to successfully decode the hidden message.</p>
+     * <p>This value can only affect PNGs that contain fully transparent pixels.</p>
+     * <p>If an image has no fully transparent pixels, this value will be ignored.</p>
+     * <p>If the image is a GIF, this value will be ignored.</p>
+     * <p>BMPs with transparent pixels are not supported by this class.</p>
      * @param useDefaultHeader should the default header be used for encoding?
      * @param useTransparent should fully transparent pixels be used for encoding and decoding?
      */
@@ -98,14 +102,6 @@ public class ImageSteg implements Steganography {
         this.useDefaultHeader = useDefaultHeader;
         this.useTransparent = useTransparent;
     }
-
-    // All formats: JPG, jpg, tiff, bmp, BMP, gif, GIF, WBMP, png, PNG, JPEG, tif, TIF, TIFF, wbmp, jpeg
-
-    // @Override
-    // public void useDefaultHeader(boolean useDefaultHeader) {
-    //     // TODO: Might be problematic decoding, length has to be given from user
-    //     // this.useDefaultHeader = useDefaultHeader;
-    // }
 
     @Override
     public byte[] encode(byte[] carrier, byte[] payload)
@@ -125,9 +121,9 @@ public class ImageSteg implements Steganography {
         if (payload == null)
             throw new NullPointerException("Parameter 'payload' must not be null");
 
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
+        ImageStegIO imageStegIO = new ImageStegIOJava(carrier, this.useTransparent);
 
-        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
 
         if (this.useDefaultHeader) {
             encoder.encode(int2bytes(HEADER_SIGNATURE));
@@ -135,9 +131,27 @@ public class ImageSteg implements Steganography {
         }
         encoder.encode(payload);
 
-        return bufferedImage2byteArray(encoder.getOverlay().getBufferedImage(), buffImgAndFormat.getFormat());
+        return imageStegIO.getImageAsByteArray();
     }
 
+    /**
+     * <p>Decodes a hidden message in the given steganographicData (an image) and returns it as a byte array.</p>
+     * <p>This method will fail, if the message was hidden without using the default header.
+     * Use ImageSteg.decodeRaw() for this purpose.</p>
+     * <p>Reasons for failing with an UnknownStegFormatExceptions are:</p>
+     * <ul>
+     *      <li>there is no hidden message</li>
+     *      <li>the message was hidden with 'useDefaultHeader = false'</li>
+     *      <li>the value for 'useTransparent' was different when hiding the message</li>
+     *      <li>the message was hidden using an unknown algorithm</li>
+     * </ul>
+     * @param steganographicData Image containing the hidden message to decode
+     * @return the hidden message as a byte array
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @throws UnknownStegFormatException if the default header could not be found
+     */
     @Override
     public byte[] decode(byte[] steganographicData)
             throws IOException, UnsupportedImageTypeException, NoImageException, UnknownStegFormatException {
@@ -146,18 +160,19 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Retrieves hidden message from a steganographic file. This method will fail, if the message
-     * was hidden without using the default header. Use ImageSteg.decodeRaw() for this purpose.
-     * Reasons for failing with an UnknownStegFormatExceptions are:
+     * <p>Decodes a hidden message in the given steganographicData (an image) and returns it as a byte array.</p>
+     * <p>This method will fail, if the message was hidden without using the default header.
+     * Use ImageSteg.decodeRaw() for this purpose.</p>
+     * <p>Reasons for failing with an UnknownStegFormatExceptions are:</p>
      * <ul>
      *      <li>there is no hidden message</li>
      *      <li>the message was hidden with 'useDefaultHeader = false'</li>
      *      <li>the value for 'useTransparent' was different when hiding the message</li>
      *      <li>the message was hidden using an unknown algorithm</li>
      * </ul>
-     * @param steganographicData Data containing data to extract
+     * @param steganographicData Image containing the hidden message to decode
      * @param seed seed that was used to encode the given stenographicData
-     * @return
+     * @return the hidden message as a byte array
      * @throws IOException if an error occurs during reading 'steganographicData'
      * @throws NoImageException if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
@@ -170,9 +185,9 @@ public class ImageSteg implements Steganography {
         if (steganographicData == null)
             throw new NullPointerException("Parameter 'steganographicData' must not be null");
 
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
+        ImageStegIO imageStegIO = new ImageStegIOJava(steganographicData, this.useTransparent);
 
-        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
 
         // TODO: only do this if useDefaultHeader == true, but length has to be given from user
         // decode 4 bytes and compare them to header signature
@@ -187,10 +202,10 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Retrieves hidden message from a steganographic file. This method will not search for a header
-     * or validate the retrieved data in any form. If 'steganographicData' contains a supported image,
-     * this method will always return a result. Whether this result is the hidden message, depends on the
-     * settings used:
+     * <p>Interprets an amount of (length * 8) pixels as a hidden message and returns it as a byte array.</p>
+     * <p>This method will not search for a header or validate the retrieved data in any form. If 'steganographicData'
+     * contains a supported image, this method will always return a result. Whether this result is the hidden message,
+     * depends on the settings used:</p>
      * <ul>
      *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
      *     <li>'payload.length' during encoding == 'length' during decoding</li>
@@ -199,7 +214,7 @@ public class ImageSteg implements Steganography {
      * </ul>
      * @param length Length (in bytes) of the hidden message
      * @param steganographicData Data containing data to extract
-     * @return
+     * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
      * @throws IOException if an error occurs during reading 'steganographicData'
      * @throws NoImageException if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
@@ -211,10 +226,10 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Retrieves hidden message from a steganographic file. This method will not search for a header
-     * or validate the retrieved data in any form. If 'steganographicData' contains a supported image,
-     * this method will always return a result. Whether this result is the hidden message, depends on the
-     * settings used:
+     * <p>Interprets an amount of (length * 8) pixels as a hidden message and returns it as a byte array.</p>
+     * <p>This method will not search for a header or validate the retrieved data in any form. If 'steganographicData'
+     * contains a supported image, this method will always return a result. Whether this result is the hidden message,
+     * depends on the settings used:</p>
      * <ul>
      *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
      *     <li>'payload.length' during encoding == 'length' during decoding</li>
@@ -224,7 +239,7 @@ public class ImageSteg implements Steganography {
      * @param length Length (in bytes) of the hidden message
      * @param steganographicData Data containing data to extract
      * @param seed seed that was used to encode the given stenographicData
-     * @return
+     * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
      * @throws IOException if an error occurs during reading 'steganographicData'
      * @throws NoImageException if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
@@ -235,9 +250,9 @@ public class ImageSteg implements Steganography {
         if (steganographicData == null)
             throw new NullPointerException("Parameter 'steganographicData' must not be null");
 
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
+        ImageStegIO imageStegIO = new ImageStegIOJava(steganographicData, this.useTransparent);
 
-        BuffImgEncoder encoder = getEncoder(buffImgAndFormat.getBufferedImage(), seed);
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
 
         return encoder.decode(length);
     }
@@ -256,10 +271,7 @@ public class ImageSteg implements Steganography {
         if (data == null)
             throw new NullPointerException("Parameter 'data' must not be null");
 
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
-
-        PixelCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), seed);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        BuffImgEncoder encoder = new ImageStegIOJava(data, this.useTransparent).getEncoder(seed);
 
         return bytesToInt(encoder.decode(4)) == HEADER_SIGNATURE;
     }
@@ -269,13 +281,16 @@ public class ImageSteg implements Steganography {
      * given to the constructor of ImageSteg.
      * @param image image to potentially encode bytes in
      * @return the payload-capacity of image
+     * @throws IOException if an error occurs during reading the image
+     * @throws NoImageException if no image could be read from the image
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
      */
     public int getImageCapacity(byte[] image)
             throws IOException, NoImageException, UnsupportedImageTypeException {
 
-        BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
-
-        int capacity = getEncoder(bufferedImage, DEFAULT_SEED).getOverlay().available() / 8;
+        int capacity = new ImageStegIOJava(image, this.useTransparent)
+                .getEncoder(DEFAULT_SEED)
+                .getOverlay().available() / 8;
 
         return this.useDefaultHeader ? (capacity - 8) : capacity;
     }
@@ -283,129 +298,6 @@ public class ImageSteg implements Steganography {
     ////////////////////////////////////////////////////////////////////////////////////////////
     //                                       UTIL
     ////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
-     * @param bufferedImage image to get the encoder for
-     * @param seed to hand to the overlay
-     * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
-     * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
-     */
-    private BuffImgEncoder getEncoder(BufferedImage bufferedImage, long seed)
-            throws UnsupportedImageTypeException {
-
-        int type = bufferedImage.getType();
-
-        switch (type) {
-
-            // Types for PixelBit Algorithm
-            //----------------------------------------------------------------------------------
-            case BufferedImage.TYPE_4BYTE_ABGR:
-            case BufferedImage.TYPE_3BYTE_BGR:
-            case BufferedImage.TYPE_INT_ARGB:
-            case BufferedImage.TYPE_INT_RGB:
-            case BufferedImage.TYPE_INT_BGR:
-                return new PixelBit(getOverlay(bufferedImage, seed));
-
-            // Type(s) for ColorCouple Algorithm
-            //----------------------------------------------------------------------------------
-            case BufferedImage.TYPE_BYTE_INDEXED:
-                GIFTableDecoder tableDecoder = new GIFTableDecoder();
-                try {
-                    Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(
-                            tableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage,"gif"))
-                    );
-                    return new PixelIndex(new TableOverlay(bufferedImage, seed, colorCouple), colorCouple, seed);
-                } catch (IOException | ImageWritingException e) {
-                    e.printStackTrace();
-                }
-                // return overlay8Bit
-
-            // Types that have not been tested, but are probably suitable for PixelBit Algorithm
-            //----------------------------------------------------------------------------------
-            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
-            case BufferedImage.TYPE_INT_ARGB_PRE:
-                // TODO: Test those types (could not find them)
-                throw new UnsupportedImageTypeException("Image type is not supported because untested.");
-
-            // Types that will (probably) not be supported - explicit for completion reasons
-            //----------------------------------------------------------------------------------
-            case BufferedImage.TYPE_BYTE_BINARY:
-            case BufferedImage.TYPE_BYTE_GRAY:
-            case BufferedImage.TYPE_CUSTOM:
-            case BufferedImage.TYPE_USHORT_555_RGB:
-            case BufferedImage.TYPE_USHORT_565_RGB:
-            case BufferedImage.TYPE_USHORT_GRAY:
-            default:
-                throw new UnsupportedImageTypeException("Image type (BufferedImage.TYPE = " + type + ") is not supported");
-        }
-    }
-
-    /**
-     * Returns overlay according to global variable useTransparent
-     * @param bufferedImage BufferedImage to hand to overlay
-     * @param seed Seed to hand to overlay
-     * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
-     * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
-     */
-    private PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
-        return this.useTransparent ?
-                new ShuffleOverlay(bufferedImage, seed) :
-                new RemoveTransparentShuffleOverlay(bufferedImage, seed);
-    }
-
-    private BuffImgAndFormat carrier2BufferedImage(byte[] carrier)
-            throws IOException, NoImageException, UnsupportedImageTypeException {
-
-        BuffImgAndFormat buffImgAndFormat;
-
-        try(ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier))) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
-
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-
-                if (!formatSupported(reader.getFormatName()))
-                    throw new UnsupportedImageTypeException(
-                                    "The Image format (" +
-                                    reader.getFormatName() +
-                                    ") is not supported."
-                    );
-
-                try {
-                    reader.setInput(imageInputStream);
-
-                    BufferedImage buffImg = reader.read(0);
-
-                    if (reader.getFormatName().equalsIgnoreCase("bmp") && buffImg.getColorModel().hasAlpha())
-                        throw new UnsupportedImageTypeException(
-                                "Image format (bmp containing transparency) is not supported."
-                        );
-
-                    buffImgAndFormat = new BuffImgAndFormat(buffImg, reader.getFormatName());
-
-                } finally {
-                    reader.dispose();
-                }
-            } else {
-                throw new NoImageException("No image could be read from input.");
-            }
-        }
-
-        return buffImgAndFormat;
-    }
-
-    private byte[] bufferedImage2byteArray(BufferedImage image, String format)
-            throws IOException, ImageWritingException {
-
-        ByteArrayOutputStream resultImage = new ByteArrayOutputStream();
-
-        if (!ImageIO.write(image, format, resultImage)) {
-            throw new ImageWritingException("Could not write image. Unknown, internal error");
-        }
-
-        return resultImage.toByteArray();
-    }
 
     private byte[] int2bytes(int integer) {
         return new byte[] {
@@ -423,27 +315,151 @@ public class ImageSteg implements Steganography {
                 (b[0] & 0xFF) << 24;
     }
 
-    private boolean formatSupported(String formatName) {
-        return ImageSteg.supportedFormats.contains(formatName);
-    }
+    // TODO: OBSOLETE?
+    // /**
+    //  * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
+    //  * @param bufferedImage image to get the encoder for
+    //  * @param seed to hand to the overlay
+    //  * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
+    //  * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
+    //  */
+    // private BuffImgEncoder getEncoder(BufferedImage bufferedImage, long seed)
+    //         throws UnsupportedImageTypeException {
+    //
+    //     int type = bufferedImage.getType();
+    //
+    //     switch (type) {
+    //
+    //         // Types for PixelBit Algorithm
+    //         //----------------------------------------------------------------------------------
+    //         case BufferedImage.TYPE_4BYTE_ABGR:
+    //         case BufferedImage.TYPE_3BYTE_BGR:
+    //         case BufferedImage.TYPE_INT_ARGB:
+    //         case BufferedImage.TYPE_INT_RGB:
+    //         case BufferedImage.TYPE_INT_BGR:
+    //             return new PixelBit(getOverlay(bufferedImage, seed));
+    //
+    //         // Type(s) for ColorCouple Algorithm
+    //         //----------------------------------------------------------------------------------
+    //         case BufferedImage.TYPE_BYTE_INDEXED:
+    //             GIFTableDecoder tableDecoder = new GIFTableDecoder();
+    //             try {
+    //                 Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(
+    //                         tableDecoder.saveColorTable(bufferedImage2byteArray(bufferedImage,"gif"))
+    //                 );
+    //                 return new PixelIndex(new TableOverlay(bufferedImage, seed, colorCouple), colorCouple, seed);
+    //             } catch (IOException | ImageWritingException e) {
+    //                 e.printStackTrace();
+    //             }
+    //             // return overlay8Bit
+    //
+    //         // Types that have not been tested, but are probably suitable for PixelBit Algorithm
+    //         //----------------------------------------------------------------------------------
+    //         case BufferedImage.TYPE_4BYTE_ABGR_PRE:
+    //         case BufferedImage.TYPE_INT_ARGB_PRE:
+    //             // TODO: Test those types (could not find them)
+    //             throw new UnsupportedImageTypeException("Image type is not supported because untested.");
+    //
+    //         // Types that will (probably) not be supported - explicit for completion reasons
+    //         //----------------------------------------------------------------------------------
+    //         case BufferedImage.TYPE_BYTE_BINARY:
+    //         case BufferedImage.TYPE_BYTE_GRAY:
+    //         case BufferedImage.TYPE_CUSTOM:
+    //         case BufferedImage.TYPE_USHORT_555_RGB:
+    //         case BufferedImage.TYPE_USHORT_565_RGB:
+    //         case BufferedImage.TYPE_USHORT_GRAY:
+    //         default:
+    //             throw new UnsupportedImageTypeException("Image type (BufferedImage.TYPE = " + type + ") is not supported");
+    //     }
+    // }
+    //
+    // /**
+    //  * Returns overlay according to global variable useTransparent
+    //  * @param bufferedImage BufferedImage to hand to overlay
+    //  * @param seed Seed to hand to overlay
+    //  * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
+    //  * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
+    //  */
+    // private PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
+    //     return this.useTransparent ?
+    //             new ShuffleOverlay(bufferedImage, seed) :
+    //             new RemoveTransparentShuffleOverlay(bufferedImage, seed);
+    // }
+    //
+    // private BuffImgAndFormat carrier2BufferedImage(byte[] carrier)
+    //         throws IOException, NoImageException, UnsupportedImageTypeException {
+    //
+    //     BuffImgAndFormat buffImgAndFormat;
+    //
+    //     try(ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier))) {
+    //         Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+    //
+    //         if (readers.hasNext()) {
+    //             ImageReader reader = readers.next();
+    //
+    //             if (!formatSupported(reader.getFormatName()))
+    //                 throw new UnsupportedImageTypeException(
+    //                                 "The Image format (" +
+    //                                 reader.getFormatName() +
+    //                                 ") is not supported."
+    //                 );
+    //
+    //             try {
+    //                 reader.setInput(imageInputStream);
+    //
+    //                 BufferedImage buffImg = reader.read(0);
+    //
+    //                 if (reader.getFormatName().equalsIgnoreCase("bmp") && buffImg.getColorModel().hasAlpha())
+    //                     throw new UnsupportedImageTypeException(
+    //                             "Image format (bmp containing transparency) is not supported."
+    //                     );
+    //
+    //                 buffImgAndFormat = new BuffImgAndFormat(buffImg, reader.getFormatName());
+    //
+    //             } finally {
+    //                 reader.dispose();
+    //             }
+    //         } else {
+    //             throw new NoImageException("No image could be read from input.");
+    //         }
+    //     }
+    //
+    //     return buffImgAndFormat;
+    // }
+    //
+    // private byte[] bufferedImage2byteArray(BufferedImage image, String format)
+    //         throws IOException, ImageWritingException {
+    //
+    //     ByteArrayOutputStream resultImage = new ByteArrayOutputStream();
+    //
+    //     if (!ImageIO.write(image, format, resultImage)) {
+    //         throw new ImageWritingException("Could not write image. Unknown, internal error");
+    //     }
+    //
+    //     return resultImage.toByteArray();
+    // }
 
-    private static class BuffImgAndFormat {
-
-        private final BufferedImage bufferedImage;
-
-        private final String format;
-
-        public BuffImgAndFormat(BufferedImage bufferedImage, String format) {
-            this.bufferedImage = bufferedImage;
-            this.format = format;
-        }
-
-        public BufferedImage getBufferedImage() {
-            return bufferedImage;
-        }
-
-        public String getFormat() {
-            return format;
-        }
-    }
+    // private boolean formatSupported(String formatName) {
+    //     return ImageSteg.supportedFormats.contains(formatName);
+    // }
+    //
+    // private static class BuffImgAndFormat {
+    //
+    //     private final BufferedImage bufferedImage;
+    //
+    //     private final String format;
+    //
+    //     public BuffImgAndFormat(BufferedImage bufferedImage, String format) {
+    //         this.bufferedImage = bufferedImage;
+    //         this.format = format;
+    //     }
+    //
+    //     public BufferedImage getBufferedImage() {
+    //         return bufferedImage;
+    //     }
+    //
+    //     public String getFormat() {
+    //         return format;
+    //     }
+    // }
 }
