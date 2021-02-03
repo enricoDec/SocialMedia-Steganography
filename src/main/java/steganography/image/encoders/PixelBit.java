@@ -119,11 +119,11 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     /**
-     * In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
-     * If it is false, the pixel represents a bit-value of 0.<br/><br/>
-     * Returns true, if the sum of the individual bytes of pixelARGB is an uneven number.<br/>
-     * Differently put: It determines whether the amount of 1's in the least significant bits
-     * of each individual byte of pixelARGB is uneven.
+     * <p>In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
+     * If it is false, the pixel represents a bit-value of 0.</p>
+     * <p>Returns true, if the sum of the individual bytes of pixelARGB is an uneven number ((A+R+G+B) mod 2 == 1).</p>
+     * <p>Differently put: It determines whether the amount of 1's in the least significant bits
+     * of each individual byte of pixelARGB is uneven.</p>
      * @param pixelARGB pixel that represents a bit.
      * @return true if the given pixel represents a 1 bit.
      */
@@ -137,10 +137,10 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     /**
-     * Changes the value of a random color channel (ARGB) of the given pixel
-     * by +1 or -1 (randomly, but w/o overflow).<br/><br/>
-     * Since a pixel represents a bit, this method "flips" it.
-     * (By changing the outcome of (A+R+G+B) & 1 == 0)
+     * <p>Changes the value of a random color channel (ARGB) of the given pixel
+     * by +1 or -1 (randomly, but w/o overflow).</p>
+     * <p>Since a pixel represents a bit, this method "flips" it.
+     * (By changing the outcome of (A+R+G+B) & 1 == 0)</p>
      * @param pixelARGB the pixelValue to change
      */
     protected int changePixelValue(int pixelARGB) {

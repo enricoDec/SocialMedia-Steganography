@@ -21,6 +21,10 @@ package steganography.image.encoders;
 import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.overlays.PixelCoordinateOverlay;
 
+/**
+ * This is a superclass to algorithms which encode and decode payloads into images using BufferedImage as
+ * image representation
+ */
 public abstract class BuffImgEncoder {
 
     protected PixelCoordinateOverlay overlay;
@@ -42,8 +46,8 @@ public abstract class BuffImgEncoder {
 
     /**
      * Decodes pixels in the sequence provided by the overlay
-     * given to the constructor, according to its algorithm
-     * and returns the result as a byte array.
+     * (given to the constructor) according to its algorithm.
+     * Returns the result as a byte array.
      * Decoding will continue until the byte arrays length is
      * equal to bLength.
      * @param bLength number of bytes to decode
