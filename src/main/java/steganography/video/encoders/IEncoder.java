@@ -25,7 +25,6 @@ public interface IEncoder {
 
     /**
      * Encodes a List of images to a Video
-     * Current implementation uses a lossless codec
      *
      * @param stegImages list of Stenographic images
      * @return Encoded Video byte[]

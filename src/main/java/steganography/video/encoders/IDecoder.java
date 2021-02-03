@@ -25,7 +25,6 @@ public interface IDecoder {
 
     /**
      * Decode a Video to single Pictures (that can be read as Buff Images) as byte[]
-     * Current implementation supports many codecs
      *
      * @param nThread number of Threads to use to decode
      * @return list of pictures decoded from Video
