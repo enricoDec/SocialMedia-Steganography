@@ -150,22 +150,8 @@ public class PixelBit extends BuffImgEncoder {
         int channelPick = rng.nextInt(this.numOfChannels) * 8;
         // extract the byte of picked channel
         int channel = ((pixelARGB >> channelPick) & 0xff);
-
-        // check if addition or subtraction would cause overflow
-        // and prevent it
-        int addition;
-            // if all bits are 1, subtract 1
-        if ((channel & 0xff) == 0xff) {
-            addition = -1;
-            // if all bits are 0, add 1
-        } else if (channel == 0) {
-            addition = 1;
-        } else {
-            // if there is no overflow add or subtract 1 at random
-            addition = (rng.nextBoolean() ? 1 : -1);
-        }
-        channel += addition;
-
+        // Flip LSB: LSB == 1 ? LSB = 0 : LSB = 1
+        channel = channel ^ 1;
         // put modified byte back to its place in the int
         return (pixelARGB | (0xff << channelPick)) & ~((~channel & 0xff) << channelPick);
         // overwrite previous picked byte in original int (pxInt) with 1111 1111

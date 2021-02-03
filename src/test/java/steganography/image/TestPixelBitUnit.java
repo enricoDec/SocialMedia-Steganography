@@ -76,6 +76,53 @@ public class TestPixelBitUnit {
         Assertions.assertEquals(payloadByte, (byte) ~resultByte);
     }
 
+
+
+    @Test
+    void testFlipAll8IntegersToMatchPayloadNoOverflow() throws ImageCapacityException {
+        int[] input = new int[8];
+        for (int i = 0; i < input.length-2; i+=2) {
+            input[i] = 0;
+            input[i+1] = 0xffffffff;
+        }
+
+        // fill payload to mismatch input
+        byte payloadByte = 0;
+        for (int value : input) {
+            payloadByte = (byte) (payloadByte << 1);
+            if (!PixelBit.pixelIsOne(value))
+                payloadByte = (byte) (payloadByte | 1);
+        }
+
+        MockOverlay mockOverlay = new MockOverlay(input);
+        PixelBit encoder = new PixelBit(mockOverlay);
+
+        encoder.encode(new byte[]{payloadByte});
+
+        // check if pixels are all flipped (see if-condition)
+        int[] output = mockOverlay.getMockPixels();
+        byte resultByte = 0;
+        for (int value : output) {
+            resultByte = (byte) (resultByte << 1);
+            if (PixelBit.pixelIsOne(value))
+                resultByte = (byte) (resultByte | 1);
+        }
+
+        Assertions.assertEquals(payloadByte, resultByte);
+        for (int i = 0; i < output.length-2; i+=2) {
+            // none of the zeros have overflown to 255
+            Assertions.assertNotEquals(255, output[i]);
+            Assertions.assertNotEquals(255, output[i] >> 8);
+            Assertions.assertNotEquals(255, output[i] >> 16);
+            Assertions.assertNotEquals(255, output[i] >> 24);
+            // none of the 255s have overflown to 0
+            Assertions.assertNotEquals(0 , output[i+1]);
+            Assertions.assertNotEquals(0 , output[i+1] >> 8);
+            Assertions.assertNotEquals(0 , output[i+1] >> 16);
+            Assertions.assertNotEquals(0 , output[i+1] >> 24);
+        }
+    }
+
     @Test
     void testFlipNoneOf8IntegersToMatchPayload() throws ImageCapacityException {
         Random random = new Random();
