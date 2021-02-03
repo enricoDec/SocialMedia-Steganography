@@ -7,6 +7,8 @@ import steganography.exceptions.UnknownStegFormatException;
  * Project name : ProjektSteganography
  * @version : 1.0
  * @since : 05.01.21
+ * <p>
+ * Thrown if if the Frame is Empty
  **/
 public class EmptyFrameException extends UnknownStegFormatException {
 

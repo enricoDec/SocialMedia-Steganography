@@ -26,9 +26,9 @@ public interface IEncoder {
     /**
      * Encodes a List of images to a Video
      *
-     * @param stegImages list of Stenographic images
+     * @param stegImages List of Stenographic images
      * @return Encoded Video byte[]
-     * @throws IOException IOException
+     * @throws IOException if a read or write fails
      */
     byte[] imagesToVideo(List<byte[]> stegImages) throws IOException;
 }

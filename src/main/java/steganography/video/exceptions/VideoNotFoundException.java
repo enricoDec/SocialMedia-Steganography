@@ -7,6 +7,8 @@ import steganography.exceptions.MediaNotFoundException;
  * Project name : ProjektSteganography
  * @version : 1.0
  * @since : 05.01.21
+ * <p>
+ * Thrown if a Video stream was not found in the given video carrier
  **/
 public class VideoNotFoundException extends MediaNotFoundException {
 

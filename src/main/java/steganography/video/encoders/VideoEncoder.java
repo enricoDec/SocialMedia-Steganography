@@ -53,9 +53,9 @@ public class VideoEncoder implements IEncoder {
     /**
      * Encode a list of images to a video
      *
-     * @param stegImages list of images to be encoded
+     * @param stegImages List of images to be encoded
      * @return Encoded Video as .avi
-     * @throws IOException IOException
+     * @throws IOException If a read or write fails
      */
     public byte[] imagesToVideo(List<byte[]> stegImages) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");

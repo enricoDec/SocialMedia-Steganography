@@ -102,9 +102,9 @@ public class VideoSteg implements Steganography {
     /**
      * Encodes a given list of byte[] of Pictures using the "Henk-Algorithm"
      *
-     * @param imageList list of Pictures as byte[]
-     * @param payload   payload (secret) as byte[]
-     * @param seed      seed to be used for distribution
+     * @param imageList List of Pictures as byte[]
+     * @param payload   Payload (secret) as byte[]
+     * @param seed      Seed to be used for distribution
      * @return Encoded list of Pictures
      */
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed)
@@ -405,13 +405,5 @@ public class VideoSteg implements Steganography {
      */
     private void log(String message) {
         System.out.println(message);
-    }
-
-    public void setFfmpegBin(File ffmpegBin) {
-        this.ffmpegBin = ffmpegBin;
-    }
-
-    public File getFfmpegBin() {
-        return ffmpegBin;
     }
 }
