@@ -93,5 +93,4 @@ public abstract class SocialMedia {
 
     public abstract List<String> getAllSubscribedKeywords();
 
-    public abstract void setBlogName(String blogname);
 }

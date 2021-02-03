@@ -15,21 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
+
 package socialmediasteganography;
 
 
 import apis.MediaType;
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
 import apis.tumblr.Tumblr;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
+import steganography.exceptions.MediaCapacityException;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.MediaReassemblingException;
+import steganography.exceptions.UnsupportedMediaTypeException;
 import steganography.image.ImageSteg;
 import steganography.util.ByteArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,76 +43,44 @@ import java.util.List;
  * @author Mario Teklic
  */
 
-/*
+
 public class App {
     public static void main(String[] args) throws IOException {
-        //JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
-        /**
-         * Setup Tumblr Client
-         */ /*
-        SocialMedia socialMedia = new Tumblr();
-        socialMedia.setBlogName("mariofenzl");
-
-        /**
-         * encode and post png on tumblr
-         */ /*
-        socialMedia.setMediaType(MediaType.PNG);
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
-        //Carrier, Payload
-        byte[] bytes = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
-        String payload = "hallo";
-        //Encode and Post
-        sms.encodeAndPost(socialMedia, bytes, payload.getBytes());
+        String payload = "hallotest";
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl();
 
 
-        /**
-         * encode and post gif on Tumblr
-         */ /*
-        // TODO MediaType in SocialMediaSteganography.encodeAndPost als parameter übergeben
-        //  socialMedia.setMediaType(MediaType.GIF);
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
-        //Carrier, Payload
-        File gifFile = new File("src/main/java/apis/tumblr/medias/simpson.gif");
-        byte[] gifByte = ByteArrayUtils.read(gifFile);
-        String payload = "hallo";
-        //Encode and Post
-        sms.encodeAndPost(socialMedia, gifByte, payload.getBytes());
-
-        /**
-         * encode and post mp3 on Tumblr
-         */
-        /*socialMedia.setMediaType(MediaType.MP3);
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new MP3Steganography());
-        //Carrier, Payload
-        File gifFile = new File("src/main/java/apis/tumblr/medias/audiotest.mp3");
-        BufferedImage bufferedImage = ImageIO.read(gifFile);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "gif", byteArrayOutputStream);
-        byte[] gifData = byteArrayOutputStream.toByteArray();
-        String payload = "hallo";
-        //Encode and Post
-        sms.encodeAndPost(socialMedia, gifData, payload.getBytes());
+        //encode and post png
+        /*try {
+            sms.encodeAndPost(APINames.TUMBLR, "katze",
+                    "/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/katze.png",
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG);
+        } catch (UnsupportedMediaTypeException e) {
+            e.printStackTrace();
+        } catch (MediaNotFoundException e) {
+            e.printStackTrace();
+        } catch (MediaReassemblingException e) {
+            e.printStackTrace();
+        } catch (MediaCapacityException e) {
+            e.printStackTrace();
+        }*/
 
 
-        /**
-         * encode and post mp4 on Tumblr
-         */
-        /*socialMedia.setMediaType(MediaType.MP4);
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new VideoSteg());
-        //Carrier, Payload
-        File videoFile = new File("src/main/java/apis/tumblr/medias/test.mp4");
-        FileInputStream fileInputStream = null;
-        fileInputStream = new FileInputStream(videoFile);
-        byte[] videoData = IOUtils.toByteArray(fileInputStream);
-        String payload = "hallo";
-        //Encode and Post
-        sms.encodeAndPost(socialMedia, videoData, payload.getBytes());*/
+        //encode and post mp3
+        /*try {
+            sms.encodeAndPost(APINames.TUMBLR, "katze",
+                    "/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/mp3ToDecode.mp3",
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.MP3);
+        } catch (UnsupportedMediaTypeException e) {
+            e.printStackTrace();
+        } catch (MediaNotFoundException e) {
+            e.printStackTrace();
+        } catch (MediaReassemblingException e) {
+            e.printStackTrace();
+        } catch (MediaCapacityException e) {
+            e.printStackTrace();
+        }*/
 
-        /**
-         * test to decode uploaded picture
-         */
-/*
     }
 }
-*/
