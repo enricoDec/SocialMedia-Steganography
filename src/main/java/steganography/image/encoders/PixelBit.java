@@ -119,11 +119,11 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     /**
-     * In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
-     * If it is false, the pixel represents a bit-value of 0.<br/><br/>
-     * Returns true, if the sum of the individual bytes of pixelARGB is an uneven number.<br/>
-     * Differently put: It determines whether the amount of 1's in the least significant bits
-     * of each individual byte of pixelARGB is uneven.
+     * <p>In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
+     * If it is false, the pixel represents a bit-value of 0.</p>
+     * <p>Returns true, if the sum of the individual bytes of pixelARGB is an uneven number ((A+R+G+B) mod 2 == 1).</p>
+     * <p>Differently put: It determines whether the amount of 1's in the least significant bits
+     * of each individual byte of pixelARGB is uneven.</p>
      * @param pixelARGB pixel that represents a bit.
      * @return true if the given pixel represents a 1 bit.
      */
@@ -137,10 +137,10 @@ public class PixelBit extends BuffImgEncoder {
     }
 
     /**
-     * Changes the value of a random color channel (ARGB) of the given pixel
-     * by +1 or -1 (randomly, but w/o overflow).<br/><br/>
-     * Since a pixel represents a bit, this method "flips" it.
-     * (By changing the outcome of (A+R+G+B) & 1 == 0)
+     * <p>Changes the value of a random color channel (ARGB) of the given pixel
+     * by +1 or -1 (randomly, but w/o overflow).</p>
+     * <p>Since a pixel represents a bit, this method "flips" it.
+     * (By changing the outcome of (A+R+G+B) & 1 == 0)</p>
      * @param pixelARGB the pixelValue to change
      */
     protected int changePixelValue(int pixelARGB) {
@@ -150,22 +150,8 @@ public class PixelBit extends BuffImgEncoder {
         int channelPick = rng.nextInt(this.numOfChannels) * 8;
         // extract the byte of picked channel
         int channel = ((pixelARGB >> channelPick) & 0xff);
-
-        // check if addition or subtraction would cause overflow
-        // and prevent it
-        int addition;
-            // if all bits are 1, subtract 1
-        if ((channel & 0xff) == 0xff) {
-            addition = -1;
-            // if all bits are 0, add 1
-        } else if (channel == 0) {
-            addition = 1;
-        } else {
-            // if there is no overflow add or subtract 1 at random
-            addition = (rng.nextBoolean() ? 1 : -1);
-        }
-        channel += addition;
-
+        // Flip LSB: LSB == 1 ? LSB = 0 : LSB = 1
+        channel = channel ^ 1;
         // put modified byte back to its place in the int
         return (pixelARGB | (0xff << channelPick)) & ~((~channel & 0xff) << channelPick);
         // overwrite previous picked byte in original int (pxInt) with 1111 1111

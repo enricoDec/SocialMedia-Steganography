@@ -24,10 +24,12 @@ import java.io.IOException;
 
 public interface Steganography {
     /**
-     * Takes some data and conceals it in a carrier (container used to hide data).
-     * @param carrier carrier used to hide the data
+     * Encodes the given payload in the given carrier (image, mp3, ...) and returns the result.
+     * The format of the returned media will be the same as carrier. Carrier needs to be an exact media representation
+     * as it would be read from a file by an InputStream.
+     * @param carrier media used to hide the payload
      * @param payload data to hide
-     * @return steganographic data
+     * @return steganographic data - exact media representation. Can be stored as it is to a file to open externally
      * @throws IOException if a problem occurs during reading of carrier or payload
      * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from carrier
      * @throws UnsupportedMediaTypeException if the Media Type (e.g. JPG) is not supported
@@ -39,7 +41,11 @@ public interface Steganography {
                     MediaReassemblingException, MediaCapacityException;
 
     /**
-     * Takes some data and conceals it in a carrier (container used to hide data) according to the given seed.
+     * <p>Encodes the given payload in the given carrier (image, mp3, ...) and returns the result.
+     * The format of the returned media will be the same as carrier. Carrier needs to be an exact media representation
+     * as it would be read from a file by an InputStream.</p>
+     * <p>The Seed changes the way the payload is encoded. When decoding the result, the exact same Seed needs to be
+     * given to decode()</p>
      * @param carrier carrier used to hide the data
      * @param payload data to hide
      * @param seed affects the resulting steganographic data (similar to a password)

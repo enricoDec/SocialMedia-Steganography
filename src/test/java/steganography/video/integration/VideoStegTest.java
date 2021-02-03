@@ -240,33 +240,6 @@ public class VideoStegTest {
     }
 
     /**
-     * Single Thread Test
-     * No Audio in Video
-     */
-
-    public void encoderIntegrationNoAudioSingleThreadTest() {
-        try {
-            VideoSteg videoSteg = new VideoSteg();
-            videoSteg.setDebug(true);
-            ImageIO.setUseCache(false);
-            videoSteg.setMaxEncodingThreads(1);
-            videoSteg.setMaxDecodingThreads(1);
-            byte[] encodedVideo = videoSteg.encode(ByteArrayUtils.read(carrier_no_audio), payload, 0);
-            Assertions.assertNotNull(encodedVideo);
-            Assertions.assertTrue(ByteArrayUtils.read(carrier_no_audio).length < encodedVideo.length);
-
-            Video stegVideo = new Video(encodedVideo, videoSteg.getFfmpegBin());
-            Assertions.assertFalse(stegVideo.hasAudioStream());
-
-            byte[] decodedPayload = videoSteg.decode(encodedVideo);
-            Assertions.assertTrue(Arrays.equals(ByteArrayUtils.read(carrier_no_audio), decodedPayload));
-        } catch (IOException | UnsupportedImageTypeException | NoImageException | ImageWritingException | ImageCapacityException | VideoCapacityException | VideoNotFoundException | UnsupportedVideoTypeException e) {
-            e.printStackTrace();
-            Assertions.fail("Video could ne be read");
-        }
-    }
-
-    /**
      * Try to encode a Large Payload in the carrier
      * Rand Test
      */
