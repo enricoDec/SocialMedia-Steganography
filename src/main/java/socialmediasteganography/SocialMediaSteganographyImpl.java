@@ -69,6 +69,9 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
 
     @Override
     public byte[] encodeCarrier(byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaCapacityException, MediaNotFoundException, MediaReassemblingException, IOException {
+        if (mediaType == null) {
+            throw new NullPointerException("Media Type is null");
+        }
        Steganography steganography = getSteganographyByMediaType(mediaType);
        if(steganography != null){
            if(seed == null) {
@@ -83,8 +86,10 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     public SocialMedia subscribeToSocialMedia(String keyword, APINames apiNames) {
         SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
         if(socialMedia != null){
-            socialMedia.subscribeToKeyword(keyword);
-            return socialMedia;
+            if (socialMedia.subscribeToKeyword(keyword)) {
+                return socialMedia;
+            }
+            return null;
         }
         throw new NullPointerException("Social Media is unsupported");
     }
@@ -93,7 +98,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     public byte[] decodeCarrier(MediaType mediaType, byte[] carrier) throws UnsupportedMediaTypeException, UnknownStegFormatException, MediaNotFoundException, IOException {
         Steganography steganography = getSteganographyByMediaType(mediaType);
         if(steganography != null){
-            if(seed != null) {
+            if(seed == null) {
                 return steganography.decode(carrier);
             }
             return steganography.decode(carrier, seed);
