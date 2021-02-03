@@ -407,10 +407,21 @@ public class VideoSteg implements Steganography {
         System.out.println(message);
     }
 
+    /**
+     * If another version or a different distribution of ffmpeg or ffprobe should be used
+     * you can set the File path here.
+     *
+     * @param ffmpegBin File pointing the Path of ffmpeg and ffprobe
+     */
     public void setFfmpegBin(File ffmpegBin) {
         this.ffmpegBin = ffmpegBin;
     }
 
+    /**
+     * Get path of ffmpeg bin
+     *
+     * @return File where ffmpeg is searched
+     */
     public File getFfmpegBin() {
         return ffmpegBin;
     }
