@@ -53,6 +53,14 @@ public class Video {
     private boolean hasAudioStream = false;
     private List<Long> ptsList = null;
 
+    /**
+     * Video POJO
+     *
+     * @param videoByteArray Video as byte array
+     * @param ffmpegBin      path to the bin of ffmpeg
+     * @throws VideoNotFoundException        If no Video found in the stream
+     * @throws UnsupportedVideoTypeException If found Video in the stream has not supported codec
+     */
     public Video(byte[] videoByteArray, File ffmpegBin) throws VideoNotFoundException, UnsupportedVideoTypeException {
         this.videoByteArray = videoByteArray;
         this.ffmpegBin = ffmpegBin;
@@ -66,7 +74,7 @@ public class Video {
 
 
     /**
-     * Uses FFProbe to read information about a Video and saves them as attributes
+     * Uses FFProbe to read information about a Video and saves them as attributes of this Object
      */
     private void analyseVideo() throws VideoNotFoundException {
         InputStream inputStream = new ByteArrayInputStream(videoByteArray);
@@ -105,54 +113,119 @@ public class Video {
         this.timebase = Long.valueOf(strings[1]);
     }
 
+    /**
+     * Get the frame rate of the Video
+     *
+     * @return frame rate as float
+     */
     public float getFrameRate() {
         return frameRate;
     }
 
+    /**
+     * Get the number of frames in the Video
+     *
+     * @return number of frames as integer
+     */
     public long getFrameCount() {
         return frameCount;
     }
 
+    /**
+     * Get the Frame Width
+     *
+     * @return frame width
+     */
     public int getFrameWidth() {
         return frameWidth;
     }
 
+    /**
+     * Get the Frame Height
+     *
+     * @return frame heigth
+     */
     public int getFrameHeight() {
         return frameHeight;
     }
 
+    /**
+     * Get the timebase of the Video
+     *
+     * @return timebase
+     */
     public Long getTimebase() {
         return timebase;
     }
 
+    /**
+     * Get the Audio stream of the Video (only one stream supported)
+     *
+     * @return get audio of video
+     */
     public File getAudioFile() {
         return audioFile;
     }
 
+    /**
+     * Set the audio file of the Video
+     *
+     * @param audioFile File of audio
+     */
     public void setAudioFile(File audioFile) {
         this.audioFile = audioFile;
     }
 
+    /**
+     * Get the byte array of the Video
+     *
+     * @return video as byte array
+     */
     public byte[] getVideoByteArray() {
         return videoByteArray;
     }
 
+    /**
+     * Get the Codec of the Video
+     *
+     * @return codec
+     */
     public String getCodec() {
         return codec;
     }
 
+    /**
+     * Get the format of the pixels of the Video as String
+     *
+     * @return pixel format
+     */
     public String getPixelformat() {
         return pixelformat;
     }
 
+    /**
+     * Returns true if video has audio stream, else false
+     *
+     * @return if Video has audio stream
+     */
     public boolean hasAudioStream() {
         return hasAudioStream;
     }
 
+    /**
+     * Get list of pts
+     *
+     * @return pts list
+     */
     public List<Long> getPtsList() {
         return ptsList;
     }
 
+    /**
+     * Set pts
+     *
+     * @param ptsList pts list
+     */
     public void setPtsList(List<Long> ptsList) {
         this.ptsList = ptsList;
     }

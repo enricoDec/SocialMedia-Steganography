@@ -28,6 +28,8 @@ import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
+import steganography.video.encoders.IDecoder;
+import steganography.video.encoders.IEncoder;
 import steganography.video.encoders.VideoDecoder;
 import steganography.video.encoders.VideoEncoder;
 import steganography.video.exceptions.UnsupportedVideoTypeException;
@@ -80,7 +82,7 @@ public class VideoSteg implements Steganography {
         //Decode Video to Single Frames
         Video video = new Video(carrier, ffmpegBin);
         //List used to save the single frames decoded from the carrier
-        VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
+        IDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
         List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
         if (debug) {
             log("Decoding Video Frames to images....");
@@ -93,16 +95,16 @@ public class VideoSteg implements Steganography {
             log("All " + stegImagesList.size() + " images encoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
         }
         //Encode Images to Video
-        VideoEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
+        IEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
         return videoEncoder.imagesToVideo(stegImagesList);
     }
 
     /**
      * Encodes a given list of byte[] of Pictures using the "Henk-Algorithm"
      *
-     * @param imageList list of Pictures as byte[]
-     * @param payload   payload (secret) as byte[]
-     * @param seed      seed to be used for distribution
+     * @param imageList List of Pictures as byte[]
+     * @param payload   Payload (secret) as byte[]
+     * @param seed      Seed to be used for distribution
      * @return Encoded list of Pictures
      */
     private List<byte[]> encodeUsingHenkAlgo(List<byte[]> imageList, byte[] payload, long seed)
@@ -205,7 +207,7 @@ public class VideoSteg implements Steganography {
         Video video = new Video(steganographicData, ffmpegBin);
 
         //Decode Video Frames to pictures
-        VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
+        IDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
         List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
 
         return decodeUsingHenkAlgo(imageList, seed);
@@ -405,10 +407,21 @@ public class VideoSteg implements Steganography {
         System.out.println(message);
     }
 
+    /**
+     * If another version or a different distribution of ffmpeg or ffprobe should be used
+     * you can set the File path here.
+     *
+     * @param ffmpegBin File pointing the Path of ffmpeg and ffprobe
+     */
     public void setFfmpegBin(File ffmpegBin) {
         this.ffmpegBin = ffmpegBin;
     }
 
+    /**
+     * Get path of ffmpeg bin
+     *
+     * @return File where ffmpeg is searched
+     */
     public File getFfmpegBin() {
         return ffmpegBin;
     }

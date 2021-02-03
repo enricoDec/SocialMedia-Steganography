@@ -7,6 +7,8 @@ import steganography.exceptions.MediaCapacityException;
  * Project name : ProjektSteganography
  * @version : 1.0
  * @since : 05.01.21
+ * <p>
+ * Thrown if the capacity of the Video carrier is not enough to encode the given payload
  **/
 public class VideoCapacityException extends MediaCapacityException {
 

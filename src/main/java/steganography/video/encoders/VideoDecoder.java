@@ -46,6 +46,11 @@ public class VideoDecoder implements IDecoder {
     private final boolean logging;
     Video video;
 
+    /**
+     * @param video     Video to be decoded
+     * @param ffmpegBin path to bin of ffmpeg
+     * @param logging   if logging should be enabled
+     */
     public VideoDecoder(Video video, File ffmpegBin, boolean logging) {
         this.ffmpegBin = ffmpegBin;
         this.videoByteArray = video.getVideoByteArray();
@@ -54,13 +59,13 @@ public class VideoDecoder implements IDecoder {
     }
 
     /**
-     * Decode a Video into a list of single Pictures
+     * Decode a Video into a list of single Pictures that can be encoded
      *
-     * @return list of pictures
-     * @throws IllegalArgumentException IllegalArgumentException
-     * @throws IOException              IOException
+     * @param nThread number of threads to be used to decode
+     * @return List of pictures from single frames of Video
+     * @throws IOException if a read or write fails
      */
-    public List<byte[]> toPictureByteArray(int nThread) throws IllegalArgumentException, IOException {
+    public List<byte[]> toPictureByteArray(int nThread) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
         //Temp file to save muxed audio channel

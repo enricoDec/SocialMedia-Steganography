@@ -7,6 +7,8 @@ import steganography.exceptions.UnsupportedMediaTypeException;
  * Project name : ProjektSteganography
  * @version : 1.0
  * @since : 05.01.21
+ * <p>
+ * Thrown if the used encoding is not supported
  **/
 public class UnsupportedVideoTypeException extends UnsupportedMediaTypeException {
 
