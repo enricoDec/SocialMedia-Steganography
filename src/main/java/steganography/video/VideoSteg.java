@@ -406,4 +406,12 @@ public class VideoSteg implements Steganography {
     private void log(String message) {
         System.out.println(message);
     }
+
+    public void setFfmpegBin(File ffmpegBin) {
+        this.ffmpegBin = ffmpegBin;
+    }
+
+    public File getFfmpegBin() {
+        return ffmpegBin;
+    }
 }
