@@ -69,7 +69,7 @@ public class GIFTableDecoder {
     private int[] globalColorTable(byte[] gif, int length) {
         int i = 13;
         int[] table = new int[(int) Math.pow(2,length + 1)];
-        if (table.length >= gif.length * 3) {
+
             for (int j = 0; j < table.length; j++) {
                 int color = 0xFF;
                 color = (color << 8) | gif[i];
@@ -80,7 +80,7 @@ public class GIFTableDecoder {
                 i++;
                 table[j] = color;
             }
-        }
+
         return table;
     }
 
