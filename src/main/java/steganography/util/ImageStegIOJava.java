@@ -22,18 +22,40 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * This Class exists to handle reading and writing of BufferedImages to and from byte arrays
+ * as well as choosing the appropriate encoders (and their overlays) for the given image. It holds on to the image
+ * during its en- or decoding.
+ */
 public class ImageStegIOJava implements ImageStegIO{
 
+    /**
+     * The given input. Remains unchanged throughout.
+     */
     private final byte[] input;
+
+    /**
+     * Info on whether to use an overlay that uses transparent pixels
+     */
     private final boolean useTransparent;
 
+    /**
+     * The BufferedImage to handle the In- and Output of
+     */
     private BufferedImage bufferedImage;
 
+    /**
+     * The format of the image as recognized while reading input
+     */
     private String format;
 
+    /**
+     * A set of supported formats to look up
+     */
     private static final Set<String> SUPPORTED_FORMATS = new HashSet<>(
             Arrays.asList("bmp", "BMP", "gif", "GIF", "png", "PNG")
     );
+/*
 
     public ImageStegIOJava(byte[] image)
             throws UnsupportedImageTypeException, IOException, NoImageException {
@@ -42,13 +64,19 @@ public class ImageStegIOJava implements ImageStegIO{
         this.useTransparent = false;
         processImage(this.input);
     }
+*/
 
-    public ImageStegIOJava(byte[] image, boolean useTransparent)
-            throws UnsupportedImageTypeException, IOException, NoImageException {
-
+    /**
+     * <p>This Class exists to handle reading and writing of BufferedImages to and from byte arrays
+     * as well as choosing the appropriate encoders (and their overlays) for the given image. It holds on to the image
+     * during its en- or decoding.</p>
+     * <p>The image will only be processed if the methods getFormat() or getEncoder() are called.</p>
+     * @param image the image to handle In- and Output of
+     * @param useTransparent if true, returned encoders will use fully transparent pixels
+     */
+    public ImageStegIOJava(byte[] image, boolean useTransparent) {
         this.input = image;
         this.useTransparent = useTransparent;
-        processImage(this.input);
     }
 
     private void processImage(byte[] carrier)
@@ -93,6 +121,13 @@ public class ImageStegIOJava implements ImageStegIO{
         return SUPPORTED_FORMATS.contains(formatName);
     }
 
+    /**
+     * <p>Returns the image in its current state (Output-Image) as a byte Array.</p>
+     * <p>If the image was not yet processed, return == input</p>
+     * @return the image in its current state as a byte array
+     * @throws IOException if there was an error during writing of BufferedImage to a byte array
+     * @throws ImageWritingException if the image was not written to a byte array for unknown reasons
+     */
     @Override
     public byte[] getImageAsByteArray() throws IOException, ImageWritingException {
         if (this.bufferedImage == null)
@@ -107,20 +142,36 @@ public class ImageStegIOJava implements ImageStegIO{
         return resultImage.toByteArray();
     }
 
+    /**
+     * <p>Returns the images format.</p>
+     * <p>Processes the image if necessary.</p>
+     * @return the images format (png, bmp, ...) as a String
+     * @throws UnsupportedImageTypeException if the image type read from input is not supported
+     * @throws IOException if there was an error during reading of input
+     * @throws NoImageException if no image could be read from input
+     */
     @Override
-    public String getFormat() {
+    public String getFormat() throws UnsupportedImageTypeException, IOException, NoImageException {
+        if (this.bufferedImage == null)
+            processImage(this.input);
+
         return this.format;
     }
 
      /**
-     * Determines and returns the suitable encoder (and overlay) for the given bufferedImage according to its type.
-     * @param seed to hand to the overlay
-     * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
-     * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
-     */
+      * <p>Determines and returns the suitable encoder (and overlay) for the image according to its type.</p>
+      * <p>Processes the image if it was not processed already.</p>
+      * @param seed to hand to the overlay
+      * @return BuffImgEncoder with set PixelCoordinateOverlay, chosen accordingly to the images type
+      * @throws UnsupportedImageTypeException if the images type is not supported by any known encoder / overlay
+      * @throws IOException if there was an error during reading of input
+      * @throws NoImageException if no image could be read from input
+      */
     @Override
     public BuffImgEncoder getEncoder(long seed)
-            throws UnsupportedImageTypeException {
+            throws UnsupportedImageTypeException, IOException, NoImageException {
+        if (this.bufferedImage == null)
+            processImage(this.input);
 
         int type = bufferedImage.getType();
 
@@ -170,7 +221,7 @@ public class ImageStegIOJava implements ImageStegIO{
     }
 
     /**
-     * Returns overlay according to global variable useTransparent
+     * Returns an overlay according to the global variable useTransparent
      * @param bufferedImage BufferedImage to hand to overlay
      * @param seed Seed to hand to overlay
      * @return ShuffleOverlay or RemoveTransparentShuffleOverlay

@@ -29,7 +29,12 @@ public abstract class BuffImgEncoder {
 
     protected PixelCoordinateOverlay overlay;
 
-    public BuffImgEncoder(PixelCoordinateOverlay overlay) throws IllegalArgumentException {
+    /**
+     * This is a superclass to algorithms which encode and decode payloads into images using BufferedImage as
+     * image representation
+     * @param overlay PixelCoordinateOverlay to get pixels from
+     */
+    public BuffImgEncoder(PixelCoordinateOverlay overlay) {
         this.overlay = overlay;
     }
 
@@ -41,15 +46,16 @@ public abstract class BuffImgEncoder {
      * Encodes the payload in the sequence of pixels provided by the overlay
      * given to the constructor.
      * @param payload payload or "message" to encode
+     * @throws ImageCapacityException if the payload is larger than the available pixels
      */
     public abstract void encode(byte[] payload) throws ImageCapacityException;
 
     /**
-     * Decodes pixels in the sequence provided by the overlay
+     * <p>Decodes pixels in the sequence provided by the overlay
      * (given to the constructor) according to its algorithm.
-     * Returns the result as a byte array.
-     * Decoding will continue until the byte arrays length is
-     * equal to bLength.
+     * Returns the result as a byte array.</p>
+     * <p>Decoding will continue until the byte arrays length is
+     * equal to bLength.</p>
      * @param bLength number of bytes to decode
      * @return decoded bytes
      */

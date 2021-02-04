@@ -22,9 +22,11 @@ import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;
 
 /**
- * Classes that implement this interface should be able to return pixels of a
+ * <p>Classes that implement this interface should be able to return pixels of a
  * given BufferedImage in an order independent from the coordinate system
- * of BufferedImage (Overlay).
+ * of BufferedImage (to act as an overlay).</p>
+ * <p>They are meant to be used by encoding algorithms (BuffImgEncoder), so
+ * arranging and en- / decoding pixels are separate procedures.</p>
  */
 public interface PixelCoordinateOverlay {
 
@@ -52,6 +54,7 @@ public interface PixelCoordinateOverlay {
 
     /**
      * Returns the BufferedImage this Object holds
+     * @return the BufferedImage this Object holds
      */
     BufferedImage getBufferedImage();
 }

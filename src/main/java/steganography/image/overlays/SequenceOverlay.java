@@ -37,6 +37,12 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
     protected int currentX = 0;
     protected int currentY = 0;
 
+    /**
+     * This class returns Pixels of the underlying Bitmap in order from top left (x=0, y=0)
+     * to bottom right (x=bitmap.getWidth(), y=bitmap.getHeight()).
+     * @param bufferedImage the BufferedImage to represent the pixels of.
+     * @throws UnsupportedImageTypeException if the type of bufferedImage is bnot supported by this overlay
+     */
     public SequenceOverlay(BufferedImage bufferedImage) throws UnsupportedImageTypeException {
         this.bufferedImage = bufferedImage;
 
@@ -52,25 +58,24 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
     }
 */
 
+    /**
+     * <p>Checks whether the type of the given image is accepted by this overlay.</p>
+     * <p>Overwritten by subclasses to apply their own rules for acceptance.</p>
+     * @param type representation of an image type as an int of BufferedImage.imageType
+     *             <p>(type doesn't matter, for this overlay, but it may for subclasses)</p>
+     * @return true if the images type is accepted by this overlay
+     */
     protected boolean typeAccepted(int type) {
-        // boolean accept;
-        //
-        // switch (type) {
-        //     case BufferedImage.TYPE_INT_ARGB:
-        //     case BufferedImage.TYPE_INT_RGB:
-        //     case BufferedImage.TYPE_INT_BGR:
-        //     case BufferedImage.TYPE_4BYTE_ABGR:
-        //         accept = true;
-        //         break;
-        //     default: accept = false;
-        // }
-        //
-        // return accept;
         int pixelSize = this.bufferedImage.getColorModel().getPixelSize();
 
         return pixelSize == 24 || pixelSize == 32;
     }
 
+    /**
+     * <p>Creates the overlay as an independent method to address pixels without using
+     * BufferedImages coordinates.</p>
+     * <p>Subclasses overwrite this method to use their own logic of creating the overlay.</p>
+     */
     protected void createOverlay() {
         this.pixelOrder =
                 IntStream.range(0, bufferedImage.getHeight() * bufferedImage.getWidth())
@@ -90,7 +95,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
         this.currentY = this.pixelOrder.get(this.currentPosition) / this.bufferedImage.getWidth();
         return this.bufferedImage.getRGB(this.currentX, this.currentY);
     }
-// Overflow bei berechnung des Color Couple und kleine unterschiede zwischen Get und set Pixel
+
     @Override
     public void setPixel(int value) {
         if (this.pixelOrder == null)
@@ -98,12 +103,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
 
         if (currentPosition < 0 || this.currentPosition >= this.pixelOrder.size())
             throw new NoSuchElementException("No pixel at current position.");
-        int getColor = (this.bufferedImage.getRGB(this.currentX, this.currentY));
         this.bufferedImage.setRGB(this.currentX, this.currentY, (value));
-
-            //System.out.println("In: Alpha= " + ((value >> 24) & 0xFF) + ", Red= " + ((value >> 16) & 0xFF) + ", Green= " + ((value >> 8) & 0xFF) + ", Blue= " + (value & 0xFF) + "\n" +
-              //      "Out: " + "Alpha= " + ((getColor >> 24) & 0xFF) + ", Red= " + ((getColor >> 16) & 0xFF) + ", Green= " + ((getColor >> 8) & 0xFF) + ", Blue= " + (getColor & 0xFF));
-
     }
 
     @Override
