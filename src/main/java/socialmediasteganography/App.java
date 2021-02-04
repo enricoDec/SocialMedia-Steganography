@@ -24,6 +24,7 @@ import apis.SocialMedia;
 import apis.models.APINames;
 import apis.models.Token;
 import apis.tumblr.Tumblr;
+import apis.tumblr.TumblrConstants;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
 import steganography.exceptions.MediaCapacityException;
@@ -39,20 +40,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Mario Teklic
- */
-
 
 public class App {
     public static void main(String[] args) throws IOException {
 
         String payload = "hallotest";
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl();
+        Tumblr.setApiKey("OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR");
+        Tumblr.setApiSecret("H2yGuhhwd7g6eXIYE0OHpkL7fEd9laDWPHArjipezGyq9dFheF");
+
+        //token in constants only for testing purpose
+        //Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
 
 
         //encode and post png
-        /*try {
+        try {
             sms.encodeAndPost(APINames.TUMBLR, "katze",
                     "/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/katze.png",
                     payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG);
@@ -64,7 +66,7 @@ public class App {
             e.printStackTrace();
         } catch (MediaCapacityException e) {
             e.printStackTrace();
-        }*/
+        }
 
 
         //encode and post mp3

@@ -45,83 +45,68 @@ public class Tumblr extends SocialMedia {
     private static final Logger logger = Logger.getLogger(Tumblr.class.getName());
 
 
-    private String accessToken = null;
-    private String accessTokenSecret = null;
+    private Token token;
     private boolean loggedIn = false;
+    static String apiKey = null;
+    static String apiSecret = null;
+    private final String callbackURL = "https://example.com";
 
-
-    JumblrClient tumblrClient;
-    String blogName;
-    List<String> postURLsForKeyword;
+    private JumblrClient tumblrClient;
+    private String blogName;
+    private List<String> postURLsForKeyword;
 
     List<String> tags = new ArrayList<>();
 
     public Tumblr(){
-        tumblrClient = new JumblrClient(TumblrConstants.apiKey, TumblrConstants.apiSecret);
-
-        try {
-            login();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        tumblrClient = new JumblrClient(apiKey, apiSecret);
+        this.token = new Token();
     }
 
 
     public void login() throws InterruptedException, ExecutionException, IOException {
 
+        final OAuth10aService service = new ServiceBuilder(apiKey)
+                .apiSecret(apiSecret)
+                .callback(this.callbackURL)
+                .build(TumblrApi.instance());
+        final Scanner in = new Scanner(System.in);
 
-        if (this.accessToken == null || this.accessTokenSecret == null){
-            final OAuth10aService service = new ServiceBuilder(TumblrConstants.apiKey)
-                    .apiSecret(TumblrConstants.apiSecret)
-                    .callback(TumblrConstants.callback)
-                    .build(TumblrApi.instance());
-            final Scanner in = new Scanner(System.in);
-
-            System.out.println("Enter the username of the Blog you want to log in");
-            this.blogName = in.nextLine();
+        System.out.println("Enter the username of the Blog you want to log in");
+        this.blogName = in.nextLine();
 
 
-            System.out.println("=== Tumblr's OAuth Workflow ===");
-            System.out.println();
+        System.out.println("=== Tumblr's OAuth Workflow ===");
+        System.out.println();
 
-            // Obtain the Request Token
-            System.out.println("Fetching the Request Token...");
-            final OAuth1RequestToken requestToken = service.getRequestToken();
-            System.out.println("Got the Request Token!");
-            System.out.println();
+        // Obtain the Request Token
+        System.out.println("Fetching the Request Token...");
+        final OAuth1RequestToken requestToken = service.getRequestToken();
+        System.out.println("Got the Request Token!");
+        System.out.println();
 
-            System.out.println("Now go and authorize ScribeJava here:");
-            System.out.println(service.getAuthorizationUrl(requestToken));
-            System.out.println("And paste the verifier here");
-            System.out.print(">>");
-            final String oauthVerifier = in.nextLine();
-            System.out.println();
-            System.out.println(oauthVerifier.length());
+        System.out.println("Now go and authorize ScribeJava here:");
+        System.out.println(service.getAuthorizationUrl(requestToken));
+        System.out.println("And paste the verifier here");
+        System.out.print(">>");
+        final String oauthVerifier = in.nextLine();
+        System.out.println();
 
-            // Trade the Request Token and Verifier for the Access Token
-            System.out.println("Trading the Request Token for an Access Token...");
-            final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
-            System.out.println("Got the Access Token!");
-            System.out.println("(The raw response looks like this: " + accessToken.getRawResponse() + "')");
-            System.out.println();
-            this.accessToken = accessToken.getToken();
-            this.accessTokenSecret = accessToken.getTokenSecret();
-            this.tumblrClient.setToken(this.accessToken, this.accessTokenSecret);
-            loggedIn = true;
-        } else {
-            System.out.println("already logged in");
-        }
-
+        // Trade the Request Token and Verifier for the Access Token
+        System.out.println("Trading the Request Token for an Access Token...");
+        final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
+        System.out.println("Got the Access Token!");
+        System.out.println("(The raw response looks like this: " + accessToken.getRawResponse() + "')");
+        System.out.println();
+        this.token.setAccessToken(accessToken.getToken());
+        this.token.setAccessTokenSecret(accessToken.getTokenSecret());
+        this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
+        loggedIn = true;
 
     }
 
     public void loginNewUser(){
-        this.accessToken = null;
-        this.accessTokenSecret = null;
+        this.token.setAccessToken(null);
+        this.token.setAccessTokenSecret(null);
         try {
             login();
         } catch (InterruptedException e) {
@@ -136,17 +121,34 @@ public class Tumblr extends SocialMedia {
 
     @Override
     public Token getToken() {
-        //only used for oAuth2 SocialMedias
-        return null;
+        return this.token;
     }
 
     @Override
     public void setToken(Token token) {
-        //only used for oAuth2 SocialMedias
+        this.token = token;
     }
 
+    public static void setApiKey(String key){
+        apiKey = key;
+    }
+
+    public static void setApiSecret(String secret){
+        apiSecret = secret;
+    }
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
+        if(this.token.getAccessToken() == null || this.token.getAccessTokenSecret() == null){
+            try {
+                login();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         Long postId = null;
         switch(mediaType){
             case MP3:
@@ -164,11 +166,18 @@ public class Tumblr extends SocialMedia {
     }
 
     @Override
+    public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token) {
+        setToken(token);
+        boolean bool = postToSocialNetwork(media, mediaType, keyword);
+        return bool;
+    }
+
+    @Override
     public boolean subscribeToKeyword(String keyword) {
 
             tags.add(keyword);
             for (Post post : tumblrClient.tagged(keyword, null)) {
-                if (post.getType() == Post.PostType.PHOTO || post.getType() == Post.PostType.VIDEO || post.getType() == Post.PostType.AUDIO)
+                if (post.getType() == Post.PostType.PHOTO || post.getType() == Post.PostType.AUDIO)
                     postURLsForKeyword.add(post.getShortUrl());
             }
             printPostURLs();
