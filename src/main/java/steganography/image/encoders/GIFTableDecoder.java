@@ -21,10 +21,7 @@ package steganography.image.encoders;
 import steganography.util.ByteHex;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Selina Wernike
@@ -55,10 +52,8 @@ public class GIFTableDecoder {
         //check if globalcolorTable exists
         System.out.println(ByteHex.byteToHex(gif[10]));
         if((gif[10] & 0x80) == 0) {
-            System.out.println("No globalcolorTable");
+            throw new NoSuchElementException("No Color Table exists");
         }  else {
-            System.out.println("GlobalColorTabel exists");
-            System.out.println(ByteHex.byteToHex(gif[9]));
             int length =  (gif[10] & 0x7);
              colorTable = globalColorTable(gif,length);
         }
@@ -74,15 +69,17 @@ public class GIFTableDecoder {
     private int[] globalColorTable(byte[] gif, int length) {
         int i = 13;
         int[] table = new int[(int) Math.pow(2,length + 1)];
-        for (int j = 0; j < table.length;j++) {
-            int color = 0xFF;
-            color = (color << 8) | gif[i];
-            i++;
-            color = (color << 8) | gif[i];
-            i++;
-            color = (color << 8) | gif[i];
-            i++;
-            table[j] = color;
+        if (table.length >= gif.length * 3) {
+            for (int j = 0; j < table.length; j++) {
+                int color = 0xFF;
+                color = (color << 8) | gif[i];
+                i++;
+                color = (color << 8) | gif[i];
+                i++;
+                color = (color << 8) | gif[i];
+                i++;
+                table[j] = color;
+            }
         }
         return table;
     }

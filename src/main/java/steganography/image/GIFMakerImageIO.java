@@ -17,6 +17,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Implementation for PC Version using GIFDecoder and java.imageio
+ * @see steganography.image.encoders.GifDecoder
+ * @author Selina Wernike
+ */
 public class GIFMakerImageIO implements IGIFMaker{
     int[] delay;
     IIOMetadata[] metadataForImages;
@@ -26,6 +31,7 @@ public class GIFMakerImageIO implements IGIFMaker{
      *
      * @param animatedGIF a byte array with the animated gif, that needs to be splitted
      * @return byte[][] output an two dimensional array which contains all gif data
+     * @see steganography.image.encoders.GifDecoder
      * @throws UnsupportedImageTypeException When image is not a gif
      */
     @Override

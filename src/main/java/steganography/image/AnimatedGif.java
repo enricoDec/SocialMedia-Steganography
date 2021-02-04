@@ -47,6 +47,11 @@ public class AnimatedGif implements Steganography{
         return encode(payload,carrier, ImageSteg.DEFAULT_SEED);
     }
 
+    /**
+     * Encodes a payload into the frames of an animated Gif and returns a gif
+     * @see steganography.image.GIFMakerImageIO#splitGIF(byte[])
+     * @see steganography.image.GIFMakerImageIO#sequenzGIF(byte[][])
+     */
     @Override
         public byte[] encode(byte[] payload, byte[] animatedGif, long seed) throws IOException, MediaNotFoundException, UnsupportedMediaTypeException, MediaReassemblingException, MediaCapacityException {
             Steganography steg = new ImageSteg(); //ImageStegIO
@@ -70,6 +75,11 @@ public class AnimatedGif implements Steganography{
         return decode(steganographicData, ImageSteg.DEFAULT_SEED);
     }
 
+    /**
+     * Decodes a payload from an animated GIF
+     * @see steganography.image.GIFMakerImageIO#splitGIF(byte[])
+     * @see steganography.image.GIFMakerImageIO#sequenzGIF(byte[][])
+     */
     @Override
         public byte[] decode(byte[] stegGif, long seed) throws UnsupportedImageTypeException, NoImageException, IOException {
             ImageSteg steg = new ImageSteg();
