@@ -97,14 +97,14 @@ public class GIFTableDecoder {
             List<Integer> couples = new ArrayList<>();
             boolean pixelIsOne = PixelBit.pixelIsOne(colorTable[i]);
             for (int j = 0; j < colorTable.length; j++) {
-                if (i != j && colorTable[i] != colorTable[j]) {
-                    int redI = getRed(colorTable[i]);
-                    int redJ = getRed(colorTable[j]);
-                    if (Math.abs(redI - redJ) <= 8 ) {
-                        int greenI = getGreen(colorTable[i]);
-                        if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
-                            if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
-                                if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
+                if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
+                    if (i != j && colorTable[i] != colorTable[j]) {
+                        int redI = getRed(colorTable[i]);
+                        int redJ = getRed(colorTable[j]);
+                        if (Math.abs(redI - redJ) <= 8 ) {
+                            int greenI = getGreen(colorTable[i]);
+                            if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
+                                 if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
                                     couples.add(colorTable[j]);
                                 }
                             }

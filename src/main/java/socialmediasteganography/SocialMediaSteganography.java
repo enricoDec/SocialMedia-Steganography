@@ -47,6 +47,16 @@ public interface SocialMediaSteganography {
 
     /** Loads carrier from file path and uses encodeAndPost
      * @param path Path to a Media file
+     * @param apiNames API Name
+     * @param payload payload to encode
+     * @param mediaType The type of the carrier (e.g. PNG.GIF)
+     * @param keyword The name under which the carrier is posted to social Media
+     * @return boolean true, when carrier is successfully posted
+     * @throws UnsupportedMediaTypeException if the MediaType is not supported
+     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
+     * @throws MediaCapacityException if the payload doesn't fit in the carrier
+     * @throws IOException if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException if a problem occurred during writing of the result media
      * @see socialmediasteganography.SocialMediaSteganography#encodeAndPost(APINames, String, byte[], byte[], MediaType)
      */
     boolean encodeAndPost(APINames apiNames, String keyword, String path, byte[] payload, MediaType mediaType) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
@@ -67,6 +77,15 @@ public interface SocialMediaSteganography {
 
     /** Load Media from a file and save encoded Media to given path as a file
      * @see socialmediasteganography.SocialMediaSteganography#saveEncodedPicture(byte[], byte[], MediaType, String)
+     * @param payload payload to encode
+     * @param mediaType The type of the carrier (e.g. PNG.GIF)
+     * @param savepath The path to which the generated file is saved
+     * @throws UnsupportedMediaTypeException if the MediaType is not supported
+     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
+     * @throws MediaCapacityException if the payload doesn't fit in the carrier
+     * @throws IOException if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     *
      * @param filepath the path to the file thath needs to be encoded
      */
     void saveEncodePicture(String filepath, MediaType mediaType, byte[] payload, String savepath) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
