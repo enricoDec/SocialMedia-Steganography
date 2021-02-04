@@ -22,6 +22,13 @@ import java.io.*;
 import java.nio.file.Files;
 
 public class ByteArrayUtils {
+    /**
+     * Util method, returns a File as a byte array
+     *
+     * @param file File to be read
+     * @return file as byte array
+     * @throws IOException read/write Exception
+     */
     public static synchronized byte[] read(File file) throws IOException {
         return Files.readAllBytes(file.toPath());
     }
