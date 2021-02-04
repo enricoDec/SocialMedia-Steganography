@@ -60,12 +60,20 @@ public abstract class SocialMedia {
     public abstract void setToken(Token token);
 
     /**
-     * Post media on this Social Media under the keyword
+     * Post media on this Social Media under the keyword if you don't have a token yet
      * @param media data to upload
      * @param keyword keyword to search this post by
      * @return true if successful
      */
     public abstract boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword);
+
+    /**
+     * Post media on this Social Media under the keyword if you already have your Token
+     * @param media data to upload
+     * @param keyword keyword to search this post by
+     * @return true if successful
+     */
+    public abstract boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token);
 
     /**
      * Subscribe to a keyword (Hashtag / Title / ...)
@@ -93,5 +101,4 @@ public abstract class SocialMedia {
 
     public abstract List<String> getAllSubscribedKeywords();
 
-    public abstract void setBlogName(String blogname);
 }

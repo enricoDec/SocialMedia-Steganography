@@ -18,14 +18,11 @@
 
 package apis.tumblr;
 
+
 public interface TumblrConstants {
 
-    String apiKey = "OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR";
-    String apiSecret = "H2yGuhhwd7g6eXIYE0OHpkL7fEd9laDWPHArjipezGyq9dFheF";
-    String callback = "https://example.com";
-
-    //only for testing, in live mode get these from android app after authorization
-    String accessToken = "sk4dqsFfEScw9NzORZ5x9s7DasAsfhHlAZYhe2nbAsWmBF6SwU";
-    String accessTokenSecret = "3cCMy7v1fkOMuSqJUe1nriAzg78nsgtnBHRje0sxSwPbDQCRmm";
+    //only for testing purpose
+    String accessToken = "EmTQI8q9LpRYXV2mmWT1eb4X8oR2SAU1IG90hnmuaKr8ucHmKF";
+    String accessTokenSecret = "bHDx8Yw1OsWbmzfNMaJPEthLdTlJ2RO9FsQMuZrVXeWIluDEqR";
 
 }
