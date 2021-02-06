@@ -56,7 +56,7 @@ public class App {
         //encode and post png
         try {
             sms.encodeAndPost(APINames.TUMBLR, "katze",
-                    "/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/katze.png",
+                    "src/test/resources/steganography/image/baum.png",
                     payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG);
         } catch (UnsupportedMediaTypeException e) {
             e.printStackTrace();
