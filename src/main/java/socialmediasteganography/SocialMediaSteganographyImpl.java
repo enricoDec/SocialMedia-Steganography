@@ -81,8 +81,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
         SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
         if (socialMedia != null){
             if (token != null) {
-                socialMedia.setToken(token);
-                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword);
+                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword,token);
             } else
             {
                 throw new NullPointerException("Token is null");
@@ -156,6 +155,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
             case TUMBLR:
                 Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
                 SocialMedia tumblr = new Tumblr();
+                tumblr.setBlogname("mariofenzl");
                 tumblr.setToken(token);
                 return tumblr;
             default:

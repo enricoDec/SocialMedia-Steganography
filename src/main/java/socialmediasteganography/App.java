@@ -44,20 +44,25 @@ import java.util.List;
 public class App {
     public static void main(String[] args) throws IOException {
 
+        File file = new File("src/test/resources/steganography/image/baum.png");
+        byte[] carrier = ByteArrayUtils.read(file);
+
+
         String payload = "hallotest";
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl();
         Tumblr.setApiKey("OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR");
         Tumblr.setApiSecret("H2yGuhhwd7g6eXIYE0OHpkL7fEd9laDWPHArjipezGyq9dFheF");
 
+
         //token in constants only for testing purpose
-        //Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
 
 
         //encode and post png
         try {
             sms.encodeAndPost(APINames.TUMBLR, "katze",
-                    "src/test/resources/steganography/image/baum.png",
-                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG);
+                    carrier,
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG, token);
         } catch (UnsupportedMediaTypeException e) {
             e.printStackTrace();
         } catch (MediaNotFoundException e) {

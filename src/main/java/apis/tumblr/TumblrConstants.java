@@ -22,7 +22,8 @@ package apis.tumblr;
 public interface TumblrConstants {
 
     //only for testing purpose
-    String accessToken = "EmTQI8q9LpRYXV2mmWT1eb4X8oR2SAU1IG90hnmuaKr8ucHmKF";
-    String accessTokenSecret = "bHDx8Yw1OsWbmzfNMaJPEthLdTlJ2RO9FsQMuZrVXeWIluDEqR";
+    String accessToken = "xTzgq3R9KrJ19JdvlrAKbLCrrheDk7v0uQvcLXFGo4bPurckP2";
+    String accessTokenSecret = "vVQvQLpYIErRLoX8ClZJU9qqlmPTPfGpotEwqvNwY9a2XuxerC";
+    String blogname = "mariofenzl";
 
 }
