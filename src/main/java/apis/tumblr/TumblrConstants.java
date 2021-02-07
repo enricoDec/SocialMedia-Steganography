@@ -24,5 +24,6 @@ public interface TumblrConstants {
     //only for testing purpose
     String accessToken = "EmTQI8q9LpRYXV2mmWT1eb4X8oR2SAU1IG90hnmuaKr8ucHmKF";
     String accessTokenSecret = "bHDx8Yw1OsWbmzfNMaJPEthLdTlJ2RO9FsQMuZrVXeWIluDEqR";
+    String blogname = "mariofenzl";
 
 }
