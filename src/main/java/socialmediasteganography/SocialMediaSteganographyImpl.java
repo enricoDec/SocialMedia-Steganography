@@ -81,8 +81,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
         SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
         if (socialMedia != null){
             if (token != null) {
-                socialMedia.setToken(token);
-                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword);
+                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword,token);
             } else
             {
                 throw new NullPointerException("Token is null");

@@ -98,7 +98,7 @@ public class Tumblr extends SocialMedia {
         System.out.println();
         this.token.setAccessToken(accessToken.getToken());
         this.token.setAccessTokenSecret(accessToken.getTokenSecret());
-        this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
+        setToken(this.token);
 
     }
 
@@ -125,6 +125,7 @@ public class Tumblr extends SocialMedia {
     @Override
     public void setToken(Token token) {
         this.token = token;
+        this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
     }
 
     public static void setApiKey(String key){
@@ -136,6 +137,9 @@ public class Tumblr extends SocialMedia {
     }
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
+        if(keyword == null){
+            throw new NullPointerException();
+        }
         if(this.token.getAccessToken() == null || this.token.getAccessTokenSecret() == null){
             try {
                 login();
