@@ -46,7 +46,6 @@ public class Tumblr extends SocialMedia {
 
 
     private Token token;
-    private boolean loggedIn = false;
     static String apiKey = null;
     static String apiSecret = null;
     private final String callbackURL = "https://example.com";
@@ -72,7 +71,7 @@ public class Tumblr extends SocialMedia {
         final Scanner in = new Scanner(System.in);
 
         System.out.println("Enter the username of the Blog you want to log in");
-        this.blogName = in.nextLine();
+        setBlogname(in.nextLine());
 
 
         System.out.println("=== Tumblr's OAuth Workflow ===");
@@ -100,7 +99,6 @@ public class Tumblr extends SocialMedia {
         this.token.setAccessToken(accessToken.getToken());
         this.token.setAccessTokenSecret(accessToken.getTokenSecret());
         this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
-        loggedIn = true;
 
     }
 
@@ -226,6 +224,11 @@ public class Tumblr extends SocialMedia {
         } catch (Exception e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public void setBlogname(String blogname) {
+        this.blogName = blogname;
     }
 
 

@@ -44,6 +44,10 @@ import java.util.List;
 public class App {
     public static void main(String[] args) throws IOException {
 
+        File file = new File("/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/photoTest.png");
+        byte[] carrier = ByteArrayUtils.read(file);
+
+
         String payload = "hallotest";
         SocialMediaSteganography sms = new SocialMediaSteganographyImpl();
         Tumblr.setApiKey("OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR");
@@ -56,7 +60,7 @@ public class App {
         //encode and post png
         try {
             sms.encodeAndPost(APINames.TUMBLR, "katze",
-                    "src/test/resources/steganography/image/baum.png",
+                    carrier,
                     payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG);
         } catch (UnsupportedMediaTypeException e) {
             e.printStackTrace();
