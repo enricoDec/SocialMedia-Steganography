@@ -6,7 +6,7 @@ Goal of this project is to develop a library able to hide information in a given
 
 [Deployment](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
 
-[Use Guide]()
+[Use Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Usage-Guide)
 
 [Update Log 1](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Zwischenbericht-Projektstrudium-Steganographie-2020)
 
