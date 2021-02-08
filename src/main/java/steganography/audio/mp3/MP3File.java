@@ -55,6 +55,7 @@ public class MP3File {
 
     /**
      * Returns the byte array this class was given.
+     * @return the byte array this class was given
      */
     public byte[] getMP3Bytes() {
         return this.mp3Bytes;
@@ -62,7 +63,7 @@ public class MP3File {
 
     /**
      * Returns the number of frames in this MP3 file.
-     * @return int - Number of frames,<br/>
+     * @return int - Number of frames,<br>
      *         -1 if there was no prior search for headers
      */
     public int getFrameCount() {
@@ -71,7 +72,7 @@ public class MP3File {
 
     /**
      * Returns the information of each frame in this MP3 file. The header is included in each frame.
-     * @return - null, if findAllFrames() has not been called or there are no frames<br/>
+     * @return - null, if findAllFrames() has not been called or there are no frames<br>
      *         - List containing Frames
      */
     public List<Frame> getFrames() {
@@ -81,7 +82,7 @@ public class MP3File {
     /**
      * Returns the positions of bytes that are safe to modify.
      * @return List of Integers - all positions of modifiable bytes in this MP3 file
-     * @throws IllegalArgumentException if there are no frames.<br/>
+     * @throws IllegalArgumentException if there are no frames.<br>
      *                                  This can happen when findAllFrames has not been called prior to this method
      *                                  or this file is not an MP3 file.
      */
@@ -124,7 +125,7 @@ public class MP3File {
     /**
      * Attempts to find {@link Frame frames} by searching for MP3 frame headers and
      * saves their information in this MP3File.
-     * @return true, if frames have been found<br/>
+     * @return true, if frames have been found<br>
      *         false, if there are none
      */
     public boolean findAllFrames() {

@@ -60,7 +60,7 @@ public class MP3Steganography implements Steganography {
     }
 
     /**
-     * Creates an instance using the default overlay.<br/>
+     * Creates an instance using the default overlay.<br>
      * The default is MP3Overlays.SEQUENCE_OVERLAY.
      */
     public MP3Steganography() {
