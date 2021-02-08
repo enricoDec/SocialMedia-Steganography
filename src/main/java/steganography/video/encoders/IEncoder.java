@@ -30,5 +30,5 @@ public interface IEncoder {
      * @return Encoded Video byte[]
      * @throws IOException if a read or write fails
      */
-    byte[] imagesToVideo(List<byte[]> stegImages) throws IOException;
+    byte[] encodeFrames(List<byte[]> stegImages) throws IOException;
 }

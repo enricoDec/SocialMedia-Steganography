@@ -23,7 +23,10 @@ import com.github.kokorin.jaffree.ffmpeg.*;
 import steganography.video.Video;
 
 import javax.imageio.ImageIO;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -65,7 +68,7 @@ public class VideoDecoder implements IDecoder {
      * @return List of pictures from single frames of Video
      * @throws IOException if a read or write fails
      */
-    public List<byte[]> toPictureByteArray(int nThread) throws IOException {
+    public List<byte[]> decodeVideoToFrames(int nThread) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
         //Temp file to save muxed audio channel
