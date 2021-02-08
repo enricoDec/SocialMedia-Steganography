@@ -23,16 +23,16 @@ import java.util.NoSuchElementException;
 
 /**
  * <p>Classes that implement this interface should be able to return pixels of a
- * given BufferedImage in an order independent from the coordinate system
- * of BufferedImage (to act as an overlay).</p>
+ * given BufferedImage or similar image representation in an order independent from the
+ * coordinate system of the pixels (to act as an overlay).</p>
  * <p>They are meant to be used by encoding algorithms (BuffImgEncoder), so
  * arranging and en- / decoding pixels are separate procedures.</p>
  */
 public interface PixelCoordinateOverlay {
 
     /**
-     * Returns the next pixel value as an int (representing ARGB as its bytes).
-     * Meaning the next pixel determined by the Overlay.
+     * Returns the next pixel value as an int (representing ARGB as its bytes),
+     * meaning the next pixel determined by the Overlay.
      * @return int representing the next pixel by the Overlay.
      * @throws NoSuchElementException if there is no next pixel
      */
@@ -51,10 +51,4 @@ public interface PixelCoordinateOverlay {
      * @return number of remaining pixels
      */
     int available();
-
-    /**
-     * Returns the BufferedImage this Object holds
-     * @return the BufferedImage this Object holds
-     */
-    BufferedImage getBufferedImage();
 }

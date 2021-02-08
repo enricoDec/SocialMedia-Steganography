@@ -22,16 +22,16 @@ import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.overlays.PixelCoordinateOverlay;
 
 /**
- * This is a superclass to algorithms which encode and decode payloads into images using BufferedImage as
- * image representation
+ * This is a superclass to algorithms which encode and decode payloads into images using
+ * PixelCoordinateOverlays as image representation.
  */
 public abstract class BuffImgEncoder {
 
     protected PixelCoordinateOverlay overlay;
 
     /**
-     * This is a superclass to algorithms which encode and decode payloads into images using BufferedImage as
-     * image representation
+     * This is a superclass to algorithms which encode and decode payloads into images using
+     * PixelCoordinateOverlays as image representation.
      * @param overlay PixelCoordinateOverlay to get pixels from
      */
     public BuffImgEncoder(PixelCoordinateOverlay overlay) {

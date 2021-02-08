@@ -150,7 +150,7 @@ public class PixelBit extends BuffImgEncoder {
 
     /**
      * <p>Changes the value of a random color channel (ARGB) of the given pixel
-     * by +1 or -1 (randomly, but w/o overflow).</p>
+     * by +1 or -1 (randomly, but avoiding overflow).</p>
      * <p>Since a pixel represents a bit, this method "flips" it.
      * (By changing the outcome of (A+R+G+B) &amp; 1 == 0)</p>
      * @param pixelARGB the pixelValue to change

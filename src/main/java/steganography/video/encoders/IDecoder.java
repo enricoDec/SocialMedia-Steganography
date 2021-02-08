@@ -30,5 +30,5 @@ public interface IDecoder {
      * @return List of pictures decoded from Video
      * @throws IOException if a read or write fails
      */
-    List<byte[]> toPictureByteArray(int nThread) throws IOException;
+    List<byte[]> decodeVideoToFrames(int nThread) throws IOException;
 }
