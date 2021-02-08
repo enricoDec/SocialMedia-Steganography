@@ -28,9 +28,9 @@ class SamplingRateLookUp {
 
     /**
      * Tries to find the Sampling rate of an MP3 frame.
-     * @param mpegVersion MPEG Version of the frame<br/>
-     *                    MPEG Version 1 = 1f<br/>
-     *                    MPEG Version 2 = 2f<br/>
+     * @param mpegVersion MPEG Version of the frame<br>
+     *                    MPEG Version 1 = 1f<br>
+     *                    MPEG Version 2 = 2f<br>
      *                    MPEG Version 2.5 = 2.5f
      * @param index Sampling rate index of the frame (should be between 0 and 2 inclusive)
      * @return int - Sampling rate according to MPEG Version and Sampling rate index of the frame
