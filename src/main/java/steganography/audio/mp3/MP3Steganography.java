@@ -246,7 +246,7 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Adds a 64 bit (8 bytes) header to the message to identify it when the message is retrieved.
-     * The Header is composed like this:<br/>
+     * The Header is composed like this:<br>
      * <ul>
      *     <li>Bits 0 - 31: MP3 Identifier (MP3+)</li>
      *     <li>Bits 32 - 64: Length of Message in Bytes</li>

@@ -53,8 +53,8 @@ class Frame {
     private int samplingRate;
     /**
      * True, if the frame is padded with additional bytes.
-     * The amount of padding bytes is dependent on the mpeg layer.<br/>
-     * layer 1 = 4 padding bytes<br/>
+     * The amount of padding bytes is dependent on the mpeg layer.<br>
+     * layer 1 = 4 padding bytes<br>
      * layer 2 or 3 = 1 padding byte
      */
     private boolean padded;
