@@ -38,6 +38,7 @@ public class ImageSequenceUtils {
      * Entry is Null if no payload for image
      * @throws IOException if IO Exception is thrown during read operations
      * @throws NoImageException read failed
+     * @throws UnsupportedImageTypeException UnsupportedImageTypeException
      */
     public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException, NoImageException, UnsupportedImageTypeException {
         int chunkCursor = 0;

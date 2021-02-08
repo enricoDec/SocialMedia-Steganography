@@ -22,67 +22,255 @@ import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.APINames;
 import apis.models.Token;
+import com.github.scribejava.apis.TumblrApi;
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.OAuth1AccessToken;
+import com.github.scribejava.core.model.OAuth1RequestToken;
+import com.github.scribejava.core.oauth.OAuth10aService;
 import com.tumblr.jumblr.JumblrClient;
 import com.tumblr.jumblr.exceptions.JumblrException;
-import com.tumblr.jumblr.types.AudioPost;
-import com.tumblr.jumblr.types.Photo;
-import com.tumblr.jumblr.types.PhotoPost;
-import com.tumblr.jumblr.types.VideoPost;
+import com.tumblr.jumblr.types.*;
+import persistence.JSONPersistentManager;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.*;
+import java.util.logging.Logger;
 
+/**
+ * Tumblr Social Media to upload PNG and MP3. search posts with keyword
+ */
 public class Tumblr extends SocialMedia {
 
-    JumblrClient tumblrClient;
-    String blogName;
-    MediaType mediaType;
+    private static final Logger logger = Logger.getLogger(Tumblr.class.getName());
 
+    /**
+     * service to handle Authorization
+     */
+    private OAuth10aService service;
 
+    private OAuth1RequestToken requestToken;
 
+    /**
+     * oAuth 1 Token containing AccessToken and AccessTokenSecret
+     */
+    private Token token;
 
-    File audioFile = new File("src/main/resources/audiotest.mp3");
-    AudioPost audioPost;
+    /**
+     * OAuth Consumer Key for Application
+     */
+    static String apiKey = null;
 
+    /**
+     * Secret Key for Application
+     */
+    static String apiSecret = null;
+
+    /**
+     * callback URL for Oauth Authorization Flow
+     */
+    private final String callbackURL = "https://example.com";
+
+    /**
+     * handles requests to Tumblr API
+     */
+    private JumblrClient tumblrClient;
+
+    /**
+     * blogname to access or post content to
+     */
+    private String blogName;
+
+    private List<String> postURLsForKeyword;
+
+    /**
+     * List of tags/keywords/hashtag to add to an upload or look for in posts
+     */
     List<String> tags = new ArrayList<>();
 
     public Tumblr(){
-        tumblrClient = new JumblrClient(TumblrConstants.apiKey, TumblrConstants.apiSecret);
-        tumblrClient.setToken("sk4dqsFfEScw9NzORZ5x9s7DasAsfhHlAZYhe2nbAsWmBF6SwU", "3cCMy7v1fkOMuSqJUe1nriAzg78nsgtnBHRje0sxSwPbDQCRmm");
+        tumblrClient = new JumblrClient(apiKey, apiSecret);
+        this.token = new Token();
     }
 
+
+    /**
+     * OAuth 1 Authorization workflow to get Request Token, authorize the Application and receive Authorization URL,
+     * after authorization verifier has to be set to obtain Token containing accessToken and accessTokenSecret
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws IOException
+     */
+    public void login() throws InterruptedException, ExecutionException, IOException {
+
+        service = new ServiceBuilder(apiKey)
+                .apiSecret(apiSecret)
+                .callback(this.callbackURL)
+                .build(TumblrApi.instance());
+        final Scanner in = new Scanner(System.in);
+
+        System.out.println("Enter the username of the Blog you want to log in");
+        setBlogname(in.nextLine());
+
+
+        System.out.println("=== Tumblr's OAuth Workflow ===");
+        System.out.println();
+
+        // Obtain the Request Token
+        System.out.println("Fetching the Request Token...");
+        requestToken = service.getRequestToken();
+        System.out.println("Got the Request Token!");
+        System.out.println();
+
+        System.out.println("Now go and authorize ScribeJava here:");
+        System.out.println(service.getAuthorizationUrl(requestToken));
+        System.out.println("And paste the verifier here");
+        System.out.print(">>");
+        final String oauthVerifier = in.nextLine();
+        System.out.println();
+
+        // Trade the Request Token and Verifier for the Access Token
+        System.out.println("Trading the Request Token for an Access Token...");
+        final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
+        System.out.println("Got the Access Token!");
+        System.out.println("(The raw response looks like this: " + accessToken.getRawResponse() + "')");
+        System.out.println();
+        this.token.setAccessToken(accessToken.getToken());
+        this.token.setAccessTokenSecret(accessToken.getTokenSecret());
+        setToken(this.token);
+
+    }
+
+    /**
+     * gets Authorization URL for USer to log in to Tumblr
+     * @return Authorization URL
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws IOException
+     */
+    public String  getAuthorizationURL() throws InterruptedException, ExecutionException, IOException {
+        String authURL;
+        service = new ServiceBuilder(apiKey)
+                .apiSecret(apiSecret)
+                .callback(this.callbackURL)
+                .build(TumblrApi.instance());
+        final Scanner in = new Scanner(System.in);
+
+
+        // Obtain the Request Token
+        final OAuth1RequestToken requestToken = service.getRequestToken();
+
+        authURL = service.getAuthorizationUrl(requestToken);
+
+        return authURL;
+    }
+
+    /**
+     * traded verifier and requestToken for accessToken and AccessTokenSecret
+     * @param verifier
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws IOException
+     */
+    public void getAccessTokenAndSecret(String verifier) throws InterruptedException, ExecutionException, IOException {
+        final String oauthVerifier = verifier;
+
+        final OAuth1AccessToken accessToken = service.getAccessToken(requestToken, oauthVerifier);
+        this.token.setAccessToken(accessToken.getToken());
+        this.token.setAccessTokenSecret(accessToken.getTokenSecret());
+        setToken(this.token);
+
+    }
+
+    /**
+     * set accessToken and TokenSecret to null to log in new user afterwards
+     */
+    public void loginNewUser(){
+        this.token.setAccessToken(null);
+        this.token.setAccessTokenSecret(null);
+        try {
+            login();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * get the oAuth 1 Token
+     * @return Token object containing accessToken and TokenSecret
+     */
     @Override
     public Token getToken() {
-        return null;
+        return this.token;
     }
 
+    /**
+     * set O Auth 1 Token to access Tumblr API
+     * @param token containing accessToken and TokenSecret
+     */
     @Override
     public void setToken(Token token) {
-
+        this.token = token;
+        this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
     }
 
+    /**
+     * sets Application Consumer key which is needed to access Tumblr API
+     * @param key
+     */
+    public static void setApiKey(String key){
+        apiKey = key;
+    }
+
+    /**
+     * sets Application Secret which is needed to access Tumblr API
+     * @param secret
+     */
+    public static void setApiSecret(String secret){
+        apiSecret = secret;
+    }
+
+    /**
+     * posts a given byte[] containing some media to Tumblr with a keyword
+     * starts login process if no token available
+     * @param media data to upload
+     * @param mediaType i.e. PNG, MP3, gif
+     * @param keyword keyword to search this post by
+     * @return
+     */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
+        if(keyword == null){
+            throw new NullPointerException();
+        }
+        if(this.token.getAccessToken() == null || this.token.getAccessTokenSecret() == null){
+            try {
+                login();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         Long postId = null;
         switch(mediaType){
             case MP3:
                 postId = this.postAudio(media, keyword);
-            //case MP4:
-              //  postId = this.postVideo(media, keyword);
-              //  break;
-            case GIF:
-                postId = this.postGif(media, keyword);
                 break;
             case PNG:
                 postId = this.postPhoto(media, keyword);
                 break;
+
         }
         if (postId != null){
             return true;
@@ -90,50 +278,102 @@ public class Tumblr extends SocialMedia {
         return false;
     }
 
+    /**
+     * posts media to Tumblr if a token already exists to skip Authorization workflow
+     * @param media data to upload
+     * @param mediaType
+     * @param keyword keyword to search this post by
+     * @param token
+     * @return
+     */
+    @Override
+    public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token) {
+        setToken(token);
+        boolean bool = postToSocialNetwork(media, mediaType, keyword);
+        return bool;
+    }
+
+    /**
+     * search for keyword in tumblrposts
+     * @param keyword keyword to subscribe to
+     * @return list of short URL, only last 20 entries from which comments and medias which are not PNG and MP3 are filtered out
+     */
     @Override
     public boolean subscribeToKeyword(String keyword) {
-        return false;
+
+            tags.add(keyword);
+            for (Post post : tumblrClient.tagged(keyword, null)) {
+                if (post.getType() == Post.PostType.PHOTO || post.getType() == Post.PostType.AUDIO)
+                    postURLsForKeyword.add(post.getShortUrl());
+            }
+            printPostURLs();
+            return true;
+    }
+
+    /**
+     * prints all saved Post URLs
+     */
+    public void printPostURLs(){
+        for(String url : postURLsForKeyword){
+            System.out.println(url);
+        }
     }
 
     @Override
-    public boolean unsubscribeKeyword(String keyword) {
-        return false;
-    }
+    public boolean unsubscribeKeyword(String keyword) {return false;}
+
+
 
     @Override
-    public void changeSchedulerPeriod(Integer interval) {
+    public void changeSchedulerPeriod(Integer interval) { }
 
-    }
 
     @Override
-    public void startSearch() {
-
-    }
+    public void startSearch() { }
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
+        // not used for Tumblr as only Posts Url can be searched, download of medias has to be done manually
+        // instead getPostUrlForKeyword(String Keyword) is used for Tumblr
+        // see method below
         return null;
     }
 
+
     @Override
-    public void stopSearch() {
+    public void stopSearch() {}
 
-    }
-
+    /**
+     * returns API name
+     * @return
+     */
     @Override
     public String getApiName() {
         return APINames.TUMBLR.toString();
     }
 
+    /**
+     * returns all subscribed keywords
+     * @return
+     */
     @Override
     public List<String> getAllSubscribedKeywords() {
-        return null;
+        try {
+            return JSONPersistentManager.getInstance().getKeywordListForAPI(APINames.TUMBLR);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
+    /**
+     * set blogname
+     * @param blogname
+     */
     @Override
-    public void setBlogName(String blogName){
-        this.blogName = blogName;
+    public void setBlogname(String blogname) {
+        this.blogName = blogname;
     }
+
 
     /**
      * used to post Audio
@@ -141,16 +381,37 @@ public class Tumblr extends SocialMedia {
      * no special "Audio"-Object has to be instanciated from File
      * with a File as input
      */
+    /**
+     * Posts Audio File to Tumblr
+     * @param media to post
+     * @param keyword
+     * @return Post id if upload was successfull
+     */
     public Long postAudio(byte[] media, String keyword){
 
+        File audioFile = null;
+        AudioPost audioPost = null;
+
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
+            fileOutputStream.write(media);
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        audioFile = new File("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
         List<String> tags = new ArrayList<>();
         tags.add(keyword);
 
         try {
-            this.audioPost = this.tumblrClient.newPost(this.blogName, AudioPost.class);
-            this.audioPost.setData(this.audioFile);
-            this.audioPost.setTags(tags);
-            this.audioPost.save();
+            audioPost = this.tumblrClient.newPost(this.blogName, AudioPost.class);
+            audioPost.setData(audioFile);
+            audioPost.setTags(tags);
+            audioPost.save();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -161,7 +422,10 @@ public class Tumblr extends SocialMedia {
         catch (JumblrException ex) {
             System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage());
         }
-        return this.audioPost.getId();
+        if(audioPost.getId() != null){
+            System.out.println(" uploaded MP3 successfull");
+        }
+        return audioPost.getId();
 
     }
 
@@ -169,6 +433,12 @@ public class Tumblr extends SocialMedia {
      * used to post Photos and GIFs
      * For Photos and GIFs a "Photo"-Object needs to be created
      * with a File as input
+     */
+    /**
+     * creates Photo Post on Tumblr
+     * @param media to post
+     * @param keyword
+     * @return post id if upload was successfull
      */
     public Long postPhoto(byte[] media, String keyword){
 
@@ -202,125 +472,8 @@ public class Tumblr extends SocialMedia {
             System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage() + "to post photo");
         }
         if(photoPost.getId() != null){
-            System.out.println("upload successfull");
+            System.out.println("uploaded PNG successfull");
         }
         return photoPost.getId();
     }
-
-    /**
-     * used to post Photos and GIFs
-     * For Photos and GIFs a "Photo"-Object needs to be created
-     * with a File as input
-     */
-    public Long postGif(byte[] media, String keyword){
-
-        String pathString = "src/main/java/apis/tumblr/medias/gifPostTest.gif";
-        Path gifPath = Paths.get(pathString);
-
-        try {
-            Files.write(gifPath, media);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        File gifFile = new File("src/main/java/apis/tumblr/medias/gifPostTest.gif");
-        Photo photo = new Photo(gifFile);
-        PhotoPost photoPost = null;
-
-        List<String> tags = new ArrayList<>();
-        tags.add(keyword);
-        try {
-            photoPost = this.tumblrClient.newPost(this.blogName, PhotoPost.class);
-            photoPost.setPhoto(photo);
-            photoPost.setTags(tags);
-            photoPost.save();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (JumblrException ex) {
-            System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage() + "to post gif");
-        }
-        if(photoPost.getId() != null){
-            System.out.println("upload successfull");
-        }
-        return photoPost.getId();
-
-
-    }
-
-
-
-
-    public Long postPhotoAndGif(byte[] media, String keyword, File file){
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(media);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Photo photo = new Photo(file);
-        PhotoPost photoPost = null;
-
-        List<String> tags = new ArrayList<>();
-        tags.add(keyword);
-        try {
-            photoPost = this.tumblrClient.newPost(this.blogName, PhotoPost.class);
-            photoPost.setPhoto(photo);
-            photoPost.setTags(tags);
-            photoPost.save();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (JumblrException ex) {
-            System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage() + "to post photo");
-        }
-        if(photoPost.getId() != null){
-            System.out.println("upload successfull");
-        }
-        return photoPost.getId();
-
-    }
-
-    /**
-     * used to post Videos
-     * For Videos the File object is enough,
-     * no special "Video"-Object has to be instanciated from File
-     * with a File as input
-     */
-    /*public Long postVideo(byte[] media, String keyword){
-
-        File videoFile = new File("src/main/resources/test.mp4");
-        VideoPost videoPost = null;
-
-        List<String> tags = new ArrayList<>();
-        tags.add(keyword);
-
-        try {
-            videoPost = this.tumblrClient.newPost(this.blogName, VideoPost.class);
-            videoPost.setData(videoFile);
-            videoPost.setTags(tags);
-            videoPost.save();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (JumblrException ex) {
-            System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage());
-        }
-        return videoPost.getId();
-
-    }*/
 }

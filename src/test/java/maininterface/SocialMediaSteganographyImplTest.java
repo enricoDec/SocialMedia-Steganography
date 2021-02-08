@@ -3,6 +3,7 @@ package maininterface;
 import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.APINames;
+import apis.tumblr.Tumblr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ public class SocialMediaSteganographyImplTest {
     public void before() throws IOException {
         exampleSteganography = new SocialMediaSteganographyImpl();
         carrier = ByteArrayUtils.read(new File(loadFilePath));
+        Tumblr.setApiKey("OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR");
+        Tumblr.setApiSecret("H2yGuhhwd7g6eXIYE0OHpkL7fEd9laDWPHArjipezGyq9dFheF");
 
     }
 
@@ -62,7 +65,7 @@ public class SocialMediaSteganographyImplTest {
         byte[] test = exampleSteganography.encodeCarrier(carrier,payload,mediaType);
     }
 
-
+    @Test
     public void postToSocialMediaCorrectInputTrue() {
         Assertions.assertTrue(exampleSteganography.postToSocialMedia(carrier, apiNames,keyword,mediaType));
     }
@@ -121,25 +124,25 @@ public class SocialMediaSteganographyImplTest {
         Assertions.assertTrue(ImageSteg.class.isInstance(socialMedia));
     }
 
-    @Test
+
     public void subscribeToSocialMediaKeywordNullNullPointer() {
         SocialMedia socialMedia = exampleSteganography.subscribeToSocialMedia(null,apiNames);
         Assertions.assertTrue(socialMedia == null);
     }
 
-    @Test
+
     public void subscribeToSocialMediaApiNameNullNullPointer() {
         Assertions.assertThrows(NullPointerException.class,() -> {
             exampleSteganography.subscribeToSocialMedia(keyword,null);
         });
     }
 
-
+    @Test
     public void encodeAndPostCarrierCorrectInputTrue() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException {
         Assertions.assertTrue(exampleSteganography.encodeAndPost(apiNames, keyword, carrier, payload, mediaType));
     }
 
-
+    @Test
     public void encodeAndPostFileCorrectInputTrue() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
         Assertions.assertEquals(true, exampleSteganography.encodeAndPost(apiNames, keyword, loadFilePath, payload, mediaType));
     }

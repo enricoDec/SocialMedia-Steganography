@@ -3,7 +3,9 @@ package socialmediasteganography;
 import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.APINames;
+import apis.models.Token;
 import apis.tumblr.Tumblr;
+import apis.tumblr.TumblrConstants;
 import steganography.Steganography;
 import steganography.audio.mp3.MP3Steganography;
 import steganography.exceptions.*;
@@ -23,6 +25,12 @@ import java.nio.file.Files;
 
 public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     private Long seed;
+
+    @Override
+    public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType, Token token) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
+        byte[] encoded = encodeCarrier(carrier, payload, mediaType);
+        return postToSocialMedia(encoded, apiNames, keyword, mediaType,token);
+    }
 
     @Override
     public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
@@ -63,6 +71,21 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
         SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
         if (socialMedia != null){
             return socialMedia.postToSocialNetwork(carrier, mediaType, keyword);
+
+        }
+        throw new NullPointerException("Social Media not supported");
+    }
+
+    @Override
+    public boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token) {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if (socialMedia != null){
+            if (token != null) {
+                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword,token);
+            } else
+            {
+                throw new NullPointerException("Token is null");
+            }
         }
         throw new NullPointerException("Social Media not supported");
     }
@@ -130,7 +153,11 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     private SocialMedia getSocialMediaByApiName(APINames apiNames){
         switch (apiNames){
             case TUMBLR:
-                return new Tumblr();
+                Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
+                SocialMedia tumblr = new Tumblr();
+                tumblr.setBlogname("mariofenzl");
+                tumblr.setToken(token);
+                return tumblr;
             default:
                 return null;
         }

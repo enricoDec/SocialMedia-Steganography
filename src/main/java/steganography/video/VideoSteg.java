@@ -72,7 +72,7 @@ public class VideoSteg implements Steganography {
     /**
      * Use {@link #setMaxEncodingThreads(int)} and {@link #setMaxDecodingThreads(int)} to enable multithreading (by default single threaded).
      * <p>
-     * We also highly recommend to set call {@link javax.imageio.ImageIO#setUseCache(boolean)}.
+     * We highly recommend to set call {@link javax.imageio.ImageIO#setUseCache(boolean)}.
      * This will make the decoding way faster since the images will be stored in-memory and not cached on disk (will be Memory demanding)
      */
     @Override
@@ -335,7 +335,7 @@ public class VideoSteg implements Steganography {
      * WARNING very memory expensive might overflow max JVM heap
      * VM option: -Xmx might help
      * By default using 1 Threads
-     * To use multithreading set maxEncodingThreads to > 1
+     * To use multithreading set maxEncodingThreads higher than 1
      *
      * @param maxEncodingThreads max number of Threads used to encode
      */
@@ -348,7 +348,7 @@ public class VideoSteg implements Steganography {
      * WARNING very memory expensive might overflow max JVM heap
      * VM option: -Xmx might help
      * By default using 1 Threads
-     * To use multithreading set maxDecodingThreads to > 1
+     * To use multithreading set maxDecodingThreads higher than 1
      *
      * @param maxDecodingThreads max number of Threads used to decode
      */
@@ -366,6 +366,11 @@ public class VideoSteg implements Steganography {
      * @param carrier carrier to be used (Video)
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
+     * @throws NoImageException Thrown if the attempt to read an image failed.
+     * @throws UnsupportedImageTypeException Thrown if an operation was attempted on an image type it doesn't support. This can happen if the frames can't be read as PNG
+     * @throws VideoNotFoundException Thrown if a Video stream was not found in the given video carrier
+     * @throws UnsupportedVideoTypeException Thrown if the used encoding is not supported
+     * @throws NoImageException Thrown if Video has Video stream but is empty
      */
     public long getVideoCapacity(byte[] carrier)
             throws IOException, NoImageException, UnsupportedImageTypeException, VideoNotFoundException, UnsupportedVideoTypeException {
@@ -386,6 +391,8 @@ public class VideoSteg implements Steganography {
      * @param pictureList list of pictures that will be encoded
      * @return max amount of total number of bytes that can be encoded in the carrier
      * @throws IOException if IO Exception occurs
+     * @throws NoImageException Thrown if the attempt to read an image failed.
+     * @throws UnsupportedImageTypeException Thrown if an operation was attempted on an image type it doesn't support.
      */
     public long getVideoCapacity(List<byte[]> pictureList)
             throws IOException, NoImageException, UnsupportedImageTypeException {
