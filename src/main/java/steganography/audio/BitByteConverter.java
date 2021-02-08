@@ -28,8 +28,8 @@ public class BitByteConverter {
      * Converts a byte array to a 2d-array containing the bit representation of each byte.
      * An empty array will be treated as a byte array containing only a zero.
      * @param bytes Byte array to convert into bits
-     * @return Byte array:<br/>
-     *         First dimension = the number of the current byte<br/>
+     * @return Byte array:<br>
+     *         First dimension = the number of the current byte<br>
      *         Second dimension = the bit representation for that byte
      * @throws NullPointerException if the given byte array is null
      */
