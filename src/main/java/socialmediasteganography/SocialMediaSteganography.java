@@ -165,6 +165,7 @@ public interface SocialMediaSteganography {
      * @param carrier data with encoded payload
      * @return payload decoded payload
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
+     * @throws UnknownStegFormatException UnknownStegFormatException
      * @throws IOException if a problem occurs during reading of steganographicData
      * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from steganographicData
      */
