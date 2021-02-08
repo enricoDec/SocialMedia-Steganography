@@ -32,12 +32,12 @@ public class ImageStegIOJava implements ImageStegIO{
     /**
      * The given input. Remains unchanged throughout.
      */
-    private final byte[] input;
+    protected final byte[] input;
 
     /**
      * Info on whether to use an overlay that uses transparent pixels
      */
-    private final boolean useTransparent;
+    protected final boolean useTransparent;
 
     /**
      * The BufferedImage to handle the In- and Output of
@@ -52,19 +52,9 @@ public class ImageStegIOJava implements ImageStegIO{
     /**
      * A set of supported formats to look up
      */
-    private static final Set<String> SUPPORTED_FORMATS = new HashSet<>(
+    protected static final Set<String> SUPPORTED_FORMATS = new HashSet<>(
             Arrays.asList("bmp", "BMP", "gif", "GIF", "png", "PNG")
     );
-/*
-
-    public ImageStegIOJava(byte[] image)
-            throws UnsupportedImageTypeException, IOException, NoImageException {
-
-        this.input = image;
-        this.useTransparent = false;
-        processImage(this.input);
-    }
-*/
 
     /**
      * <p>Creates an object that exists to handle reading and writing of BufferedImages to and from byte arrays
@@ -184,6 +174,10 @@ public class ImageStegIOJava implements ImageStegIO{
             case BufferedImage.TYPE_INT_ARGB:
             case BufferedImage.TYPE_INT_RGB:
             case BufferedImage.TYPE_INT_BGR:
+            // Types that have not been tested, but should be suitable for PixelBit Algorithm
+            //----------------------------------------------------------------------------------
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE: // could not be found or artificially created
+            case BufferedImage.TYPE_INT_ARGB_PRE: // could not be found or artificially created
                 return new PixelBit(getOverlay(this.bufferedImage, seed));
 
             // Type(s) for ColorCouple Algorithm
@@ -198,17 +192,9 @@ public class ImageStegIOJava implements ImageStegIO{
                 } catch (IOException | ImageWritingException e) {
                     e.printStackTrace();
                 }
-                // return overlay8Bit
 
-                // Types that have not been tested, but are probably suitable for PixelBit Algorithm
-                //----------------------------------------------------------------------------------
-            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
-            case BufferedImage.TYPE_INT_ARGB_PRE:
-                // TODO: Test those types (could not find them)
-                throw new UnsupportedImageTypeException("Image type is not supported because untested.");
-
-                // Types that will (probably) not be supported - explicit for completion reasons
-                //----------------------------------------------------------------------------------
+            // Types that are not supported - explicit for completion reasons
+            //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_BINARY:
             case BufferedImage.TYPE_BYTE_GRAY:
             case BufferedImage.TYPE_CUSTOM:
