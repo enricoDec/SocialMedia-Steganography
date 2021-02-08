@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * This class returns Pixels of the underlying Bitmap in order from top left (x=0, y=0)
- * to bottom right (x=bitmap.getWidth(), y=bitmap.getHeight()).
+ * This class returns Pixels of the underlying BufferedImage in order from top left (x=0, y=0)
+ * to bottom right (x=bufferedImage.getWidth(), y=bufferedImage.getHeight()).
  */
 public class SequenceOverlay implements PixelCoordinateOverlay {
 
@@ -39,7 +39,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
 
     /**
      * Creates a SequenceOverlay that returns Pixels of the underlying BufferedImage in order from top left (x=0, y=0)
-     * to bottom right (x=bitmap.getWidth(), y=bitmap.getHeight()).
+     * to bottom right (x=bufferedImage.getWidth(), y=bufferedImage.getHeight()).
      * @param bufferedImage the BufferedImage to represent the pixels of.
      * @throws UnsupportedImageTypeException if the type of bufferedImage is bnot supported by this overlay
      */
