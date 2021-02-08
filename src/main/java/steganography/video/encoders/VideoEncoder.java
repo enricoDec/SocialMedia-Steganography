@@ -57,7 +57,7 @@ public class VideoEncoder implements IEncoder {
      * @return Encoded Video as .avi
      * @throws IOException If a read or write fails
      */
-    public byte[] imagesToVideo(List<byte[]> stegImages) throws IOException {
+    public byte[] encodeFrames(List<byte[]> stegImages) throws IOException {
         File tempFile = File.createTempFile("VideoSteganography-", ".avi");
         tempFile.deleteOnExit();
         SeekableByteChannel sbc = Files.newByteChannel(tempFile.toPath(), StandardOpenOption.WRITE);

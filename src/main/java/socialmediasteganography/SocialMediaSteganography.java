@@ -151,11 +151,21 @@ public interface SocialMediaSteganography {
     SocialMedia subscribeToSocialMedia(String keyword,APINames apiNames);
 
     /**
+     * Gets Media for a certain Keyword and checks if it is a steganographic picture.
+     * If it is, proceeds to decode the picture and return payload
+     * @param keyword keyword under which the media was posted
+     * @param apiNames name of the api used
+     * @param mediaType media type in which the payload is decoded
+     * @return payloads all payloads that could be read
+     */
+    byte[][] getMediaAndDecode(String keyword,APINames apiNames,MediaType mediaType);
+    /**
      * Decodes hidden payload from carrier
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
      * @param carrier data with encoded payload
      * @return payload decoded payload
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
+     * @throws UnknownStegFormatException UnknownStegFormatException
      * @throws IOException if a problem occurs during reading of steganographicData
      * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from steganographicData
      */

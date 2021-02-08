@@ -36,18 +36,18 @@ public abstract class SocialMedia {
 
     List<SocialMediaListener> socialMediaListeners = new ArrayList<SocialMediaListener>();
 
-    public void addAsListener(SocialMediaListener socialMediaListener){
+    public void addAsListener(SocialMediaListener socialMediaListener) {
         socialMediaListeners.add(socialMediaListener);
     }
 
-    public void removeAsListener(SocialMediaListener socialMediaListener){
+    public void removeAsListener(SocialMediaListener socialMediaListener) {
         socialMediaListeners.remove(socialMediaListener);
     }
 
-    public void updateListeners(List<String> msgList){
+    public void updateListeners(List<String> msgList) {
         this.message = msgList;
         message.stream().forEach(msg -> logger.info("Update contains: " + msg));
-        for(SocialMediaListener socialMediaListener : socialMediaListeners){
+        for (SocialMediaListener socialMediaListener : socialMediaListeners) {
             logger.info("Update Listener");
             socialMediaListener.updateSocialMediaMessage(message);
         }
@@ -61,22 +61,28 @@ public abstract class SocialMedia {
 
     /**
      * Post media on this Social Media under the keyword if you don't have a token yet
-     * @param media data to upload
-     * @param keyword keyword to search this post by
+     *
+     * @param media     data to upload
+     * @param mediaType media type
+     * @param keyword   keyword to search this post by
      * @return true if successful
      */
     public abstract boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword);
 
     /**
      * Post media on this Social Media under the keyword if you already have your Token
-     * @param media data to upload
-     * @param keyword keyword to search this post by
+     *
+     * @param media     data to upload
+     * @param mediaType media type
+     * @param token     Token
+     * @param keyword   keyword to search this post by
      * @return true if successful
      */
     public abstract boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token);
 
     /**
      * Subscribe to a keyword (Hashtag / Title / ...)
+     *
      * @param keyword keyword to subscribe to
      * @return true if successful
      */
@@ -86,6 +92,7 @@ public abstract class SocialMedia {
 
     /**
      * Get Medias posted under keyword
+     *
      * @param keyword hashtag
      * @return true if successful
      */

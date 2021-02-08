@@ -36,7 +36,7 @@ public class LSBChanger {
 
     /**
      * Takes the byte array message and writes the message into the least significant bits of the byte array carrier
-     * using the overlay given in the constructor.<br/>
+     * using the overlay given in the constructor.<br>
      * If the message is null, nothing will change.
      * @param message bytes to encode
      * @return the given byte array with the message encoded into the least significant bits

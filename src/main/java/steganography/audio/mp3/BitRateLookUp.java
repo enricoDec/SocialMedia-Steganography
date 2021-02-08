@@ -28,14 +28,14 @@ class BitRateLookUp {
 
     /**
      * Tries to find the Bitrate of an MP3 frame.
-     * @param mpegVersion MPEG Version of the frame<br/>
-     *                    MPEG Version 1 = 1<br/>
-     *                    MPEG Version 2 or 2.5 = 2<br/>
-     * @param layer Layer of the frame<br/>
-     *              Layer 1 = 1<br/>
-     *              Layer 2 = 2<br/>
-     *              Layer 3 = 3<br/>
-     * @param index Bitrate index of the frame (should be between 0 and 14 inclusive)<br/>
+     * @param mpegVersion MPEG Version of the frame<br>
+     *                    MPEG Version 1 = 1<br>
+     *                    MPEG Version 2 or 2.5 = 2<br>
+     * @param layer Layer of the frame<br>
+     *              Layer 1 = 1<br>
+     *              Layer 2 = 2<br>
+     *              Layer 3 = 3<br>
+     * @param index Bitrate index of the frame (should be between 0 and 14 inclusive)<br>
      * @return int - Bitrate according to MPEG Version, Layer and Bitrate index of the frame
      * @throws IllegalArgumentException if any of the parameters are invalid
      * @throws NoSuchElementException if there is no value for the given parameters

@@ -45,7 +45,7 @@ public class VideoDecoderTest {
         try {
             this.video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            Assertions.assertTrue(video.getFrameCount() >= decoder.toPictureByteArray(4).size());
+            Assertions.assertTrue(video.getFrameCount() >= decoder.decodeVideoToFrames(4).size());
         } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail("Couldn't decode Video");
         }
@@ -60,7 +60,7 @@ public class VideoDecoderTest {
         try {
             this.video = new Video(ByteArrayUtils.read(carrier_no_audio), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            List<byte[]> pictureList = decoder.toPictureByteArray(4);
+            List<byte[]> pictureList = decoder.decodeVideoToFrames(4);
 
             Assertions.assertNotNull(pictureList);
 
@@ -78,7 +78,7 @@ public class VideoDecoderTest {
             this.video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             ImageIO.setUseCache(false);
-            List<byte[]> imageList = decoder.toPictureByteArray(4);
+            List<byte[]> imageList = decoder.decodeVideoToFrames(4);
 
             for (byte[] image : imageList) {
                 BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(image));

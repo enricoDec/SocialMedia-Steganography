@@ -22,7 +22,7 @@ import steganography.Steganography;
 import steganography.exceptions.MediaNotFoundException;
 import steganography.exceptions.UnknownStegFormatException;
 import steganography.exceptions.UnsupportedMediaTypeException;
-import steganography.image.*;
+import steganography.image.ImageSteg;
 import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
@@ -36,7 +36,10 @@ import steganography.video.exceptions.UnsupportedVideoTypeException;
 import steganography.video.exceptions.VideoCapacityException;
 import steganography.video.exceptions.VideoNotFoundException;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -83,7 +86,7 @@ public class VideoSteg implements Steganography {
         Video video = new Video(carrier, ffmpegBin);
         //List used to save the single frames decoded from the carrier
         IDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
-        List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
+        List<byte[]> imageList = videoDecoder.decodeVideoToFrames(maxDecodingThreads);
         if (debug) {
             log("Decoding Video Frames to images....");
             log("Video decoded in: " + (System.currentTimeMillis() - startTime) + "ms" + " (" + ((System.currentTimeMillis() - startTime) / 1000) + "s)");
@@ -96,7 +99,7 @@ public class VideoSteg implements Steganography {
         }
         //Encode Images to Video
         IEncoder videoEncoder = new VideoEncoder(video, ffmpegBin, debug);
-        return videoEncoder.imagesToVideo(stegImagesList);
+        return videoEncoder.encodeFrames(stegImagesList);
     }
 
     /**
@@ -208,7 +211,7 @@ public class VideoSteg implements Steganography {
 
         //Decode Video Frames to pictures
         IDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
-        List<byte[]> imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
+        List<byte[]> imageList = videoDecoder.decodeVideoToFrames(maxDecodingThreads);
 
         return decodeUsingHenkAlgo(imageList, seed);
     }
@@ -320,7 +323,7 @@ public class VideoSteg implements Steganography {
         //Decode Video to Single Frames
         Video video = new Video(data, ffmpegBin);
         VideoDecoder videoDecoder = new VideoDecoder(video, ffmpegBin, debug);
-        imageList = videoDecoder.toPictureByteArray(maxDecodingThreads);
+        imageList = videoDecoder.decodeVideoToFrames(maxDecodingThreads);
 
         boolean isSteganographicData = true;
         for (byte[] image : imageList) {
@@ -375,7 +378,7 @@ public class VideoSteg implements Steganography {
     public long getVideoCapacity(byte[] carrier)
             throws IOException, NoImageException, UnsupportedImageTypeException, VideoNotFoundException, UnsupportedVideoTypeException {
         VideoDecoder videoDecoder = new VideoDecoder(new Video(carrier, this.ffmpegBin), this.ffmpegBin, this.debug);
-        List<byte[]> pictureList = videoDecoder.toPictureByteArray(maxDecodingThreads);
+        List<byte[]> pictureList = videoDecoder.decodeVideoToFrames(maxDecodingThreads);
         ImageSteg imageSteg = new ImageSteg();
 
         long totalCapacity = 0;
