@@ -118,6 +118,11 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     }
 
     @Override
+    public byte[][] getMediaAndDecode(String keyword, APINames apiNames, MediaType mediaType) {
+        return new byte[0][];
+    }
+
+    @Override
     public byte[] decodeCarrier(MediaType mediaType, byte[] carrier) throws UnsupportedMediaTypeException, UnknownStegFormatException, MediaNotFoundException, IOException {
         Steganography steganography = getSteganographyByMediaType(mediaType);
         if(steganography != null){
