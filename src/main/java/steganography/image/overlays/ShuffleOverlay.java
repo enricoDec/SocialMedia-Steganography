@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 /**
- * This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+ * This class returns Pixels of the underlying BufferedImage in a random order determined by the seed
  * that is given to its constructor
  */
 public class ShuffleOverlay extends SequenceOverlay {
@@ -32,8 +32,8 @@ public class ShuffleOverlay extends SequenceOverlay {
     protected Random random;
 
     /**
-     * This class returns Pixels of the underlying Bitmap in a random order determined by the seed
-     * that is given to its constructor.
+     * Creates a ShuffleOverlay that returns Pixels of the underlying BufferedImage in a random order
+     * determined by the seed that is given to its constructor.
      * @param bufferedImage BufferedImage to represent the pixels of
      * @param seed Long to be used to affect the randomization of pixelorder.
      * @throws UnsupportedImageTypeException if the images type is not supported by this overlay
@@ -42,16 +42,6 @@ public class ShuffleOverlay extends SequenceOverlay {
         super(bufferedImage);
         this.random = new Random(seed);
     }
-/*
-
-    public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {
-        super(bufferedImage);
-
-        this.random = new Random(seed);
-        createOverlay();
-        shufflePixelOrder();
-    }
-*/
 
     /**
      * <p>Creates the overlay as an independent method to address pixels without using

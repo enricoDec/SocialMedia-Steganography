@@ -67,7 +67,7 @@ public class ImageStegIOJava implements ImageStegIO{
 */
 
     /**
-     * <p>This Class exists to handle reading and writing of BufferedImages to and from byte arrays
+     * <p>Creates an object that exists to handle reading and writing of BufferedImages to and from byte arrays
      * as well as choosing the appropriate encoders (and their overlays) for the given image. It holds on to the image
      * during its en- or decoding.</p>
      * <p>The image will only be processed if the methods getFormat() or getEncoder() are called.</p>
@@ -227,7 +227,7 @@ public class ImageStegIOJava implements ImageStegIO{
      * @return ShuffleOverlay or RemoveTransparentShuffleOverlay
      * @throws UnsupportedImageTypeException if the image type is not supported by the overlay
      */
-    private PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed)
+    protected PixelCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed)
             throws UnsupportedImageTypeException {
 
         return this.useTransparent ?

@@ -31,7 +31,7 @@ import java.util.*;
 public class RemoveTransparentShuffleOverlay extends ShuffleOverlay {
 
     /**
-     * <p>This class returns Pixels of the underlying Bitmap in a random order determined by the seed
+     * <p>Creates an Overlay that returns Pixels of the underlying Bitmap in a random order determined by the seed
      * that is given to its constructor.</p>
      * <p>It will only return Pixels with an alpha value greater than 0.</p>
      * @param bufferedImage BufferedImage to represent the pixels of

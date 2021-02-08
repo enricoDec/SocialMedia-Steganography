@@ -56,16 +56,17 @@ public class ImageSteg implements Steganography {
     );
 
     /**
-     * Creates a new ImageSteg with settings:
+     * <p>Creates a new ImageSteg with settings:</p>
      * <ul>
      *     <li>useDefaultHeader = true</li>
      *     <li>useTransparent = false</li>
      * </ul>
      *
-     * This means, a default header will be encoded in the image to simplify decoding and
-     * fully transparent pixels will not be used for encoding or decoding.
+     * <p>This means, a default header will be encoded in the image to simplify decoding and
+     * fully transparent pixels will not be used for encoding or decoding.</p>
      *
-     * Is equivalent to ImageSteg(true, false).
+     * <p>This is equivalent to ImageSteg(true, false).</p>
+     * @see #ImageSteg(boolean, boolean)
      */
     public ImageSteg() {
         this.useDefaultHeader = true;
@@ -89,14 +90,18 @@ public class ImageSteg implements Steganography {
      * <ul>
      *      <li>if true, fully transparent pixels will be used for encoding and decoding</li>
      *      <li>if false, fully transparent pixels will not be used for encoding and decoding</li>
+     *      <li>This value must be equal while encoding and decoding to successfully decode the hidden message.</li>
+     *      <li>This value can only affect PNGs that contain fully transparent pixels.</li>
+     *      <li>If an image has no fully transparent pixels, this value will be ignored.</li>
+     *      <li>If the image is a GIF, this value will be ignored.</li>
+     *      <li>BMPs with transparent pixels are not supported by this class.</li>
      * </ul>
-     * <p>This value must be equal while encoding and decoding to successfully decode the hidden message.</p>
-     * <p>This value can only affect PNGs that contain fully transparent pixels.</p>
-     * <p>If an image has no fully transparent pixels, this value will be ignored.</p>
-     * <p>If the image is a GIF, this value will be ignored.</p>
-     * <p>BMPs with transparent pixels are not supported by this class.</p>
      * @param useDefaultHeader should the default header be used for encoding?
      * @param useTransparent should fully transparent pixels be used for encoding and decoding?
+     * @see #decode(byte[])
+     * @see #decode(byte[], long)
+     * @see #decodeRaw(int, byte[])
+     * @see #decodeRaw(int, byte[], long)
      */
     public ImageSteg(boolean useDefaultHeader, boolean useTransparent) {
         this.useDefaultHeader = useDefaultHeader;
@@ -151,6 +156,7 @@ public class ImageSteg implements Steganography {
      * @throws NoImageException if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
      * @throws UnknownStegFormatException if the default header could not be found
+     * @see #decodeRaw(int, byte[])
      */
     @Override
     public byte[] decode(byte[] steganographicData)
@@ -177,6 +183,7 @@ public class ImageSteg implements Steganography {
      * @throws NoImageException if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
      * @throws UnknownStegFormatException if the default header could not be found
+     * @see #decodeRaw(int, byte[], long)
      */
     @Override
     public byte[] decode(byte[] steganographicData, long seed)
@@ -277,13 +284,14 @@ public class ImageSteg implements Steganography {
     }
 
     /**
-     * Returns the maximum number of bytes that can be encoded in the given image using the settings
-     * given to the constructor of ImageSteg.
+     * Returns the maximum number of bytes that can be encoded (as payload) in the given image.
+     * This method accounts for the use of transparent pixels and default header as given to the constructor.
      * @param image image to potentially encode bytes in
      * @return the payload-capacity of image
      * @throws IOException if an error occurs during reading the image
      * @throws NoImageException if no image could be read from the image
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @see #ImageSteg(boolean, boolean)
      */
     public int getImageCapacity(byte[] image)
             throws IOException, NoImageException, UnsupportedImageTypeException {
