@@ -33,6 +33,7 @@ import com.tumblr.jumblr.types.*;
 import persistence.JSONPersistentManager;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -393,7 +394,7 @@ public class Tumblr extends SocialMedia {
         AudioPost audioPost = null;
 
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
+            FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/audioAfterEncode.mp3");
             fileOutputStream.write(media);
             fileOutputStream.close();
         } catch (FileNotFoundException e) {
@@ -403,7 +404,7 @@ public class Tumblr extends SocialMedia {
         }
 
 
-        audioFile = new File("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
+        audioFile = new File("src/main/resources/audioAfterEncode.mp3");
         List<String> tags = new ArrayList<>();
         tags.add(keyword);
 
@@ -412,6 +413,7 @@ public class Tumblr extends SocialMedia {
             audioPost.setData(audioFile);
             audioPost.setTags(tags);
             audioPost.save();
+            Files.deleteIfExists(audioFile.toPath());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -442,7 +444,7 @@ public class Tumblr extends SocialMedia {
      */
     public Long postPhoto(byte[] media, String keyword){
 
-        File photoFile = new File("src/main/java/apis/tumblr/medias/photoTest.png");
+        File photoFile = new File("src/main/resources/photoTest.png");
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(photoFile);
             fileOutputStream.write(media);
@@ -461,6 +463,7 @@ public class Tumblr extends SocialMedia {
             photoPost.setPhoto(photo);
             photoPost.setTags(tags);
             photoPost.save();
+            Files.deleteIfExists(photoFile.toPath());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
