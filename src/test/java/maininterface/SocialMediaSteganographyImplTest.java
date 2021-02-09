@@ -3,7 +3,9 @@ package maininterface;
 import apis.MediaType;
 import apis.SocialMedia;
 import apis.models.APINames;
+import apis.models.Token;
 import apis.tumblr.Tumblr;
+import apis.tumblr.TumblrConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,33 +69,37 @@ public class SocialMediaSteganographyImplTest {
 
     @Test
     public void postToSocialMediaCorrectInputTrue() {
-        Assertions.assertTrue(exampleSteganography.postToSocialMedia(carrier, apiNames,keyword,mediaType));
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
+        Assertions.assertTrue(exampleSteganography.postToSocialMedia(carrier, apiNames,keyword,mediaType,token,"mariofenzl"));
     }
 
     @Test
     public void postToSocialMediacarrierNullNullPointer() {
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() -> {
-            exampleSteganography.postToSocialMedia(null, apiNames,keyword,mediaType);
+            exampleSteganography.postToSocialMedia(null, apiNames,keyword,mediaType,token,"mariofenzl");
         });
     }
 
     @Test
     public void postToSocialAPINameNullNullPointer() {
         Assertions.assertThrows(NullPointerException.class,() -> {
-            exampleSteganography.postToSocialMedia(null, apiNames,keyword,mediaType);
+            exampleSteganography.postToSocialMedia(carrier, null,keyword,mediaType);
         });
     }
 
     @Test
     public void postToSocialKeywordNullNullPointer() {
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() -> {
-            exampleSteganography.postToSocialMedia(carrier, apiNames,null,mediaType);
+            exampleSteganography.postToSocialMedia(carrier, apiNames,null,mediaType,token,"mariofenzl");
         });
     }
     @Test
     public void postToSocialMediaTypeNullNullPointer() {
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() -> {
-            exampleSteganography.postToSocialMedia(carrier, apiNames,keyword,null);
+            exampleSteganography.postToSocialMedia(carrier, apiNames,keyword,null,token,"mariofenzl");
         });
     }
 
@@ -139,11 +145,13 @@ public class SocialMediaSteganographyImplTest {
 
     @Test
     public void encodeAndPostCarrierCorrectInputTrue() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException {
-        Assertions.assertTrue(exampleSteganography.encodeAndPost(apiNames, keyword, carrier, payload, mediaType));
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
+        Assertions.assertTrue(exampleSteganography.encodeAndPost(apiNames, keyword, carrier, payload, mediaType,token,"mariofenzl"));
     }
 
-    @Test
+
     public void encodeAndPostFileCorrectInputTrue() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertEquals(true, exampleSteganography.encodeAndPost(apiNames, keyword, loadFilePath, payload, mediaType));
     }
 
@@ -154,36 +162,41 @@ public class SocialMediaSteganographyImplTest {
 
     @Test
     public void encodeAndPostCarrierNull() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() ->{
-            exampleSteganography.encodeAndPost(apiNames, keyword, (byte[])null, payload, mediaType);
+            exampleSteganography.encodeAndPost(apiNames, keyword, (byte[])null, payload, mediaType,token,"mariofenzl");
         });
     }
 
     @Test
     public void encodeAndPostPayloadNull() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() ->{
-            exampleSteganography.encodeAndPost(apiNames, keyword, carrier, null, mediaType);
+            exampleSteganography.encodeAndPost(apiNames, keyword, carrier, null, mediaType,token,"mariofenzl");
         });
     }
 
     @Test
     public void encodeAndPostMediaTypeNull() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() ->{
-            exampleSteganography.encodeAndPost(apiNames, keyword, carrier, payload, null);
+            exampleSteganography.encodeAndPost(apiNames, keyword, carrier, payload, null,token,"mariofenzl");
         });
     }
 
     @Test
     public void encodeAndPostApiNamesNull() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() ->{
-            exampleSteganography.encodeAndPost(null, keyword, carrier, payload, mediaType);
+            exampleSteganography.encodeAndPost(null, keyword, carrier, payload, mediaType,token,"mariofenzl");
         });
     }
 
     @Test
     public void encodeAndPostKeywordNull() throws UnsupportedMediaTypeException, IOException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException{
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
         Assertions.assertThrows(NullPointerException.class,() ->{
-            exampleSteganography.encodeAndPost(apiNames, null, carrier, payload, mediaType);
+            exampleSteganography.encodeAndPost(apiNames, null, carrier, payload, mediaType,token,"mariofenzl");
         });
     }
 }

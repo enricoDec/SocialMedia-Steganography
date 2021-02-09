@@ -51,7 +51,7 @@ public class MockOverlay implements PixelCoordinateOverlay {
         return this.mockPixels;
     }
 
-    @Override
+
     public BufferedImage getBufferedImage() {
         return null;
     }
