@@ -1,10 +1,10 @@
 
-# Projekt Studium steganography.Steganography
+# Projekt Studium Steganography
 Goal of this project is to develop a library able to hide information in a given Image, Video or Sound file and send this over to any of the available social networks.
 ## Docs
 [Javadoc](https://enricodec.github.io/ProjektStudiumSteganography/)
 
-[Deployment](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
+[Deployment Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
 
 [Use Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Usage-Guide)
 
@@ -14,13 +14,12 @@ Goal of this project is to develop a library able to hide information in a given
 
 
 ## Features
-
 ### Social Media APIs
  - Mario Teklic (Reddit & Imgur)
  - Mario Fenzl (Instagram)
  - Omar El-Issa (Twitter)
  - Robert Dreyer (TikTok)
- ### steganography.Steganography 
+ ### Steganography 
  - Enrico de Chadarevian (Video)
  - Selina Wernike (Bild GIF)
  - Henk-Joas Lubig (BufferedImage)
