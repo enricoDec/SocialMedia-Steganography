@@ -19,9 +19,21 @@
 package steganography.image;
 
 import steganography.Steganography;
-import steganography.util.BuffImgEncoder;
-import steganography.util.BuffImgAndFormat;
-import steganography.util.BufferedImageCoordinateOverlay;
+import steganography.image.encoders.GIFTableDecoder;
+import steganography.exceptions.UnknownStegFormatException;
+import steganography.image.encoders.PixelBit;
+import steganography.image.encoders.PixelIndex;
+import steganography.image.exceptions.ImageCapacityException;
+import steganography.image.exceptions.ImageWritingException;
+import steganography.image.exceptions.NoImageException;
+import steganography.image.exceptions.UnsupportedImageTypeException;
+import steganography.image.overlays.RemoveTransparentShuffleOverlay;
+import steganography.image.overlays.ShuffleOverlay;
+import steganography.image.encoders.BuffImgEncoder;
+import steganography.image.overlays.PixelCoordinateOverlay;
+import steganography.image.overlays.TableOverlay;
+import steganography.util.ImageStegIO;
+import steganography.util.ImageStegIOJava;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -29,33 +41,94 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Iterator;
+import java.util.*;
+import java.util.List;
 
 public class ImageSteg implements Steganography {
 
-    public static final int DEFAULT_SEED = 1732341558;
+    public static final long DEFAULT_SEED = 1732341558;
     private static final int HEADER_SIGNATURE = 1349075561;
-    private boolean useDefaultHeader = true;
+    private final boolean useTransparent;
+    private final boolean useDefaultHeader;
 
-    // @Override
-    // public void useDefaultHeader(boolean useDefaultHeader) {
-    //     // TODO: Might be problematic decoding, length has to be given from user
-    //     // this.useDefaultHeader = useDefaultHeader;
-    // }
+    private static final Set<String> supportedFormats = new HashSet<>(
+            Arrays.asList("bmp", "BMP", "gif", "GIF", "png", "PNG")
+    );
+
+    /**
+     * <p>Creates a new ImageSteg with settings:</p>
+     * <ul>
+     *     <li>useDefaultHeader = true</li>
+     *     <li>useTransparent = false</li>
+     * </ul>
+     *
+     * <p>This means, a default header will be encoded in the image to simplify decoding and
+     * fully transparent pixels will not be used for encoding or decoding.</p>
+     *
+     * <p>This is equivalent to ImageSteg(true, false).</p>
+     * @see #ImageSteg(boolean, boolean)
+     */
+    public ImageSteg() {
+        this.useDefaultHeader = true;
+        this.useTransparent = false;
+    }
+
+    /**
+     * <p>Creates a new ImageSteg with the given settings.</p>
+     * <b>useDefaultHeader</b>
+     * <ul>
+     *     <li>if true, the default header will be encoded in the image. The hidden message can then be
+     *         decoded using ImageSteg.decode(...).
+     *     </li>
+     *     <li>
+     *         if false, no header will be encoded in the image. The hidden message can only be decoded
+     *         using ImageSteg.decodeRaw(length, ...)
+     *     </li>
+     * </ul>
+     *
+     * <b>useTransparent</b>
+     * <ul>
+     *      <li>if true, fully transparent pixels will be used for encoding and decoding</li>
+     *      <li>if false, fully transparent pixels will not be used for encoding and decoding</li>
+     *      <li>This value must be equal while encoding and decoding to successfully decode the hidden message.</li>
+     *      <li>This value can only affect PNGs that contain fully transparent pixels.</li>
+     *      <li>If an image has no fully transparent pixels, this value will be ignored.</li>
+     *      <li>If the image is a GIF, this value will be ignored.</li>
+     *      <li>BMPs with transparent pixels are not supported by this class.</li>
+     * </ul>
+     * @param useDefaultHeader should the default header be used for encoding?
+     * @param useTransparent should fully transparent pixels be used for encoding and decoding?
+     * @see #decode(byte[])
+     * @see #decode(byte[], long)
+     * @see #decodeRaw(int, byte[])
+     * @see #decodeRaw(int, byte[], long)
+     */
+    public ImageSteg(boolean useDefaultHeader, boolean useTransparent) {
+        this.useDefaultHeader = useDefaultHeader;
+        this.useTransparent = useTransparent;
+    }
 
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload)
+            throws IOException, UnsupportedImageTypeException, NoImageException,
+                    ImageWritingException, ImageCapacityException {
+
         return encode(carrier, payload, DEFAULT_SEED);
     }
 
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(carrier);
+    public byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException,
+                    ImageWritingException, ImageCapacityException {
 
-        int type = buffImgAndFormat.getBufferedImage().getType();
+        if (carrier == null)
+            throw new NullPointerException("Parameter 'carrier' must not be null");
+        if (payload == null)
+            throw new NullPointerException("Parameter 'payload' must not be null");
 
-        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        ImageStegIO imageStegIO = new ImageStegIOJava(carrier, this.useTransparent);
+
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
 
         if (this.useDefaultHeader) {
             encoder.encode(int2bytes(HEADER_SIGNATURE));
@@ -63,26 +136,69 @@ public class ImageSteg implements Steganography {
         }
         encoder.encode(payload);
 
-        return bufferedImage2byteArray(overlay.getBufferedImage(), buffImgAndFormat.getFormat());
+        return imageStegIO.getImageAsByteArray();
     }
 
+    /**
+     * <p>Decodes a hidden message in the given steganographicData (an image) and returns it as a byte array.</p>
+     * <p>This method will fail, if the message was hidden without using the default header.
+     * Use ImageSteg.decodeRaw() for this purpose.</p>
+     * <p>Reasons for failing with an UnknownStegFormatExceptions are:</p>
+     * <ul>
+     *      <li>there is no hidden message</li>
+     *      <li>the message was hidden with 'useDefaultHeader = false'</li>
+     *      <li>the value for 'useTransparent' was different when hiding the message</li>
+     *      <li>the message was hidden using an unknown algorithm</li>
+     * </ul>
+     * @param steganographicData Image containing the hidden message to decode
+     * @return the hidden message as a byte array
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @throws UnknownStegFormatException if the default header could not be found
+     * @see #decodeRaw(int, byte[])
+     */
     @Override
-    public byte[] decode(byte[] steganographicData) throws IOException {
+    public byte[] decode(byte[] steganographicData)
+            throws IOException, UnsupportedImageTypeException, NoImageException, UnknownStegFormatException {
+
         return decode(steganographicData, DEFAULT_SEED);
     }
 
+    /**
+     * <p>Decodes a hidden message in the given steganographicData (an image) and returns it as a byte array.</p>
+     * <p>This method will fail, if the message was hidden without using the default header.
+     * Use ImageSteg.decodeRaw() for this purpose.</p>
+     * <p>Reasons for failing with an UnknownStegFormatExceptions are:</p>
+     * <ul>
+     *      <li>there is no hidden message</li>
+     *      <li>the message was hidden with 'useDefaultHeader = false'</li>
+     *      <li>the value for 'useTransparent' was different when hiding the message</li>
+     *      <li>the message was hidden using an unknown algorithm</li>
+     * </ul>
+     * @param steganographicData Image containing the hidden message to decode
+     * @param seed seed that was used to encode the given stenographicData
+     * @return the hidden message as a byte array
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @throws UnknownStegFormatException if the default header could not be found
+     * @see #decodeRaw(int, byte[], long)
+     */
     @Override
-    public byte[] decode(byte[] steganographicData, long seed) throws IOException {
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(steganographicData);
+    public byte[] decode(byte[] steganographicData, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException, UnknownStegFormatException {
 
-        BufferedImageCoordinateOverlay overlay = getOverlay(buffImgAndFormat.getBufferedImage(), seed);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        if (steganographicData == null)
+            throw new NullPointerException("Parameter 'steganographicData' must not be null");
 
-        // TODO: only do this if useDefaultHeader == true, but length has to be given from user
+        ImageStegIO imageStegIO = new ImageStegIOJava(steganographicData, this.useTransparent);
+
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
+
         // decode 4 bytes and compare them to header signature
         if (bytesToInt(encoder.decode(4)) != HEADER_SIGNATURE) {
-            // TODO: Specialized Exception
-            throw new UnsupportedEncodingException("No steganographic encoding found.");
+            throw new UnknownStegFormatException("No steganographic encoding found.");
         }
 
         // decode the next 4 bytes to get the amount of bytes to read
@@ -91,109 +207,104 @@ public class ImageSteg implements Steganography {
         return encoder.decode(length);
     }
 
-    @Override
-    public boolean isSteganographicData(byte[] data) throws IOException {
-        BuffImgAndFormat buffImgAndFormat = carrier2BufferedImage(data);
+    /**
+     * <p>Interprets an amount of (length * 8) pixels as a hidden message and returns it as a byte array.</p>
+     * <p>This method will not search for a header or validate the retrieved data in any form. If 'steganographicData'
+     * contains a supported image, this method will always return a result. Whether this result is the hidden message,
+     * depends on the settings used:</p>
+     * <ul>
+     *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
+     *     <li>'payload.length' during encoding == 'length' during decoding</li>
+     *     <li>No seed used during encoding (thereby using ImageSteg.DEFAULT_SEED)</li>
+     *     <li>'useDefaultHeader' == false during encoding</li>
+     * </ul>
+     * @param length Length (in bytes) of the hidden message
+     * @param steganographicData Data containing data to extract
+     * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     */
+    public byte[] decodeRaw(int length, byte[] steganographicData)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
 
-        BufferedImageCoordinateOverlay overlay = new ShuffleOverlay(buffImgAndFormat.getBufferedImage(), DEFAULT_SEED);
-        BuffImgEncoder encoder = new PixelBit(overlay);
+        return decodeRaw(length, steganographicData, DEFAULT_SEED);
+    }
+
+    /**
+     * <p>Interprets an amount of (length * 8) pixels as a hidden message and returns it as a byte array.</p>
+     * <p>This method will not search for a header or validate the retrieved data in any form. If 'steganographicData'
+     * contains a supported image, this method will always return a result. Whether this result is the hidden message,
+     * depends on the settings used:</p>
+     * <ul>
+     *     <li>'useTransparent' during encoding == 'useTransparent' during decoding</li>
+     *     <li>'payload.length' during encoding == 'length' during decoding</li>
+     *     <li>'seed' during encoding == 'seed' during decoding</li>
+     *     <li>'useDefaultHeader' == false during encoding</li>
+     * </ul>
+     * @param length Length (in bytes) of the hidden message
+     * @param steganographicData Data containing data to extract
+     * @param seed seed that was used to encode the given stenographicData
+     * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
+     * @throws IOException if an error occurs during reading 'steganographicData'
+     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     */
+    public byte[] decodeRaw(int length, byte[] steganographicData, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
+        if (steganographicData == null)
+            throw new NullPointerException("Parameter 'steganographicData' must not be null");
+
+        ImageStegIO imageStegIO = new ImageStegIOJava(steganographicData, this.useTransparent);
+
+        BuffImgEncoder encoder = imageStegIO.getEncoder(seed);
+
+        return encoder.decode(length);
+    }
+
+    @Override
+    public boolean isSteganographicData(byte[] data)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
+        return isSteganographicData(data, DEFAULT_SEED);
+    }
+
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
+
+        if (data == null)
+            throw new NullPointerException("Parameter 'data' must not be null");
+
+        BuffImgEncoder encoder = new ImageStegIOJava(data, this.useTransparent).getEncoder(seed);
 
         return bytesToInt(encoder.decode(4)) == HEADER_SIGNATURE;
     }
 
     /**
-     * Returns the maximum number of bytes that can be encoded in the given image.
+     * Returns the maximum number of bytes that can be encoded (as payload) in the given image.
+     * This method accounts for the use of transparent pixels and default header as given to the constructor.
      * @param image image to potentially encode bytes in
-     * @param subtractDefaultHeader should the length of the default header be subtracted from the capacity?
-     * @param withTransparent should transparent pixels account to the capacity?
      * @return the payload-capacity of image
+     * @throws IOException if an error occurs during reading the image
+     * @throws NoImageException if no image could be read from the image
+     * @throws UnsupportedImageTypeException if the type of the given image is not supported
+     * @see #ImageSteg(boolean, boolean)
      */
-    public int getImageCapacity(byte[] image, boolean subtractDefaultHeader, boolean withTransparent)
-            throws IOException {
+    public int getImageCapacity(byte[] image)
+            throws IOException, NoImageException, UnsupportedImageTypeException {
 
-        BufferedImage bufferedImage = carrier2BufferedImage(image).getBufferedImage();
-        int capacity;
-        if (!withTransparent) {
-            capacity = bufferedImage.getWidth() * bufferedImage.getHeight();
-        } else {
-            capacity = countIntransparent(bufferedImage);
-        }
-        capacity /= 8;
+        int capacity = new ImageStegIOJava(image, this.useTransparent)
+                .getEncoder(DEFAULT_SEED)
+                .getOverlay().available() / 8;
 
-        return (subtractDefaultHeader && capacity >= 8) ? (capacity - 8) : capacity;
+        return this.useDefaultHeader ? (capacity - 8) : capacity;
     }
-
-    private int countIntransparent(BufferedImage bufferedImage) {
-        int count = 0;
-        for(int y = 0; y < bufferedImage.getHeight(); y++) {
-            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                int pixel = bufferedImage.getRGB(x, y);
-                if(((pixel >> 24) & 0xff) != 0)
-                    count++;
-            }
-        }
-        return count;
-    }
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     //                                       UTIL
     ////////////////////////////////////////////////////////////////////////////////////////////
-
-    private BufferedImageCoordinateOverlay getOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedEncodingException {
-        int type = bufferedImage.getType();
-        switch (type) {
-            case BufferedImage.TYPE_INT_ARGB:
-            case BufferedImage.TYPE_4BYTE_ABGR:
-            case BufferedImage.TYPE_INT_RGB:
-            case BufferedImage.TYPE_INT_BGR:
-                return new ShuffleOverlay(bufferedImage, seed);
-            case BufferedImage.TYPE_BYTE_INDEXED:
-                // TODO: Put 8 Bit algorithm here
-                throw new UnsupportedEncodingException("8 Bit / Type BYTE_INDEXED not yet implemented");
-                // return overlay8Bit
-            default:
-                throw new UnsupportedEncodingException("Image type is not supported");
-        }
-    }
-
-    private BuffImgAndFormat carrier2BufferedImage(byte[] carrier) throws IOException {
-        BuffImgAndFormat buffImgAndFormat;
-
-        try(ImageInputStream imageInputStream = new MemoryCacheImageInputStream(new ByteArrayInputStream(carrier))) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
-
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-
-                try {
-                    reader.setInput(imageInputStream);
-
-                    buffImgAndFormat = new BuffImgAndFormat(reader.read(0), reader.getFormatName());
-
-                } finally {
-                    reader.dispose();
-                }
-            } else {
-                // TODO: Specialized Exception
-                throw new UnsupportedEncodingException("No image could be read from input.");
-            }
-        }
-
-        return buffImgAndFormat;
-    }
-
-    private byte[] bufferedImage2byteArray(BufferedImage image, String format) throws IOException {
-        ByteArrayOutputStream resultImage = new ByteArrayOutputStream();
-
-        if (!ImageIO.write(image, format, resultImage)) {
-            // TODO: Specialized Exception
-            throw new UnsupportedEncodingException("Could not write image. Unknown, internal failure");
-        }
-
-        return resultImage.toByteArray();
-    }
 
     private byte[] int2bytes(int integer) {
         return new byte[] {

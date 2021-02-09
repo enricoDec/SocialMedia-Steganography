@@ -19,7 +19,7 @@
 package steganography.audio.mp3;
 
 /**
- * This class is a POJO and holds information about a frame in an MP3 file.
+ * This class holds information about a frame in an MP3 file.
  * @author Richard Rudek
  */
 class Frame {
@@ -28,6 +28,10 @@ class Frame {
      */
     public static final int HEADER_LENGTH = 4;
     /**
+     * The length of the checksum following an MP3 header in bytes
+     */
+    public static final int CHECKSUM_LENGTH = 2;
+    /**
      * The number of the byte in an MP3 file where this frame begins
      */
     private int startingByte;
@@ -35,10 +39,29 @@ class Frame {
      * The length of the entire frame including the header in bytes
      */
     private int length;
+    /**
+     * True, if the frame header is protected by a 16 bit checksum
+     */
     private boolean crcProtected;
+    /**
+     * The bitrate of the frame
+     */
     private int bitrate;
+    /**
+     * The sampling rate of the frame
+     */
     private int samplingRate;
+    /**
+     * True, if the frame is padded with additional bytes.
+     * The amount of padding bytes is dependent on the mpeg layer.<br>
+     * layer 1 = 4 padding bytes<br>
+     * layer 2 or 3 = 1 padding byte
+     */
     private boolean padded;
+    /**
+     * True, if the frames header is valid, meaning the properties of the header make sense and
+     * it can be handled by MP3Steganography (e.g. checksums are possible, but not supported by the algorithm).
+     */
     private boolean valid;
 
 

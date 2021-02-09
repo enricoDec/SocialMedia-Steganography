@@ -18,35 +18,43 @@
 
 package apis.models;
 
+/**
+ * resembles oAuth1 Tokens
+ * oAuth1 Token consists of a pair of tokens
+ * accessToken and accessTokenSecret
+ */
 public class Token {
 
     /**
-     * Code of the Token
+     * Code of the accessToken for oAuth1
      */
-    private String token;
+    private String accessToken;
+
     /**
-     * time of creation in ms
+     * code of accessTokenSecret for oAuth1
      */
-    private long time;
+    private String accessTokenSecret;
 
-    public Token(String token, long time) {
-        this.token = token;
-        this.time = time;
+    public Token(){}
+
+    public Token(String acessToken, String accessTokenSecret) {
+        this.accessToken = acessToken;
+        this.accessTokenSecret = accessTokenSecret;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String token) {
+        this.accessToken = token;
     }
 
-    public long getTime() {
-        return time;
+    public String getAccessTokenSecret() {
+        return accessTokenSecret;
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    public void setAccessTokenSecret(String token) {
+        this.accessTokenSecret = token;
     }
 }

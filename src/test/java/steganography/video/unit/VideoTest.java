@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import java.io.*;
 
@@ -34,52 +36,56 @@ import java.io.*;
  **/
 public class VideoTest {
     private final File ffmpegBin = new File("src/main/resources");
+    private final File carrier = new File("src/test/java/steganography/video/resources/Carrier.mp4");
+
+    /**
+     * Try to pass invalid data
+     * Bad Test
+     */
+    @Test
+    public void decodeToPictureWrongData() {
+        byte[] randomData = new byte[100];
+
+        try {
+            new Video(randomData, ffmpegBin);
+        } catch (RuntimeException | VideoNotFoundException | UnsupportedVideoTypeException e) {
+            //do nothing
+        }
+    }
 
     /**
      * Check if Video data is read correctly
+     * Good Test
      */
     @Test
     public void decodeToPictureMetadata() {
         try {
-            Video video = new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/video1.mp4")), ffmpegBin);
+            Video video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             Assertions.assertNotNull(video.getCodec());
-            Assertions.assertNotEquals(0, video.getTimebase());
-            Assertions.assertNotEquals(0, video.getFrameRate());
-            Assertions.assertNotEquals(0, video.getFrameCount());
+            Assertions.assertNotEquals(0L, video.getTimebase());
+            Assertions.assertNotEquals(0.0f, video.getFrameRate());
+            Assertions.assertNotEquals(0L, video.getFrameCount());
             Assertions.assertNotEquals(0, video.getFrameWidth());
             Assertions.assertNotEquals(0, video.getFrameHeight());
             Assertions.assertNotNull(video.getVideoByteArray());
             Assertions.assertNotNull(video.getPixelformat());
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail();
         }
     }
 
     /**
-     * Try to pass invalid data
-     */
-    @Test
-    public void decodeToPictureWrongData() {
-        try {
-            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), ffmpegBin);
-        } catch (UnsupportedEncodingException e) {
-            //do nothing
-        } catch (IOException e) {
-            Assertions.fail();
-        }
-    }
-
-    /**
      * Try to pass empty data
+     * Bad Test
      */
     @Test
     public void decodeToPictureEmptyData() {
         try {
             new Video(new byte[0], ffmpegBin);
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedVideoTypeException e) {
             //do nothing
-        } catch (UnsupportedEncodingException e) {
+        } catch (VideoNotFoundException e) {
             e.printStackTrace();
             Assertions.fail();
         }
@@ -91,10 +97,10 @@ public class VideoTest {
     @Test
     public void decodeToPictureInvalidFFmpegPath() {
         try {
-            new Video(ByteArrayUtils.read(new File("src/test/java/steganography/video/resources/audio.mp3")), new File(""));
+            new Video(ByteArrayUtils.read(carrier), new File(""));
         } catch (IllegalArgumentException e) {
             // do nothing
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             e.printStackTrace();
             Assertions.fail();
         }

@@ -25,22 +25,24 @@ import java.util.NoSuchElementException;
  * @author Richard Rudek
  */
 class BitRateLookUp {
+
     /**
      * Tries to find the Bitrate of an MP3 frame.
-     * @param mpegVersion MPEG Version of the frame<br/>
-     *                    MPEG Version 1 = 1<br/>
-     *                    MPEG Version 2 or 2.5 = 2<br/>
-     * @param layer Layer of the frame<br/>
-     *              Layer 1 = 1<br/>
-     *              Layer 2 = 2<br/>
-     *              Layer 3 = 3<br/>
-     * @param index Bitrate index of the frame (should be between 0 and 14 inclusive)<br/>
+     * @param mpegVersion MPEG Version of the frame<br>
+     *                    MPEG Version 1 = 1<br>
+     *                    MPEG Version 2 or 2.5 = 2<br>
+     * @param layer Layer of the frame<br>
+     *              Layer 1 = 1<br>
+     *              Layer 2 = 2<br>
+     *              Layer 3 = 3<br>
+     * @param index Bitrate index of the frame (should be between 0 and 14 inclusive)<br>
      * @return int - Bitrate according to MPEG Version, Layer and Bitrate index of the frame
      * @throws IllegalArgumentException if any of the parameters are invalid
      * @throws NoSuchElementException if there is no value for the given parameters
      */
     static int getValueForBitrate(int mpegVersion, int layer, int index)
             throws IllegalArgumentException, NoSuchElementException {
+        // check if parameters are valid
         if (mpegVersion < 1 || mpegVersion > 2)
             throw new IllegalArgumentException("MPEG version " + mpegVersion + " not supported");
 
@@ -53,19 +55,25 @@ class BitRateLookUp {
         if (index == 0)
             throw new NoSuchElementException("Free Bitrate is not supported (value was " + index + ")");
 
+        // find bitrate for given layer and mpeg version
         int bitrate = -1;
 
         if (mpegVersion == 1 && layer == 1)
             bitrate = getValueForV1AndL1(index);
+
         if (mpegVersion == 1 && layer == 2)
             bitrate = getValueForV1AndL2(index);
+
         if (mpegVersion == 1 && layer == 3)
             bitrate = getValueForV1AndL3(index);
+
         if (mpegVersion == 2 && layer == 1)
             bitrate = getValueForV2AndL1(index);
+
         if (mpegVersion == 2 && (layer == 2 || layer == 3))
             bitrate = getValueForV2AndL2OrL3(index);
 
+        // if bitrate is still not assigned, something went wrong
         if (bitrate == -1)
             throw new NoSuchElementException("Could not resolve Bitrate for MPEG version " + mpegVersion
                     + ", Layer " + layer + " and index " + index + ". This is most likely a bug.");

@@ -1,89 +1,200 @@
-/*
- * Copyright (c) 2020
- * Contributed by NAME HERE
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package socialmediasteganography;
 
+import apis.MediaType;
 import apis.SocialMedia;
+import apis.models.APINames;
+import apis.models.Token;
+import apis.tumblr.Tumblr;
+import apis.tumblr.TumblrConstants;
 import steganography.Steganography;
+import steganography.audio.mp3.MP3Steganography;
+import steganography.exceptions.*;
+import steganography.image.AnimatedGif;
+import steganography.image.ImageSteg;
+import steganography.util.ByteArrayUtils;
+import steganography.video.VideoSteg;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
+import javax.print.attribute.standard.Media;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
-/**
- * @author Mario Teklic
- */
+public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
+    private Long seed;
 
-
-public class SocialMediaSteganographyImpl implements SocialMediaSteganography {
-
-    private static final Logger logger = Logger.getLogger(SocialMediaSteganographyImpl.class.getName());
-
-    private Steganography steganography;
-
-    public SocialMediaSteganographyImpl(Steganography steganography) {
-        this.steganography = steganography;
+    @Override
+    public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType, Token token, String username) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
+        byte[] encoded = encodeCarrier(carrier, payload, mediaType);
+        return postToSocialMedia(encoded, apiNames, keyword, mediaType,token, username);
     }
 
     @Override
-    public boolean encodeAndPost(SocialMedia socialMedia, byte[] carrier, byte[] payload) {
+    public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
+        byte[] encoded = encodeCarrier(carrier, payload, mediaType);
+        return postToSocialMedia(encoded, apiNames, keyword, mediaType);
+    }
+
+    @Override
+    public boolean encodeAndPost(APINames apiNames, String keyword, String path, byte[] payload, MediaType mediaType) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException {
+        File file = new File(path);
+        byte[] carrier = ByteArrayUtils.read(file);
+        return encodeAndPost(apiNames, keyword, carrier, payload, mediaType);
+    }
+
+    @Override
+    public void saveEncodedPicture(byte[] carrier, byte[] payload, MediaType mediaType, String savepath) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
+        byte[] encoded = encodeCarrier(carrier, payload, mediaType);
+        if(encoded == null){
+            throw new UnsupportedMediaTypeException("Unsupported");
+        }
+        File file = new File(savepath);
         try {
-            byte[] bytes = steganography.encode(carrier, payload);
-
-            //Zum pruefen, ob man das Bild nach dem enkodieren noch (manuell) öffnen kann.
-            InputStream is = new ByteArrayInputStream(bytes);
-            BufferedImage bImg = ImageIO.read(is);
-            ImageIO.write(bImg, "png", new File("myfileEncoded.png"));
-
-
-            return socialMedia.postToSocialNetwork(bytes, "test");
-        } catch (Exception e) {
+            Files.write(file.toPath(), encoded);
+        }catch (IOException e){
             e.printStackTrace();
-            return false;
         }
     }
 
     @Override
-    public List<byte[]> searchForHiddenMessages(SocialMedia socialMedia, String keyword) {
-        List<byte[]> recentMedias = socialMedia.getRecentMediaForKeyword(keyword);
-        List<byte[]> decodedMedias = new ArrayList<>();
+    public void saveEncodePicture(String filepath, MediaType mediaType, byte[] payload, String savepath) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException {
+        File file = new File(filepath);
+        byte[] carrier = ByteArrayUtils.read(file);
+        saveEncodedPicture(carrier, payload, mediaType, savepath);
+    }
 
-        if(recentMedias == null){
-            logger.info("No media with class " + socialMedia.getClass() + " for keyword '" + keyword + "' was found.") ;
-            return null;
+    @Override
+    public boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType) {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if (socialMedia != null){
+            return socialMedia.postToSocialNetwork(carrier, mediaType, keyword);
+
         }
+        throw new NullPointerException("Social Media not supported");
+    }
 
-        for(int i = 0; i < recentMedias.size(); i++){
-            try {
-                byte[] bDecoded = steganography.decode(recentMedias.get(i));
-                if (bDecoded.length > 0) {
-                    decodedMedias.add(bDecoded);
-                    logger.info("Decoded successfully.");
-                    System.out.println("Hidden message was: " + new String(bDecoded));
-                }
-            } catch (IOException e) {
-                logger.info("Decoding failed for entry on index " + i + " with an " + e.getClass().getSimpleName() + ".");
+    @Override
+    public boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token, String username) {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if (socialMedia != null){
+            if (token != null) {
+                socialMedia.setToken(token);
+                socialMedia.setBlogname(username);
+                return socialMedia.postToSocialNetwork(carrier, mediaType, keyword,token);
+            } else
+            {
+                throw new NullPointerException("Token is null");
             }
         }
-        return decodedMedias;
+        throw new NullPointerException("Social Media not supported");
     }
+
+    @Override
+    public byte[] encodeCarrier(byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaCapacityException, MediaNotFoundException, MediaReassemblingException, IOException {
+        if (mediaType == null) {
+            throw new NullPointerException("Media Type is null");
+        }
+       Steganography steganography = getSteganographyByMediaType(mediaType);
+       if(steganography != null){
+           if(seed == null) {
+               return steganography.encode(carrier, payload);
+           }
+           return steganography.encode(carrier,payload,seed);
+       }
+          return null;
+    }
+
+    @Override
+    public SocialMedia subscribeToSocialMedia(String keyword, APINames apiNames) {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if(socialMedia != null){
+            if (socialMedia.subscribeToKeyword(keyword)) {
+                return socialMedia;
+            }
+            return null;
+        }
+        throw new NullPointerException("Social Media is unsupported");
+    }
+
+    @Override
+    public List<byte[]> getMediaAndDecode(String keyword, APINames apiNames, MediaType mediaType) throws UnsupportedMediaTypeException {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if(socialMedia != null){
+            List<byte[]> downloads = socialMedia.getRecentMediaForKeyword(keyword);
+                if (downloads.size() > 0) {
+                    Steganography steganography = getSteganographyByMediaType(mediaType);
+                    if (steganography != null) {
+                        List<byte[]> payloads = new ArrayList<>();
+                        for (byte[] data: downloads ) {
+                            try { // If exception are thrown while decoding they will be ignored to continue decoding
+                                if (steganography.isSteganographicData(data)) {
+                                    if (seed != null) {
+                                       payloads.add(steganography.decode(data,seed));
+                                    } else {
+                                        payloads.add(steganography.decode(data));
+                                    }
+                                }
+                            } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | UnknownStegFormatException exception) {
+                               continue;
+                            }
+                        }
+                        return payloads;
+                    } else {
+                        throw new UnsupportedMediaTypeException("unsupported Media Type");
+                    }
+                }
+            return null;
+        }
+        throw new NullPointerException("Social Media or Media ");
+    }
+
+    @Override
+    public byte[] decodeCarrier(MediaType mediaType, byte[] carrier) throws UnsupportedMediaTypeException, UnknownStegFormatException, MediaNotFoundException, IOException {
+        Steganography steganography = getSteganographyByMediaType(mediaType);
+        if(steganography != null){
+            if(seed == null) {
+                return steganography.decode(carrier);
+            }
+            return steganography.decode(carrier, seed);
+        }
+        throw new UnsupportedMediaTypeException("Unsupported media");
+    }
+
+    @Override
+    public void setSeed(Long seed) {
+        this.seed = seed;
+    }
+
+    private Steganography getSteganographyByMediaType(MediaType mediaType){
+        switch (mediaType){
+            case PNG:
+                return new ImageSteg();
+            case BMP:
+                return new ImageSteg();
+            case GIF:
+                return new AnimatedGif();
+            case MP3:
+                return new MP3Steganography();
+            case AVI:
+                return new VideoSteg();
+            default: return null;
+        }
+    }
+
+    private SocialMedia getSocialMediaByApiName(APINames apiNames){
+        switch (apiNames){
+            case TUMBLR:
+                SocialMedia tumblr = new Tumblr();
+                return tumblr;
+            default:
+                return null;
+        }
+    }
+
 }

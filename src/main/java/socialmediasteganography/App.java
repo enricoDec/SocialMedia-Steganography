@@ -19,96 +19,75 @@
 package socialmediasteganography;
 
 
+import apis.MediaType;
 import apis.SocialMedia;
+import apis.models.APINames;
 import apis.models.Token;
-import apis.imgur.Imgur;
-import apis.reddit.Reddit;
-import apis.utils.BlobConverterImpl;
+import apis.tumblr.Tumblr;
+import apis.tumblr.TumblrConstants;
 import persistence.JSONPersistentManager;
 import persistence.PersistenceDummy;
+import steganography.exceptions.MediaCapacityException;
+import steganography.exceptions.MediaNotFoundException;
+import steganography.exceptions.MediaReassemblingException;
+import steganography.exceptions.UnsupportedMediaTypeException;
 import steganography.image.ImageSteg;
+import steganography.util.ByteArrayUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * @author Mario Teklic
- */
 
 
 public class App {
     public static void main(String[] args) throws IOException {
-        JSONPersistentManager.getInstance().setJsonPersistentHelper(new PersistenceDummy());
 
-        //Setup
-        SocialMedia socialMedia = new Imgur();
-        socialMedia.setToken(new Token("e1e5f0ff327cb45aa5440f456297317cbcb77859", 100));
-        SocialMediaSteganography sms = new SocialMediaSteganographyImpl(new ImageSteg());
+        File file = new File("src/test/resources/steganography/image/baum.png");
+        byte[] carrier = ByteArrayUtils.read(file);
 
-        //Carrier, Payload
-        byte[] byts = BlobConverterImpl.downloadToByte("https://compress-or-die.com/public/understanding-png/assets/lena-dirty-transparency-corrected-cv.png");
-        String payload = "This is a secret message which was built by ProjectStudiumSteganography";
 
-        //Encode and Post
-        //sms.encodeAndPost(socialMedia, byts, payload.getBytes());
+        String payload = "hallotest";
+        SocialMediaSteganography sms = new SocialMediaSteganographyImpl();
+        Tumblr.setApiKey("OfpsSPZAf9mClIvgVAKY3Hhg63Y09riZ9AMmbbI0hQVMdS4uYR");
+        Tumblr.setApiSecret("H2yGuhhwd7g6eXIYE0OHpkL7fEd9laDWPHArjipezGyq9dFheF");
 
-        //Search in social media for pictures and try to decode
-        //List<byte[]> results = sms.searchForHiddenMessages(socialMedia, "test");
-        socialMedia.subscribeToKeyword("nature");
 
-/*
-        //Auswertung als Strings
-        List<String> messages = new ArrayList<>();
-        for (byte[] b : results) {
-            if (b.length > 0) {
-                String msg = new String(b);
-                messages.add(msg);
-                System.out.println(msg);
-            } else {
-                System.out.println("No bytes for message type found");
-            }
+        //token in constants only for testing purpose
+        Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
+
+
+        //encode and post png
+        try {
+            sms.encodeAndPost(APINames.TUMBLR, "katze",
+                    carrier,
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG, token, "mariofenzl");
+        } catch (UnsupportedMediaTypeException e) {
+            e.printStackTrace();
+        } catch (MediaNotFoundException e) {
+            e.printStackTrace();
+        } catch (MediaReassemblingException e) {
+            e.printStackTrace();
+        } catch (MediaCapacityException e) {
+            e.printStackTrace();
         }
-*/
 
-        /*
-         //Zum testen, ob dieses Bild korrekt runtergeladen wurde.
 
-        InputStream is = new ByteArrayInputStream(byts);
-        BufferedImage bImg = ImageIO.read(is);
-        ImageIO.write(bImg, "png", new File("myfile.png"));
-        */
+        //encode and post mp3
+        /*try {
+            sms.encodeAndPost(APINames.TUMBLR, "katze",
+                    "/home/marfen/Documents/Studium/Projekt_Steganographie/ProjektStudiumSteganography/src/main/java/apis/tumblr/medias/mp3ToDecode.mp3",
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.MP3);
+        } catch (UnsupportedMediaTypeException e) {
+            e.printStackTrace();
+        } catch (MediaNotFoundException e) {
+            e.printStackTrace();
+        } catch (MediaReassemblingException e) {
+            e.printStackTrace();
+        } catch (MediaCapacityException e) {
+            e.printStackTrace();
+        }*/
 
-    /*
-        //Upload on Imgur
-
-         SocialMedia imgur = new Imgur();
-         imgur.setToken(new Token("0d5ce353c61cbb597df3497669e7c4e85f072e2a", 123));
-         byte[] byts = BlobConverterImpl.downloadToByte("https://i.imgur.com/SJZyZQ1.png");
-         imgur.postToSocialNetwork(byts, "testword");
-*/
-
-        
-/*
-        //Upload on Reddit
-
-        SocialMedia reddit = new Reddit();
-        List<byte[]> resultList = reddit.getRecentMediaForKeyword("nature");
-        byte[] tmpImage = resultList.get(resultList.size()-1);
-        reddit.setToken(new Token("668533834712-q_itL79dEvxBQgWCRsktUkpTBScVQw", 123124));
-        reddit.postToSocialNetwork(tmpImage, "test");
-
-*/
-
-        /**
-         //Subscribe Imgur & Reddit
-
-         SocialMedia imgur = new Imgur();
-         imgur.changeSubscriptionInterval(TimeUnit.MINUTES, 5);
-         imgur.subscribeToKeyword("test");
-
-         SocialMedia reddit = new Reddit();
-         reddit.subscribeToKeyword("nature");
-         */
     }
 }

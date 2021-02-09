@@ -19,16 +19,14 @@
 package steganography.image;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import steganography.image.GIFTableDecoder;
+import steganography.image.encoders.GIFTableDecoder;
+import steganography.util.ByteArrayUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,13 +40,12 @@ public class GIFTableDecoderTest {
 
     }
 
-/*
+
     @Test
     public void saveColorTable_FullTabel_intArray() {
         try {
-            FileInputStream in = new FileInputStream("src/main/resources/gifFrames/25.gif");
-            gif = in.readAllBytes();
-            in.close();
+            File in = new File("src/test/resources/steganography/image/insta.gif");
+            gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertEquals(256,table.length);
         } catch (FileNotFoundException e) {
@@ -57,13 +54,12 @@ public class GIFTableDecoderTest {
             e.printStackTrace();
         }
     }
-
+/*
     @Test
     public void saveColorTable_SmallTable_intArray() {
         try {
-            FileInputStream in = new FileInputStream("src/main/resources/gifFrames/1.gif");
-            gif = in.readAllBytes();
-            in.close();
+            File in = new File("src/test/resources/steganography/image/insta.gif");
+            gif = ByteArrayUtils.read(in);
             int[] table = decoder.saveColorTable(gif);
             Assertions.assertTrue(table.length > 0 && table.length < 256);
         } catch (FileNotFoundException e) {
@@ -100,4 +96,8 @@ public class GIFTableDecoderTest {
         Map<Integer, List<Integer>> map = decoder.getColorCouples(table);
         Assertions.assertEquals(0,map.size());
     }
+
+    @Test
+    public void getColorCouples_Null_NullPointerException() {
+        Assertions.assertThrows(NullPointerException.class, () -> decoder.getColorCouples(null));    }
 }

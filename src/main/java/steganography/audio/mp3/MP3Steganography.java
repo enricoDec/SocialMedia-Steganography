@@ -19,119 +19,234 @@
 package steganography.audio.mp3;
 
 import steganography.Steganography;
-import steganography.audio.util.LSBChanger;
+import steganography.audio.LSBChanger;
+import steganography.audio.exception.AudioCapacityException;
+import steganography.audio.exception.AudioNotFoundException;
+import steganography.audio.overlays.AudioOverlay;
+import steganography.audio.overlays.MP3Overlays;
+import steganography.audio.overlays.MP3SequenceOverlay;
+import steganography.audio.overlays.MP3ShuffleOverlay;
+import steganography.exceptions.UnknownStegFormatException;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 /**
- * This class can encode and decode messages from a byte array containing an MP3 audio file.
+ * This class can encode and decode messages from a byte array containing an MP3 audio file using an overlay.
  * @author Richard Rudek
  */
 public class MP3Steganography implements Steganography {
 
-    private static final String HEADER_IDENTIFIER = "HAIM"; // Hide Audio In Mp3
+    /**
+     * The 4 Bytes used to identify messages hidden in mp3 files
+     */
+    private static final String HEADER_IDENTIFIER = "HAIM";
+    /**
+     * The default seed used, if none is provided
+     */
+    private static final long DEFAULT_SEED = 5571009188606006082L;
+    /**
+     * The overlay used to hide the message
+     */
+    private final MP3Overlays overlay;
+
 
     /**
-     * @throws IOException if carrier is not an MP3 file or if the payload does not fit into the carrier
+     * Creates an instance using the {@link MP3Overlays MP3Overlay} provided.
+     * @param overlay overlay to use
+     */
+    public MP3Steganography(MP3Overlays overlay) {
+        this.overlay = overlay;
+    }
+
+    /**
+     * Creates an instance using the default overlay.<br>
+     * The default is MP3Overlays.SEQUENCE_OVERLAY.
+     */
+    public MP3Steganography() {
+        this(MP3Overlays.SEQUENCE_OVERLAY);
+    }
+
+    /**
+     * Returns the AudioOverlay instance depending on this.overlay .
+     * @param bytes the bytes containing the mp3 file
+     * @param seed the seed to use for encoding or decoding
+     * @return Instance of an {@link AudioOverlay}
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm .
+     */
+    private AudioOverlay getOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
+        AudioOverlay overlay;
+        switch (this.overlay) {
+            case SHUFFLE_OVERLAY:
+                overlay = new MP3ShuffleOverlay(bytes, seed);
+                break;
+            case SEQUENCE_OVERLAY:
+            default:
+                overlay = new MP3SequenceOverlay(bytes, seed);
+                break;
+        }
+        return overlay;
+    }
+
+    /**
+     * Conceals the given payload in the carrier (which is an mp3 file) using a default seed.
+     * @param carrier a byte array containing an mp3 file
+     * @param payload a byte array containing the message
+     * @return The given carrier with the hidden message
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm
+     * @throws AudioCapacityException If the payload does not fit into the carrier
+     * @throws NullPointerException If the carrier and or payload are null or have length 0
      */
     @Override
-    public byte[] encode(byte[] carrier, byte[] payload) throws IOException {
+    public byte[] encode(byte[] carrier, byte[] payload)
+            throws AudioNotFoundException, AudioCapacityException, NullPointerException {
+        return encode(carrier, payload, DEFAULT_SEED);
+    }
+
+    /**
+     * Conceals the given payload in the carrier (which is an mp3 file) using the given seed.
+     * @param carrier a byte array containing an mp3 file
+     * @param payload a byte array containing the message
+     * @return the given carrier with the hidden message
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm
+     * @throws AudioCapacityException If the payload does not fit into the carrier
+     * @throws NullPointerException If the carrier and or payload are null or have length 0
+     */
+    @Override
+    public byte[] encode(byte[] carrier, byte[] payload, long seed)
+            throws AudioNotFoundException, AudioCapacityException, NullPointerException {
+        if (carrier == null || carrier.length == 0 || payload == null || payload.length == 0)
+            throw new NullPointerException("Carrier or payload are null or have length 0");
+
+        System.out.println("[INFO] Starting to encode into MP3 file.");
+
+        // add mp3 steganography header
         payload = addMP3SteganographyHeader(payload);
 
-        // check if message fits into carrier
+        // check if payload fits into carrier
         if (payload.length * 8 > carrier.length)
-            throw new IOException("Message is longer than carrier.");
+            throw new AudioCapacityException("Message is longer than carrier.");
 
-        // find the modifiable bytes in the carrier
-        byte[] carrierDataBytes = removeUnmodifiableBytes(carrier);
+        // start encoding
+        AudioOverlay overlay;
+        byte[] result;
+        // create overlay (also checks if the bytes are a valid mp3 file)
+        overlay = getOverlay(carrier, seed);
+        // get the encoder
+        LSBChanger lsbChanger = new LSBChanger(overlay);
+        // encode the payload
+        result = lsbChanger.encode(payload);
 
-        // check if message fits into carriers data bytes
-        if (payload.length * 8 > carrierDataBytes.length)
-            throw new IOException("Payload doesn't fit into carrier. " + payload.length * 8 +
-                    " bytes are required, but only " + carrier.length + " bytes are supplied.");
-
-        // encode payload
-        return LSBChanger.writeToByteArray(carrierDataBytes, payload);
-    }
-
-    @Override
-    public byte[] encode(byte[] carrier, byte[] payload, long seed) throws IOException {
-        // TODO use a distribution algorithm
-        System.err.println("Audio steganography does not support seeds yet.");
-        return encode(carrier, payload);
+        System.out.println("[INFO] Finished encoding into MP3 file.");
+        System.out.println();
+        return result;
     }
 
     /**
-     * @throws IOException if the given byte array doesn't contain an mp3 file.
+     * Attempts to retrieve a hidden message from the given byte array (which contains an mp3 file)
+     * using the default seed.
+     * @param steganographicData a byte array containing an mp3 file that has a message hidden within
+     * @return a byte array containing the hidden message
+     * @throws UnknownStegFormatException if the message could not be read from the given byte array.
+     *                                    This can happen if the file got changed after encoding
+     *                                    (e.g. file gets compressed when uploading it to a social media).
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm
+     * @throws NullPointerException If the given byte array is null or has length 0
      */
     @Override
-    public byte[] decode(byte[] steganographicData) throws IOException {
-        // find all frames in mp3 bytes
-        MP3File file = new MP3File(steganographicData);
-        if (!file.findAllFrames())
-            throw new IOException("The given byte array does not contain any MP3 headers.");
-
-        // get data bytes
-        byte[] dataBytes = removeUnmodifiableBytes(steganographicData);
-
-        // search for header identifier
-        byte[] possibleHeader = LSBChanger.readFromByteArray(dataBytes, 0, 4);
-        if (!new String(possibleHeader, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER))
-            throw new IOException("The steganographic data does not contain a hidden message.");
-
-        // find length of message
-        byte[] messageLength = LSBChanger.readFromByteArray(dataBytes, 4, 4);
-        int length = ByteBuffer.wrap(messageLength).getInt();
-
-        // retrieve message
-        return LSBChanger.readFromByteArray(dataBytes, 8, length);
-    }
-
-    @Override
-    public byte[] decode(byte[] steganographicData, long seed) throws IOException {
-        // TODO use a distribution algorithm
-        System.err.println("Audio steganography does not support seeds yet.");
-        return decode(steganographicData);
+    public byte[] decode(byte[] steganographicData)
+            throws UnknownStegFormatException, AudioNotFoundException, NullPointerException {
+        return decode(steganographicData, DEFAULT_SEED);
     }
 
     /**
-     * @throws IOException if the given byte array does not contain an MP3 file.
+     * Attempts to retrieve a hidden message from the given byte array (which contains an mp3 file)
+     * using the given seed.
+     * @param steganographicData a byte array containing an mp3 file that has a message hidden within
+     * @return a byte array containing the hidden message
+     * @throws UnknownStegFormatException if the message could not be read from the given byte array.
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm
+     * @throws NullPointerException If the given byte array is null or has length 0
      */
     @Override
-    public boolean isSteganographicData(byte[] data) throws IOException {
-        // find all frames in mp3 bytes
-        MP3File file = new MP3File(data);
-        if (!file.findAllFrames())
-            throw new IOException("The given byte array does not contain any MP3 headers.");
+    public byte[] decode(byte[] steganographicData, long seed)
+            throws UnknownStegFormatException, AudioNotFoundException, NullPointerException {
+        if (steganographicData == null || steganographicData.length == 0)
+            throw new NullPointerException("steganographicData is null or has length 0");
 
-        // get data bytes
-        byte[] dataBytes = removeUnmodifiableBytes(data);
+        System.out.println("[INFO] Starting to decode from MP3 file.");
 
-        // search for header identifier
-        byte[] possibleHeader = LSBChanger.readFromByteArray(dataBytes, 0, 4);
+        byte[] message;
+
+        // create overlay (also checks if the bytes are a valid mp3 file)
+        AudioOverlay overlay = getOverlay(steganographicData, seed);
+        // get the decoder
+        LSBChanger lsbChanger = new LSBChanger(overlay);
+
+        // decode the header
+        byte[] header = lsbChanger.decode(4);
+        if (!new String(header, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER))
+            throw new UnknownStegFormatException("No hidden Message found.");
+
+        // if header was found, decode message length
+        int length = ByteBuffer.wrap(lsbChanger.decode(4)).getInt();
+
+        // decode message according to decoded message length
+        message = lsbChanger.decode(length);
+
+        System.out.println("[INFO] Finished decoding from MP3 file.");
+        System.out.println();
+        return message;
+    }
+
+    /**
+     * Checks if the given byte array contains a message that was hidden using the default seed.
+     * @return true, if a message was found
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                the mp3 file is not supported by this algorithm
+     * @throws NullPointerException If the given byte array is null or has length 0
+     */
+    @Override
+    public boolean isSteganographicData(byte[] data) throws AudioNotFoundException {
+        return isSteganographicData(data, DEFAULT_SEED);
+    }
+
+    /**
+     * Checks if the given byte array contains a message that was hidden using the given seed.
+     * @return true, if a message was found
+     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
+     *                                 the mp3 file is not supported by this algorithm
+     * @throws NullPointerException If the given byte array is null or has length 0
+     */
+    @Override
+    public boolean isSteganographicData(byte[] data, long seed) throws AudioNotFoundException {
+        if (data == null || data.length == 0)
+            throw new NullPointerException("Data is null or has length 0");
+
+        // create overlay and decoder
+        AudioOverlay overlay = getOverlay(data, seed);
+        LSBChanger lsbChanger = new LSBChanger(overlay);
+
+        // try to decode header
+        byte[] possibleHeader;
+
+        try {
+            possibleHeader = lsbChanger.decode(4);
+        } catch (UnknownStegFormatException e) {
+            return false;
+        }
 
         return new String(possibleHeader, StandardCharsets.US_ASCII).equals(HEADER_IDENTIFIER);
     }
 
-    private byte[] removeUnmodifiableBytes(byte[] carrier) throws IOException {
-        MP3File file = new MP3File(carrier);
-        if (!file.findAllFrames())
-            throw new IOException("No modifiable bytes found in carrier, can't encode payload. " +
-                    "The supplied carrier is not an MP3 file.");
-        List<Integer> modifiableBytes = file.getModifiablePositions();
-        byte[] carrierDataBytes = new byte[modifiableBytes.size()];
-        for (int i = 0; i < modifiableBytes.size(); i++) {
-            carrierDataBytes[i] = carrier[modifiableBytes.get(i)];
-        }
-        return carrierDataBytes;
-    }
-
     /**
-     * Adds a 64 bit header to the message to identify it when the message is retrieved.
-     * The Header is composed like this:<br/>
+     * Adds a 64 bit (8 bytes) header to the message to identify it when the message is retrieved.
+     * The Header is composed like this:<br>
      * <ul>
      *     <li>Bits 0 - 31: MP3 Identifier (MP3+)</li>
      *     <li>Bits 32 - 64: Length of Message in Bytes</li>
@@ -140,7 +255,7 @@ public class MP3Steganography implements Steganography {
      * @return byte[] - message with added steganographic header
      */
     private byte[] addMP3SteganographyHeader(byte[] payload) {
-        byte[] headerAndMessage = new byte[payload.length + 8];
+        byte[] headerAndMessage = new byte[8 + payload.length];
 
         // add identifier
         byte[] identifier = HEADER_IDENTIFIER.getBytes(StandardCharsets.US_ASCII);

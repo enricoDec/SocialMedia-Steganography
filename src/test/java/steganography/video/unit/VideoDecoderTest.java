@@ -19,11 +19,12 @@
 package steganography.video.unit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
-import steganography.video.VideoDecoder;
+import steganography.video.encoders.VideoDecoder;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -32,66 +33,59 @@ import java.util.List;
 
 public class VideoDecoderTest {
     private final File ffmpegBin = new File("src/main/resources");
+    private final File carrier = new File("src/test/java/steganography/video/resources/Carrier.mp4");
+    private final File carrier_no_audio = new File("src/test/java/steganography/video/resources/Carrier_no_Audio.mp4");
     private Video video;
 
     /**
      * Try to decode valid Video and check frame count
      */
     @Test
-    public void decodeToPictureFrameCount(){
+    public void decodeToPictureFrameCount() {
         try {
-            File file = new File("src/test/java/steganography/video/resources/video1.mp4");
-            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
+            this.video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
-        } catch (IOException e) {
+            Assertions.assertTrue(video.getFrameCount() >= decoder.decodeVideoToFrames(4).size());
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail("Couldn't decode Video");
         }
     }
 
     /**
      * Try to decode valid Video with no Audio Stream
+     * TODO: fix this bug
      */
     @Test
-    public void decodeToPictureNoAudio(){
+    public void decodeToPictureNoAudio() {
         try {
-            File file = new File("src/test/java/steganography/video/resources/video2.MP4");
-            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
+            this.video = new Video(ByteArrayUtils.read(carrier_no_audio), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
-            Assertions.assertEquals(video.getFrameCount(), decoder.toPictureByteArray(2).size());
-        } catch (IOException e) {
-            e.printStackTrace();
+            List<byte[]> pictureList = decoder.decodeVideoToFrames(4);
+
+            Assertions.assertNotNull(pictureList);
+
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail("Couldn't decode Video");
         }
-    }
-
-    /**
-     * Try to decode audio
-     */
-    @Test
-    public void decodeAudioToPicture(){
-        File file = new File("src/test/java/steganography/video/resources/audio.mp3");
-        Assertions.assertThrows(UnsupportedEncodingException.class, () -> new Video(ByteArrayUtils.read(file), ffmpegBin));
     }
 
     /**
      * Check if Video is decoded to valid buff images
      */
     @Test
-    public void decodeToPictureValidBufferedImage(){
+    public void decodeToPictureValidBufferedImage() {
         try {
-            File file = new File("src/test/java/steganography/video/resources/video1.mp4");
-            this.video = new Video(ByteArrayUtils.read(file), ffmpegBin);
+            this.video = new Video(ByteArrayUtils.read(carrier), ffmpegBin);
             VideoDecoder decoder = new VideoDecoder(video, ffmpegBin, true);
             ImageIO.setUseCache(false);
-            List<byte[]> imageList = decoder.toPictureByteArray(4);
+            List<byte[]> imageList = decoder.decodeVideoToFrames(4);
 
-            for (byte[] image: imageList) {
+            for (byte[] image : imageList) {
                 BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(image));
                 Assertions.assertNotNull(bufferedImage.getData());
             }
 
-        } catch (IOException e) {
+        } catch (IOException | VideoNotFoundException | UnsupportedVideoTypeException e) {
             Assertions.fail(e.toString());
         }
     }

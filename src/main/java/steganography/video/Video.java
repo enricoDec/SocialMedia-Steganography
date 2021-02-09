@@ -22,11 +22,12 @@ import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
+import steganography.video.exceptions.UnsupportedVideoTypeException;
+import steganography.video.exceptions.VideoNotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ import java.util.List;
  * Project name : ProjektStudiumSteganography
  * @version : 1.0
  * @since : 24-11-2020
- *
+ * <p>
  * This class represents a Video
  **/
 public class Video {
@@ -51,12 +52,20 @@ public class Video {
     private boolean hasAudioStream = false;
     private List<Long> ptsList = null;
 
-    public Video(byte[] videoByteArray, File ffmpegBin) throws UnsupportedEncodingException {
+    /**
+     * Video POJO
+     *
+     * @param videoByteArray Video as byte array
+     * @param ffmpegBin      path to the bin of ffmpeg
+     * @throws VideoNotFoundException        If no Video found in the stream
+     * @throws UnsupportedVideoTypeException If found Video in the stream has not supported codec
+     */
+    public Video(byte[] videoByteArray, File ffmpegBin) throws VideoNotFoundException, UnsupportedVideoTypeException {
         this.videoByteArray = videoByteArray;
         this.ffmpegBin = ffmpegBin;
         //analyse the data (check if data has Video)
         if (videoByteArray == null || videoByteArray.length < 10)
-            throw new IllegalArgumentException("videoByteArray can't be empty");
+            throw new UnsupportedVideoTypeException("Video can't be empty");
         if (!ffmpegBin.exists())
             throw new IllegalArgumentException("FFmpegBin is invalid");
         analyseVideo();
@@ -64,9 +73,9 @@ public class Video {
 
 
     /**
-     * Uses FFProbe to read information about a Video and saves them as attributes
+     * Uses FFProbe to read information about a Video and saves them as attributes of this Object
      */
-    private void analyseVideo() throws UnsupportedEncodingException {
+    private void analyseVideo() throws VideoNotFoundException {
         InputStream inputStream = new ByteArrayInputStream(videoByteArray);
 
         FFprobe ffprobe;
@@ -79,7 +88,7 @@ public class Video {
 
         //Check if given Video has no Streams
         if (result.getStreams().isEmpty())
-            throw new UnsupportedEncodingException("Video has no streams");
+            throw new VideoNotFoundException("Video has no streams");
 
         //Check if Video stream is present
         boolean hasVideoStream = false;
@@ -90,7 +99,7 @@ public class Video {
                 hasAudioStream = true;
         }
         if (!hasVideoStream)
-            throw new UnsupportedEncodingException("No Video Stream in given Video");
+            throw new VideoNotFoundException("No Video Stream in given Video");
 
         //Saving some info on frames
         this.frameCount = result.getStreams().get(0).getNbFrames();
@@ -103,54 +112,119 @@ public class Video {
         this.timebase = Long.valueOf(strings[1]);
     }
 
+    /**
+     * Get the frame rate of the Video
+     *
+     * @return frame rate as float
+     */
     public float getFrameRate() {
         return frameRate;
     }
 
+    /**
+     * Get the number of frames in the Video
+     *
+     * @return number of frames as integer
+     */
     public long getFrameCount() {
         return frameCount;
     }
 
+    /**
+     * Get the Frame Width
+     *
+     * @return frame width
+     */
     public int getFrameWidth() {
         return frameWidth;
     }
 
+    /**
+     * Get the Frame Height
+     *
+     * @return frame heigth
+     */
     public int getFrameHeight() {
         return frameHeight;
     }
 
+    /**
+     * Get the timebase of the Video
+     *
+     * @return timebase
+     */
     public Long getTimebase() {
         return timebase;
     }
 
+    /**
+     * Get the Audio stream of the Video (only one stream supported)
+     *
+     * @return get audio of video
+     */
     public File getAudioFile() {
         return audioFile;
     }
 
+    /**
+     * Set the audio file of the Video
+     *
+     * @param audioFile File of audio
+     */
     public void setAudioFile(File audioFile) {
         this.audioFile = audioFile;
     }
 
+    /**
+     * Get the byte array of the Video
+     *
+     * @return video as byte array
+     */
     public byte[] getVideoByteArray() {
         return videoByteArray;
     }
 
+    /**
+     * Get the Codec of the Video
+     *
+     * @return codec
+     */
     public String getCodec() {
         return codec;
     }
 
+    /**
+     * Get the format of the pixels of the Video as String
+     *
+     * @return pixel format
+     */
     public String getPixelformat() {
         return pixelformat;
     }
 
+    /**
+     * Returns true if video has audio stream, else false
+     *
+     * @return if Video has audio stream
+     */
     public boolean hasAudioStream() {
         return hasAudioStream;
     }
 
+    /**
+     * Get list of pts
+     *
+     * @return pts list
+     */
     public List<Long> getPtsList() {
         return ptsList;
     }
 
+    /**
+     * Set pts
+     *
+     * @param ptsList pts list
+     */
     public void setPtsList(List<Long> ptsList) {
         this.ptsList = ptsList;
     }
