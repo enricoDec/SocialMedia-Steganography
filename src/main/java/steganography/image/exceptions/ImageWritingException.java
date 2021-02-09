@@ -1,6 +1,5 @@
 package steganography.image.exceptions;
 
-import socialmediasteganography.SocialMediaSteganographyException;
 import steganography.exceptions.MediaReassemblingException;
 
 /**

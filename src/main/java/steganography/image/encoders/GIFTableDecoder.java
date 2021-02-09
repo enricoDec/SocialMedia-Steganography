@@ -20,7 +20,6 @@ package steganography.image.encoders;
 
 import steganography.util.ByteHex;
 
-
 import java.util.*;
 
 /**

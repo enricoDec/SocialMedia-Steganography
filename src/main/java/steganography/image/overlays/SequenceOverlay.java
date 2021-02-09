@@ -21,7 +21,8 @@ package steganography.image.overlays;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

@@ -27,7 +27,9 @@ import steganography.exceptions.*;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
-import java.io.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 

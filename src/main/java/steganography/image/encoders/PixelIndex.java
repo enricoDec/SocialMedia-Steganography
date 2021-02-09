@@ -2,7 +2,6 @@ package steganography.image.encoders;
 
 import steganography.image.overlays.PixelCoordinateOverlay;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
