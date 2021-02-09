@@ -26,6 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * @author Henk-Joas Lubig
+ * Implementation of RandomLSB, an algorithm to encode hidden messages into images
+ */
 public class PixelBit extends BuffImgEncoder {
     private int numOfChannels = 3;
 

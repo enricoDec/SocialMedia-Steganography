@@ -19,31 +19,23 @@
 package steganography.image;
 
 import steganography.Steganography;
-import steganography.image.encoders.GIFTableDecoder;
 import steganography.exceptions.UnknownStegFormatException;
-import steganography.image.encoders.PixelBit;
-import steganography.image.encoders.PixelIndex;
+import steganography.image.encoders.BuffImgEncoder;
 import steganography.image.exceptions.ImageCapacityException;
 import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
-import steganography.image.overlays.RemoveTransparentShuffleOverlay;
-import steganography.image.overlays.ShuffleOverlay;
-import steganography.image.encoders.BuffImgEncoder;
-import steganography.image.overlays.PixelCoordinateOverlay;
-import steganography.image.overlays.TableOverlay;
 import steganography.util.ImageStegIO;
 import steganography.util.ImageStegIOJava;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.MemoryCacheImageInputStream;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.*;
-import java.util.List;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Uses steganography to encode hidden messages ("payload") into images
+ */
 public class ImageSteg implements Steganography {
 
     public static final long DEFAULT_SEED = 1732341558;

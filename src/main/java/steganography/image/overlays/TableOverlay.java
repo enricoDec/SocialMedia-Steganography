@@ -21,12 +21,13 @@ package steganography.image.overlays;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Henk-Joas Lubig, Selina Wernike
- * Overlayy Class for images using the Color-Couple-Algorithem
+ * Overlay Class for images using the Color-Couple-Algorithem
  */
 public class TableOverlay extends ShuffleOverlay {
     private final Map<Integer, List<Integer>> colorCouple;

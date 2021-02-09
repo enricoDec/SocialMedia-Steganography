@@ -18,7 +18,6 @@
 
 package steganography.image.overlays;
 
-import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;
 
 /**
