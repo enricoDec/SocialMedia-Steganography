@@ -77,7 +77,7 @@ public interface SocialMediaSteganography {
      * @throws MediaReassemblingException if a problem occurred during writing of the result media
      * @see socialmediasteganography.SocialMediaSteganography#encodeAndPost(APINames, String, byte[], byte[], MediaType)
      */
-    boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType,Token token) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
+    boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType,Token token, String username) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
     /**
      * Save encoded Media to given path as a file
      * @param carrier data used to encode the payload in
@@ -126,7 +126,7 @@ public interface SocialMediaSteganography {
      * @param token The token used to access Social Media
      * @return boolean true when carrier was successfully posted
      */
-    boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token);
+    boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token, String username);
 
     /**
      * Encodes payload into carrier for a given mediatype
@@ -152,13 +152,15 @@ public interface SocialMediaSteganography {
 
     /**
      * Gets Media for a certain Keyword and checks if it is a steganographic picture.
-     * If it is, proceeds to decode the picture and return payload
+     * If it is, proceeds to decode the picture and return payload. Currently not
+     * supported by any Social Media implementation
      * @param keyword keyword under which the media was posted
      * @param apiNames name of the api used
      * @param mediaType media type in which the payload is decoded
      * @return payloads all payloads that could be read
+     * @throws UnsupportedMediaTypeException if media type is not supported
      */
-    byte[][] getMediaAndDecode(String keyword,APINames apiNames,MediaType mediaType);
+    List<byte[]> getMediaAndDecode(String keyword,APINames apiNames,MediaType mediaType) throws UnsupportedMediaTypeException;
     /**
      * Decodes hidden payload from carrier
      * @param mediaType The type of the carrier (e.g. PNG.GIF)

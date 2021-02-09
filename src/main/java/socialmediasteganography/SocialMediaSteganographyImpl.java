@@ -19,17 +19,20 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.print.attribute.standard.Media;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     private Long seed;
 
     @Override
-    public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType, Token token) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
+    public boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType, Token token, String username) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException {
         byte[] encoded = encodeCarrier(carrier, payload, mediaType);
-        return postToSocialMedia(encoded, apiNames, keyword, mediaType,token);
+        return postToSocialMedia(encoded, apiNames, keyword, mediaType,token, username);
     }
 
     @Override
@@ -77,10 +80,12 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     }
 
     @Override
-    public boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token) {
+    public boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token, String username) {
         SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
         if (socialMedia != null){
             if (token != null) {
+                socialMedia.setToken(token);
+                socialMedia.setBlogname(username);
                 return socialMedia.postToSocialNetwork(carrier, mediaType, keyword,token);
             } else
             {
@@ -118,8 +123,35 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     }
 
     @Override
-    public byte[][] getMediaAndDecode(String keyword, APINames apiNames, MediaType mediaType) {
-        return new byte[0][];
+    public List<byte[]> getMediaAndDecode(String keyword, APINames apiNames, MediaType mediaType) throws UnsupportedMediaTypeException {
+        SocialMedia socialMedia = getSocialMediaByApiName(apiNames);
+        if(socialMedia != null){
+            List<byte[]> downloads = socialMedia.getRecentMediaForKeyword(keyword);
+                if (downloads.size() > 0) {
+                    Steganography steganography = getSteganographyByMediaType(mediaType);
+                    if (steganography != null) {
+                        List<byte[]> payloads = new ArrayList<>();
+                        for (byte[] data: downloads ) {
+                            try { // If exception are thrown while decoding they will be ignored to continue decoding
+                                if (steganography.isSteganographicData(data)) {
+                                    if (seed != null) {
+                                       payloads.add(steganography.decode(data,seed));
+                                    } else {
+                                        payloads.add(steganography.decode(data));
+                                    }
+                                }
+                            } catch (IOException | MediaNotFoundException | UnsupportedMediaTypeException | UnknownStegFormatException exception) {
+                               continue;
+                            }
+                        }
+                        return payloads;
+                    } else {
+                        throw new UnsupportedMediaTypeException("unsupported Media Type");
+                    }
+                }
+            return null;
+        }
+        throw new NullPointerException("Social Media or Media ");
     }
 
     @Override
@@ -158,10 +190,7 @@ public class SocialMediaSteganographyImpl implements SocialMediaSteganography{
     private SocialMedia getSocialMediaByApiName(APINames apiNames){
         switch (apiNames){
             case TUMBLR:
-                Token token = new Token(TumblrConstants.accessToken, TumblrConstants.accessTokenSecret);
                 SocialMedia tumblr = new Tumblr();
-                tumblr.setBlogname("mariofenzl");
-                tumblr.setToken(token);
                 return tumblr;
             default:
                 return null;

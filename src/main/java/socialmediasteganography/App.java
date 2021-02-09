@@ -62,7 +62,7 @@ public class App {
         try {
             sms.encodeAndPost(APINames.TUMBLR, "katze",
                     carrier,
-                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG, token);
+                    payload.getBytes(StandardCharsets.UTF_8), MediaType.PNG, token, "mariofenzl");
         } catch (UnsupportedMediaTypeException e) {
             e.printStackTrace();
         } catch (MediaNotFoundException e) {
