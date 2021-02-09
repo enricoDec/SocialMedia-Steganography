@@ -17,7 +17,7 @@ public interface ImageStegIO {
     /**
      * <p>Returns the image in its current state (Output-Image) as a byte Array.</p>
      * @return the image in its current state as a byte array
-     * @throws IOException if there was an error during writing of BufferedImage to a byte array
+     * @throws IOException if there was an error during writing of the image representation to a byte array
      * @throws ImageWritingException if the image was not written to a byte array for unknown reasons
      */
     byte[] getImageAsByteArray() throws IOException, ImageWritingException;

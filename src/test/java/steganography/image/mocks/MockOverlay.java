@@ -50,9 +50,4 @@ public class MockOverlay implements PixelCoordinateOverlay {
     public int[] getMockPixels() {
         return this.mockPixels;
     }
-
-
-    public BufferedImage getBufferedImage() {
-        return null;
-    }
 }

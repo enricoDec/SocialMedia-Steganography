@@ -71,7 +71,6 @@ public class PixelBit extends BuffImgEncoder {
             throw new ImageCapacityException(sb.toString());
         }
 
-        // TODO: this must be determined by some algorithm
         for (byte bite : payload) {
             for (int bitNo = 7; bitNo >= 0; bitNo--) {
                 // turn bit to boolean (0 or 1) -> true if 1
@@ -123,10 +122,10 @@ public class PixelBit extends BuffImgEncoder {
         int result = 0;
         for (Boolean pixelBit : pixelByte) {
             result = (result << 1);
-            if (pixelBit) // short statement?
+            if (pixelBit)
                 result = (result | 1);
         }
-        // for safety, byte-cast should be enough
+        
         return (byte) (result & 0xff);
     }
 
