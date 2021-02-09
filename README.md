@@ -4,7 +4,7 @@ Goal of this project is to develop a library able to hide information in a given
 ## Docs
 [Javadoc](https://enricodec.github.io/ProjektStudiumSteganography/)
 
-[Deployment](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
+[Deployment Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
 
 [Use Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Usage-Guide)
 
@@ -19,7 +19,7 @@ Goal of this project is to develop a library able to hide information in a given
  - Mario Fenzl (Instagram)
  - Omar El-Issa (Twitter)
  - Robert Dreyer (TikTok)
- ### steganography.Steganography 
+ ### Steganography 
  - Enrico de Chadarevian (Video)
  - Selina Wernike (Bild GIF)
  - Henk-Joas Lubig (BufferedImage)
