@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Henk-Joas Lubig, Selina Wernike
  * Overlay Class for images using the Color-Couple-Algorithem
+ * @author Henk-Joas Lubig, Selina Wernike
  */
 public class TableOverlay extends ShuffleOverlay {
     private final Map<Integer, List<Integer>> colorCouple;

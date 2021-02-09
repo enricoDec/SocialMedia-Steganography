@@ -34,8 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Selina Wernike
  * The class splits an animated gif into several single frame gifs or vice versa
+ * @author Selina Wernike
  */
 public class AnimatedGif implements Steganography{
         private IGIFMaker maker;

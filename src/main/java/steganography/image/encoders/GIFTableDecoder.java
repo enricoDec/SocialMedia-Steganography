@@ -23,9 +23,9 @@ import steganography.util.ByteHex;
 import java.util.*;
 
 /**
- * @author Selina Wernike
- * These Class is mainly used to decode and change a GIF color table.
+ * This Class is mainly used to decode and change a GIF color table.
  * It's based on the official GIF source
+ * @author Selina Wernike
  */
 public class GIFTableDecoder {
     byte[] header = {ByteHex.hexToByte("47"),ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),

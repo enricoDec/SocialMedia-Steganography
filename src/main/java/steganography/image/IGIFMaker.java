@@ -2,8 +2,8 @@ package steganography.image;
 
 import steganography.image.exceptions.UnsupportedImageTypeException;
 /**
- * @author Selina Wernike
  * The class splits an animated gif into several single frame gifs or vice versa
+ * @author Selina Wernike
  */
 public interface IGIFMaker {
 
