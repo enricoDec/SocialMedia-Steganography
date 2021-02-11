@@ -1,26 +1,22 @@
+# Projekt Studium Steganographie
+Dieses Projekt ist im Zuge eines Projektstudiums an der HTW Berlin entstanden. Seine Zielsetzung war es, eine Bibliothek zu erstellen, mit deren Hilfe man in verschiedenen Medientypen steganografisch Nachrichten verschlüsseln und das Ergebnis auf unterschidliche soziale Medien hochladen kann. Nutzer sollten des Weiteren diese hochgeladenen Medien automatisch herunterladen und nach versteckten Nachrichten durchsuchen können.
 
-# Projekt Studium Steganography
-Goal of this project is to develop a library able to hide information in a given Image, Video or Sound file and send this over to any of the available social networks.
-## Docs
-[Javadoc](https://enricodec.github.io/ProjektStudiumSteganography/)
+In diesem Wiki finden sich Erklärungen zum [Deployment](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide) der entstandenen Bibliothek sowie zur individuellen Verwendung der einzelnen Implementationen der Interfaces:
 
-[Deployment Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Deployment-Guide)
+- [SocialMediaSteganography](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Usage-Guide)
+- Steganography
+  - [ImageSteg](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/ImageSteg)
+  - [AnimatedGif](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Animated-GIF)
+  - [VideoSteg](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/VideoSteg)
+  - [MP3Steganography](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/MP3Steganography)
 
-[Use Guide](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Usage-Guide)
+und der abstrakten Klasse:
+- SocialMedia
+  - [Tumblr](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Tumblr)
 
-[Update Log 1](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Zwischenbericht-Projektstrudium-Steganographie-2020)
+Außerdem finden sich Dokumentationen zu geplanten, aber nicht erfolgreich implementierten Teilen des Projekts:
+- [AVI](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Erweiterung#avi-corepng)
+- [Twitter](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Erweiterung#twitter)
+- [Instagram](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Instagram)
 
-[Update Log 2](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Zwischenbericht--2--Steganographie-2020)
-
-
-## Features
-### Social Media APIs
- - Mario Teklic (Reddit & Imgur)
- - Mario Fenzl (Instagram)
- - Omar El-Issa (Twitter)
- - Robert Dreyer (TikTok)
- ### Steganography 
- - Enrico de Chadarevian (Video)
- - Selina Wernike (Bild GIF)
- - Henk-Joas Lubig (BufferedImage)
- - Richard Rudek (MP3)
+Die JavaDocumentation befindet sich [hier](https://enricodec.github.io/ProjektStudiumSteganography/), einzelne Teile derselben sind in den unterschiedlichen Seiten des Wikis aber noch einmal verlinkt.
