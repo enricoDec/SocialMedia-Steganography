@@ -27,13 +27,15 @@ import steganography.exceptions.*;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ImageSequenceUtils;
-import java.io.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Selina Wernike
  * The class splits an animated gif into several single frame gifs or vice versa
+ * @author Selina Wernike
  */
 public class AnimatedGif implements Steganography{
         private IGIFMaker maker;

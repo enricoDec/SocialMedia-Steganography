@@ -96,8 +96,27 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>social_steganography</finalName>
+        <finalName>SocialSteganography</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <reportOutputDirectory>${project.build.directory}/classes/</reportOutputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
@@ -122,13 +141,6 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>
-                                        com.baeldung.executable.ExecutableMavenJar
-                                    </mainClass>
-                                </manifest>
-                            </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>

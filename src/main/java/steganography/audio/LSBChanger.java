@@ -22,6 +22,8 @@ import steganography.audio.exception.AudioCapacityException;
 import steganography.audio.overlays.AudioOverlay;
 import steganography.exceptions.UnknownStegFormatException;
 
+import java.util.NoSuchElementException;
+
 /**
  * This class can read from and write to the least significant bits of a byte array.
  * @author Richard Rudek
@@ -50,17 +52,21 @@ public class LSBChanger {
 
             byte[][] messageBytesAndBits = BitByteConverter.byteToBits(message);
 
-            for (byte[] messageBytes : messageBytesAndBits) {
-                for (byte messageBit : messageBytes) {
-                    // get the next byte
-                    byte currentByte = this.overlay.next();
-                    // get the bit representation and change the last bit
-                    byte[] currentBits = BitByteConverter.byteToBits(currentByte);
-                    if (currentBits[7] != messageBit)
-                        currentBits[7] = messageBit;
-                    // set the changed byte in this overlay
-                    this.overlay.setByte(BitByteConverter.bitsToByte(currentBits));
+            try {
+                for (byte[] messageBytes : messageBytesAndBits) {
+                    for (byte messageBit : messageBytes) {
+                        // get the next byte
+                        byte currentByte = this.overlay.next();
+                        // get the bit representation and change the last bit
+                        byte[] currentBits = BitByteConverter.byteToBits(currentByte);
+                        if (currentBits[7] != messageBit)
+                            currentBits[7] = messageBit;
+                        // set the changed byte in this overlay
+                        this.overlay.setByte(BitByteConverter.bitsToByte(currentBits));
+                    }
                 }
+            } catch (NoSuchElementException e) {
+                throw new AudioCapacityException(e.getMessage());
             }
         }
 

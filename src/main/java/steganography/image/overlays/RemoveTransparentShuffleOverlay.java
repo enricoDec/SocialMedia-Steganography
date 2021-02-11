@@ -21,7 +21,7 @@ package steganography.image.overlays;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * <p>This class returns Pixels of the underlying BufferedImage in a random order determined by the seed

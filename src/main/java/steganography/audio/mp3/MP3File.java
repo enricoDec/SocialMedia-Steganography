@@ -115,9 +115,10 @@ public class MP3File {
                 frameCounter++;
 
             // stop if loop went through every frame
-            if (frameCounter == this.frameCount)
+            if (frameCounter == this.frameCount) // TODO this is buggy, skips final frame - index out of bound zu beginn der schleife im "letzten" durchlauf
                 break;
         }
+
         System.out.println("[INFO] Found " + result.size() + " modifiable Positions in the MP3 byte array.");
         return result;
     }
@@ -134,7 +135,7 @@ public class MP3File {
             this.frames = new ArrayList<>();
             this.frameCount = findFrames();
         }
-        System.out.println(this.frameCount + " frames found.");
+        System.out.println("[INFO] " + this.frameCount + " frames found.");
 
         if (this.frameCount == 0) {
             this.frames = null;

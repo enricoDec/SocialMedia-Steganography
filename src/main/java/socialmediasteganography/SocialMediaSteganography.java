@@ -69,6 +69,7 @@ public interface SocialMediaSteganography {
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
      * @param keyword The name under which the carrier is posted to social Media
      * @param token Token class with tokens for Social Media
+     * @param username username
      * @return boolean true, when carrier is successfully posted
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
      * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
@@ -124,6 +125,7 @@ public interface SocialMediaSteganography {
      * @param keyword The name under which the carrier is posted to social Media
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
      * @param token The token used to access Social Media
+     * @param username username
      * @return boolean true when carrier was successfully posted
      */
     boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token, String username);

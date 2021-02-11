@@ -2,14 +2,13 @@ package steganography.image.encoders;
 
 import steganography.image.overlays.PixelCoordinateOverlay;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 /**
- * @author Henk-Joas Lubig, Selina Wernike
  * The Pixel-Bit-Algorithm for Images using the Color-Couple-Algorithem
+ * @author Henk-Joas Lubig, Selina Wernike
  */
 public class PixelIndex extends PixelBit {
     private final Map<Integer,List<Integer>> colorCouple;

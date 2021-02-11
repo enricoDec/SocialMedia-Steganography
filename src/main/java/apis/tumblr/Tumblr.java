@@ -33,6 +33,7 @@ import com.tumblr.jumblr.types.*;
 import persistence.JSONPersistentManager;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -100,9 +101,9 @@ public class Tumblr extends SocialMedia {
     /**
      * OAuth 1 Authorization workflow to get Request Token, authorize the Application and receive Authorization URL,
      * after authorization verifier has to be set to obtain Token containing accessToken and accessTokenSecret
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public void login() throws InterruptedException, ExecutionException, IOException {
 
@@ -147,9 +148,9 @@ public class Tumblr extends SocialMedia {
     /**
      * gets Authorization URL for USer to log in to Tumblr
      * @return Authorization URL
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public String  getAuthorizationURL() throws InterruptedException, ExecutionException, IOException {
         String authURL;
@@ -170,10 +171,10 @@ public class Tumblr extends SocialMedia {
 
     /**
      * traded verifier and requestToken for accessToken and AccessTokenSecret
-     * @param verifier
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @param verifier verifier
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public void getAccessTokenAndSecret(String verifier) throws InterruptedException, ExecutionException, IOException {
         final String oauthVerifier = verifier;
@@ -224,7 +225,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * sets Application Consumer key which is needed to access Tumblr API
-     * @param key
+     * @param key key
      */
     public static void setApiKey(String key){
         apiKey = key;
@@ -232,7 +233,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * sets Application Secret which is needed to access Tumblr API
-     * @param secret
+     * @param secret secret
      */
     public static void setApiSecret(String secret){
         apiSecret = secret;
@@ -244,7 +245,7 @@ public class Tumblr extends SocialMedia {
      * @param media data to upload
      * @param mediaType i.e. PNG, MP3, gif
      * @param keyword keyword to search this post by
-     * @return
+     * @return boolean
      */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
@@ -281,10 +282,10 @@ public class Tumblr extends SocialMedia {
     /**
      * posts media to Tumblr if a token already exists to skip Authorization workflow
      * @param media data to upload
-     * @param mediaType
+     * @param mediaType mediaType
      * @param keyword keyword to search this post by
-     * @param token
-     * @return
+     * @param token token
+     * @return bolean
      */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token) {
@@ -345,7 +346,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * returns API name
-     * @return
+     * @return string
      */
     @Override
     public String getApiName() {
@@ -354,7 +355,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * returns all subscribed keywords
-     * @return
+     * @return Collections.emptyList()
      */
     @Override
     public List<String> getAllSubscribedKeywords() {
@@ -367,7 +368,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * set blogname
-     * @param blogname
+     * @param blogname blogname
      */
     @Override
     public void setBlogname(String blogname) {
@@ -384,7 +385,7 @@ public class Tumblr extends SocialMedia {
     /**
      * Posts Audio File to Tumblr
      * @param media to post
-     * @param keyword
+     * @param keyword keyword
      * @return Post id if upload was successfull
      */
     public Long postAudio(byte[] media, String keyword){
@@ -393,7 +394,7 @@ public class Tumblr extends SocialMedia {
         AudioPost audioPost = null;
 
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
+            FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/audioAfterEncode.mp3");
             fileOutputStream.write(media);
             fileOutputStream.close();
         } catch (FileNotFoundException e) {
@@ -403,7 +404,7 @@ public class Tumblr extends SocialMedia {
         }
 
 
-        audioFile = new File("src/main/java/apis/tumblr/medias/audiotestAfterEncode.mp3");
+        audioFile = new File("src/main/resources/audioAfterEncode.mp3");
         List<String> tags = new ArrayList<>();
         tags.add(keyword);
 
@@ -412,6 +413,7 @@ public class Tumblr extends SocialMedia {
             audioPost.setData(audioFile);
             audioPost.setTags(tags);
             audioPost.save();
+            Files.deleteIfExists(audioFile.toPath());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -437,12 +439,12 @@ public class Tumblr extends SocialMedia {
     /**
      * creates Photo Post on Tumblr
      * @param media to post
-     * @param keyword
+     * @param keyword keyword
      * @return post id if upload was successfull
      */
     public Long postPhoto(byte[] media, String keyword){
 
-        File photoFile = new File("src/main/java/apis/tumblr/medias/photoTest.png");
+        File photoFile = new File("src/main/resources/photoTest.png");
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(photoFile);
             fileOutputStream.write(media);
@@ -461,6 +463,7 @@ public class Tumblr extends SocialMedia {
             photoPost.setPhoto(photo);
             photoPost.setTags(tags);
             photoPost.save();
+            Files.deleteIfExists(photoFile.toPath());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {

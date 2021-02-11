@@ -20,13 +20,12 @@ package steganography.image.encoders;
 
 import steganography.util.ByteHex;
 
-
 import java.util.*;
 
 /**
- * @author Selina Wernike
- * These Class is mainly used to decode and change a GIF color table.
+ * This Class is mainly used to decode and change a GIF color table.
  * It's based on the official GIF source
+ * @author Selina Wernike
  */
 public class GIFTableDecoder {
     byte[] header = {ByteHex.hexToByte("47"),ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),
@@ -50,7 +49,7 @@ public class GIFTableDecoder {
         }
         int[] colorTable = null;
         //check if globalcolorTable exists
-        System.out.println(ByteHex.byteToHex(gif[10]));
+        //System.out.println(ByteHex.byteToHex(gif[10]));
         if((gif[10] & 0x80) == 0) {
             throw new NoSuchElementException("No Color Table exists");
         }  else {
