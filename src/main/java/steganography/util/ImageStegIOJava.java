@@ -183,6 +183,9 @@ public class ImageStegIOJava implements ImageStegIO{
             // Type(s) for ColorCouple Algorithm
             //----------------------------------------------------------------------------------
             case BufferedImage.TYPE_BYTE_INDEXED:
+                if (this.format.equalsIgnoreCase("png"))
+                    throw new UnsupportedImageTypeException("Format PNG with type 13 is not supported.");
+
                 GIFTableDecoder tableDecoder = new GIFTableDecoder();
                 try {
                     Map<Integer, List<Integer>> colorCouple = tableDecoder.getColorCouples(

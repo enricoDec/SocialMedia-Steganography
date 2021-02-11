@@ -49,7 +49,7 @@ public class GIFTableDecoder {
         }
         int[] colorTable = null;
         //check if globalcolorTable exists
-        System.out.println(ByteHex.byteToHex(gif[10]));
+        //System.out.println(ByteHex.byteToHex(gif[10]));
         if((gif[10] & 0x80) == 0) {
             throw new NoSuchElementException("No Color Table exists");
         }  else {
