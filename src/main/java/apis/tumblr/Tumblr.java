@@ -101,9 +101,9 @@ public class Tumblr extends SocialMedia {
     /**
      * OAuth 1 Authorization workflow to get Request Token, authorize the Application and receive Authorization URL,
      * after authorization verifier has to be set to obtain Token containing accessToken and accessTokenSecret
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public void login() throws InterruptedException, ExecutionException, IOException {
 
@@ -148,9 +148,9 @@ public class Tumblr extends SocialMedia {
     /**
      * gets Authorization URL for USer to log in to Tumblr
      * @return Authorization URL
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public String  getAuthorizationURL() throws InterruptedException, ExecutionException, IOException {
         String authURL;
@@ -171,10 +171,10 @@ public class Tumblr extends SocialMedia {
 
     /**
      * traded verifier and requestToken for accessToken and AccessTokenSecret
-     * @param verifier
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws IOException
+     * @param verifier verifier
+     * @throws InterruptedException InterruptedException
+     * @throws ExecutionException ExecutionException
+     * @throws IOException IOException
      */
     public void getAccessTokenAndSecret(String verifier) throws InterruptedException, ExecutionException, IOException {
         final String oauthVerifier = verifier;
@@ -225,7 +225,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * sets Application Consumer key which is needed to access Tumblr API
-     * @param key
+     * @param key key
      */
     public static void setApiKey(String key){
         apiKey = key;
@@ -233,7 +233,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * sets Application Secret which is needed to access Tumblr API
-     * @param secret
+     * @param secret secret
      */
     public static void setApiSecret(String secret){
         apiSecret = secret;
@@ -245,7 +245,7 @@ public class Tumblr extends SocialMedia {
      * @param media data to upload
      * @param mediaType i.e. PNG, MP3, gif
      * @param keyword keyword to search this post by
-     * @return
+     * @return boolean
      */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
@@ -282,10 +282,10 @@ public class Tumblr extends SocialMedia {
     /**
      * posts media to Tumblr if a token already exists to skip Authorization workflow
      * @param media data to upload
-     * @param mediaType
+     * @param mediaType mediaType
      * @param keyword keyword to search this post by
-     * @param token
-     * @return
+     * @param token token
+     * @return bolean
      */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword, Token token) {
@@ -346,7 +346,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * returns API name
-     * @return
+     * @return string
      */
     @Override
     public String getApiName() {
@@ -355,7 +355,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * returns all subscribed keywords
-     * @return
+     * @return Collections.emptyList()
      */
     @Override
     public List<String> getAllSubscribedKeywords() {
@@ -368,7 +368,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * set blogname
-     * @param blogname
+     * @param blogname blogname
      */
     @Override
     public void setBlogname(String blogname) {
@@ -385,7 +385,7 @@ public class Tumblr extends SocialMedia {
     /**
      * Posts Audio File to Tumblr
      * @param media to post
-     * @param keyword
+     * @param keyword keyword
      * @return Post id if upload was successfull
      */
     public Long postAudio(byte[] media, String keyword){
@@ -439,7 +439,7 @@ public class Tumblr extends SocialMedia {
     /**
      * creates Photo Post on Tumblr
      * @param media to post
-     * @param keyword
+     * @param keyword keyword
      * @return post id if upload was successfull
      */
     public Long postPhoto(byte[] media, String keyword){
