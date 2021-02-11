@@ -64,7 +64,7 @@ public class MP3Steganography implements Steganography {
      * The default is MP3Overlays.SEQUENCE_OVERLAY.
      */
     public MP3Steganography() {
-        this(MP3Overlays.SEQUENCE_OVERLAY);
+        this(MP3Overlays.SHUFFLE_OVERLAY);
     }
 
     /**
@@ -78,12 +78,12 @@ public class MP3Steganography implements Steganography {
     private AudioOverlay getOverlay(byte[] bytes, long seed) throws AudioNotFoundException {
         AudioOverlay overlay;
         switch (this.overlay) {
-            case SHUFFLE_OVERLAY:
-                overlay = new MP3ShuffleOverlay(bytes, seed);
-                break;
             case SEQUENCE_OVERLAY:
-            default:
                 overlay = new MP3SequenceOverlay(bytes, seed);
+                break;
+            case SHUFFLE_OVERLAY:
+            default:
+                overlay = new MP3ShuffleOverlay(bytes, seed);
                 break;
         }
         return overlay;
