@@ -26,11 +26,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JSONPersistentManager {
-    private Map<String, Map<String, List<String>>> jsonMap = new ConcurrentHashMap<>();
-
-    private JSONPersistentHelper jsonPersistentHelper;
-
     private static final JSONPersistentManager instance = new JSONPersistentManager();
+    private Map<String, Map<String, List<String>>> jsonMap = new ConcurrentHashMap<>();
+    private JSONPersistentHelper jsonPersistentHelper;
 
     private JSONPersistentManager() {
     }
@@ -39,11 +37,11 @@ public class JSONPersistentManager {
         return instance;
     }
 
-    public void setJsonPersistentHelper(JSONPersistentHelper jsonPersistentHelper){
+    public void setJsonPersistentHelper(JSONPersistentHelper jsonPersistentHelper) {
         this.jsonPersistentHelper = jsonPersistentHelper;
         try {
             jsonStringToJsonMap(jsonPersistentHelper.readFromJsonFile());
-            if(jsonMap==null){
+            if (jsonMap == null) {
                 jsonMap = new ConcurrentHashMap<>();
             }
         } catch (IOException e) {
@@ -51,29 +49,29 @@ public class JSONPersistentManager {
         }
     }
 
-    public Map<String, Map<String, List<String>>> getJsonMap()throws Exception{
+    public Map<String, Map<String, List<String>>> getJsonMap() throws Exception {
         try {
             return jsonMap;
-        } catch (NullPointerException ne){
+        } catch (NullPointerException ne) {
             ne.printStackTrace();
-            throw new Exception("jsonMap is null",ne);
+            throw new Exception("jsonMap is null", ne);
         }
     }
 
-    public void addKeywordForAPI(APINames apiName, String keyword){
-        if(!jsonMap.containsKey(apiName.getValue())){
-            jsonMap.put(apiName.getValue(),new HashMap<String, List<String>>());
+    public void addKeywordForAPI(APINames apiName, String keyword) {
+        if (!jsonMap.containsKey(apiName.getValue())) {
+            jsonMap.put(apiName.getValue(), new HashMap<String, List<String>>());
         }
-        if(!jsonMap.get(apiName.getValue()).containsKey("keywords")){
+        if (!jsonMap.get(apiName.getValue()).containsKey("keywords")) {
             jsonMap.get(apiName.getValue()).put("keywords", new ArrayList<String>());
         }
-        Map<String, List<String>> specificAPIMap =  jsonMap.get(apiName.getValue());
-        List<String> specificKeywordList =  specificAPIMap.get("keywords");
-        if(!specificKeywordList.contains(keyword)) {
+        Map<String, List<String>> specificAPIMap = jsonMap.get(apiName.getValue());
+        List<String> specificKeywordList = specificAPIMap.get("keywords");
+        if (!specificKeywordList.contains(keyword)) {
             specificKeywordList.add(keyword);
         }
-        specificAPIMap.put("keywords",specificKeywordList);
-        jsonMap.put(apiName.getValue(),specificAPIMap);
+        specificAPIMap.put("keywords", specificKeywordList);
+        jsonMap.put(apiName.getValue(), specificAPIMap);
 
         try {
             jsonPersistentHelper.writeToJsonFile(jsonMapToJsonString());
@@ -82,20 +80,18 @@ public class JSONPersistentManager {
         }
     }
 
-    public void removeKeywordForAPI(APINames apiName, String keyword){
-        if(!jsonMap.containsKey(apiName.getValue())){
-            jsonMap.put(apiName.getValue(),new HashMap<String, List<String>>());
+    public void removeKeywordForAPI(APINames apiName, String keyword) {
+        if (!jsonMap.containsKey(apiName.getValue())) {
+            jsonMap.put(apiName.getValue(), new HashMap<String, List<String>>());
         }
-        if(!jsonMap.get(apiName.getValue()).containsKey("keywords")){
+        if (!jsonMap.get(apiName.getValue()).containsKey("keywords")) {
             jsonMap.get(apiName.getValue()).put("keywords", new ArrayList<String>());
         }
-        Map<String, List<String>> specificAPIMap =  jsonMap.get(apiName.getValue());
-        List<String> specificKeywordList =   specificAPIMap.get("keywords");
-        if(specificKeywordList.contains(keyword)) {
-            specificKeywordList.remove(keyword);
-        }
-        specificAPIMap.put("keywords",specificKeywordList);
-        jsonMap.put(apiName.getValue(),specificAPIMap);
+        Map<String, List<String>> specificAPIMap = jsonMap.get(apiName.getValue());
+        List<String> specificKeywordList = specificAPIMap.get("keywords");
+        specificKeywordList.remove(keyword);
+        specificAPIMap.put("keywords", specificKeywordList);
+        jsonMap.put(apiName.getValue(), specificAPIMap);
 
         try {
             jsonPersistentHelper.writeToJsonFile(jsonMapToJsonString());
@@ -104,28 +100,28 @@ public class JSONPersistentManager {
         }
     }
 
-    public List<String> getKeywordListForAPI(APINames apiName) throws Exception{
+    public List<String> getKeywordListForAPI(APINames apiName) throws Exception {
         try {
             Map<String, List<String>> specificAPIMap = jsonMap.get(apiName.getValue());
             return specificAPIMap.get("keywords");
-        } catch (NullPointerException ne){
+        } catch (NullPointerException ne) {
             ne.printStackTrace();
-            throw new Exception("No entry for API: "+apiName.getValue(),ne);
+            throw new Exception("No entry for API: " + apiName.getValue(), ne);
         }
     }
 
-    public void setLastTimeCheckedForAPI(APINames apiName, long lastTimeCheckedSystemTimeMillis){
-        if(!jsonMap.containsKey(apiName.getValue())){
-            jsonMap.put(apiName.getValue(),new HashMap<String, List<String>>());
+    public void setLastTimeCheckedForAPI(APINames apiName, long lastTimeCheckedSystemTimeMillis) {
+        if (!jsonMap.containsKey(apiName.getValue())) {
+            jsonMap.put(apiName.getValue(), new HashMap<String, List<String>>());
         }
-        if(!jsonMap.get(apiName.getValue()).containsKey("last-checked")){
+        if (!jsonMap.get(apiName.getValue()).containsKey("last-checked")) {
             jsonMap.get(apiName.getValue()).put("last-checked", Arrays.asList(new String[1]));
         }
-        Map<String, List<String>> specificAPIMap = specificAPIMap = jsonMap.get(apiName.getValue());;
+        Map<String, List<String>> specificAPIMap = specificAPIMap = jsonMap.get(apiName.getValue());
         List<String> specificLastCheckedList = specificLastCheckedList = specificAPIMap.get("last-checked");
         specificLastCheckedList.set(0, Long.toString(lastTimeCheckedSystemTimeMillis));
-        specificAPIMap.put("last-checked",specificLastCheckedList);
-        jsonMap.put(apiName.getValue(),specificAPIMap);
+        specificAPIMap.put("last-checked", specificLastCheckedList);
+        jsonMap.put(apiName.getValue(), specificAPIMap);
 
         try {
             jsonPersistentHelper.writeToJsonFile(jsonMapToJsonString());
@@ -134,23 +130,23 @@ public class JSONPersistentManager {
         }
     }
 
-    public String getLastTimeCheckedForAPI(APINames apiName) throws Exception{
+    public String getLastTimeCheckedForAPI(APINames apiName) throws Exception {
         try {
             Map<String, List<String>> specificAPIMap = jsonMap.get(apiName.getValue());
             return specificAPIMap.get("last-checked").get(0);
-        } catch (NullPointerException ne){
+        } catch (NullPointerException ne) {
             ne.printStackTrace();
-            throw new Exception("No entry for API: "+apiName.getValue(),ne);
+            throw new Exception("No entry for API: " + apiName.getValue(), ne);
         }
     }
 
-    private String jsonMapToJsonString(){
+    private String jsonMapToJsonString() {
         Gson gson = new Gson();
         String json = gson.toJson(jsonMap);
-        return  json;
+        return json;
     }
 
-    private void jsonStringToJsonMap(String jsonString){
+    private void jsonStringToJsonMap(String jsonString) {
         Gson gson = new Gson();
         jsonMap = gson.fromJson(jsonString, Map.class);
     }

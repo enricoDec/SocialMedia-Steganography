@@ -28,7 +28,7 @@ public enum APINames {
     IMGUR("imgur"),
     TUMBLR("tumblr");
 
-    private String value;
+    private final String value;
 
     APINames(String value) {
         this.value = value;

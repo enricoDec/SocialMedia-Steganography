@@ -33,7 +33,7 @@ public class TestPixelBitUnit {
         int input = new Random().nextInt();
         boolean inputIsOne = PixelBit.pixelIsOne(input);
 
-        byte[] payload = inputIsOne ?  new byte[]{0} : new byte[]{(byte)(1 << 7)};
+        byte[] payload = inputIsOne ? new byte[]{0} : new byte[]{(byte) (1 << 7)};
 
         MockOverlay mockOverlay = new MockOverlay(new int[]{input, 0, 0, 0, 0, 0, 0, 0});
         PixelBit encoder = new PixelBit(mockOverlay);
@@ -52,9 +52,9 @@ public class TestPixelBitUnit {
         byte payloadByte = 0;
         for (int i = 0; i < 8; i++) {
             input[i] = random.nextInt();
-            payloadByte = (byte)(payloadByte << 1);
+            payloadByte = (byte) (payloadByte << 1);
             if (PixelBit.pixelIsOne(input[i]))
-                payloadByte = (byte)(payloadByte | 1);
+                payloadByte = (byte) (payloadByte | 1);
         }
 
         // flip payload to mismatch all integers
@@ -68,22 +68,21 @@ public class TestPixelBitUnit {
         int[] output = mockOverlay.getMockPixels();
         byte resultByte = 0;
         for (int i = 0; i < 8; i++) {
-            resultByte = (byte)(resultByte << 1);
+            resultByte = (byte) (resultByte << 1);
             if (PixelBit.pixelIsOne(output[i]))
-                resultByte = (byte)(resultByte | 1);
+                resultByte = (byte) (resultByte | 1);
         }
 
         Assertions.assertEquals(payloadByte, (byte) ~resultByte);
     }
 
 
-
     @Test
     void testFlipAll8IntegersToMatchPayloadNoOverflow() throws ImageCapacityException {
         int[] input = new int[8];
-        for (int i = 0; i < input.length-2; i+=2) {
+        for (int i = 0; i < input.length - 2; i += 2) {
             input[i] = 0;
-            input[i+1] = 0xffffffff;
+            input[i + 1] = 0xffffffff;
         }
 
         // fill payload to mismatch input
@@ -109,17 +108,17 @@ public class TestPixelBitUnit {
         }
 
         Assertions.assertEquals(payloadByte, resultByte);
-        for (int i = 0; i < output.length-2; i+=2) {
+        for (int i = 0; i < output.length - 2; i += 2) {
             // none of the zeros have overflown to 255
             Assertions.assertNotEquals(255, output[i]);
             Assertions.assertNotEquals(255, output[i] >> 8);
             Assertions.assertNotEquals(255, output[i] >> 16);
             Assertions.assertNotEquals(255, output[i] >> 24);
             // none of the 255s have overflown to 0
-            Assertions.assertNotEquals(0 , output[i+1]);
-            Assertions.assertNotEquals(0 , output[i+1] >> 8);
-            Assertions.assertNotEquals(0 , output[i+1] >> 16);
-            Assertions.assertNotEquals(0 , output[i+1] >> 24);
+            Assertions.assertNotEquals(0, output[i + 1]);
+            Assertions.assertNotEquals(0, output[i + 1] >> 8);
+            Assertions.assertNotEquals(0, output[i + 1] >> 16);
+            Assertions.assertNotEquals(0, output[i + 1] >> 24);
         }
     }
 
@@ -130,9 +129,9 @@ public class TestPixelBitUnit {
         byte payloadByte = 0;
         for (int i = 0; i < 8; i++) {
             input[i] = random.nextInt();
-            payloadByte = (byte)(payloadByte << 1);
+            payloadByte = (byte) (payloadByte << 1);
             if (PixelBit.pixelIsOne(input[i]))
-                payloadByte = (byte)(payloadByte | 1);
+                payloadByte = (byte) (payloadByte | 1);
         }
 
         byte[] payload = new byte[]{payloadByte};

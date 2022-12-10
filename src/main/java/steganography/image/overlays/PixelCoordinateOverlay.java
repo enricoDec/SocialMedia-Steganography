@@ -32,6 +32,7 @@ public interface PixelCoordinateOverlay {
     /**
      * Returns the next pixel value as an int (representing ARGB as its bytes),
      * meaning the next pixel determined by the Overlay.
+     *
      * @return int representing the next pixel by the Overlay.
      * @throws NoSuchElementException if there is no next pixel
      */
@@ -39,14 +40,17 @@ public interface PixelCoordinateOverlay {
 
     /**
      * Sets the current pixel to the given value
+     *
      * @param value the value to set the current pixel to
      * @throws NoSuchElementException if setPixel() is called before the first call to next().
-     * Or if setPixel() is called after the last call to next() produced a NoSuchElementException
+     *                                Or if setPixel() is called after the last call to next() produced a
+     *                                NoSuchElementException
      */
     void setPixel(int value) throws NoSuchElementException;
 
     /**
      * Returns the number of remaining pixels (not yet returned by next())
+     *
      * @return number of remaining pixels
      */
     int available();

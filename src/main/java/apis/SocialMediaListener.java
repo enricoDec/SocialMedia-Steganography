@@ -21,5 +21,5 @@ package apis;
 import java.util.List;
 
 public interface SocialMediaListener {
-    public void updateSocialMediaMessage(List<String> messages);
+    void updateSocialMediaMessage(List<String> messages);
 }

@@ -27,12 +27,13 @@ import java.util.Map;
 
 /**
  * Overlay Class for images using the Color-Couple-Algorithem
+ *
  * @author Henk-Joas Lubig, Selina Wernike
  */
 public class TableOverlay extends ShuffleOverlay {
     private final Map<Integer, List<Integer>> colorCouple;
 
-    public TableOverlay(BufferedImage bufferedImage, long seed,Map<Integer, List<Integer>> colorCouple ) throws UnsupportedImageTypeException {
+    public TableOverlay(BufferedImage bufferedImage, long seed, Map<Integer, List<Integer>> colorCouple) throws UnsupportedImageTypeException {
         super(bufferedImage, seed);
         this.colorCouple = colorCouple;
     }
@@ -51,10 +52,10 @@ public class TableOverlay extends ShuffleOverlay {
     @Override
     protected void initOverlay() {
         this.pixelOrder = new ArrayList<>();
-        for(int y = 0; y < this.bufferedImage.getHeight(); y++) {
+        for (int y = 0; y < this.bufferedImage.getHeight(); y++) {
             for (int x = 0; x < this.bufferedImage.getWidth(); x++) {
                 int pixel = this.bufferedImage.getRGB(x, y);
-                if(this.colorCouple.containsKey(pixel)) {
+                if (this.colorCouple.containsKey(pixel)) {
                     this.pixelOrder.add(x + (y * this.bufferedImage.getWidth()));
                 }
             }

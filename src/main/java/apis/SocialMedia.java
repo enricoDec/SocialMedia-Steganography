@@ -18,7 +18,6 @@
 
 package apis;
 
-import apis.models.APINames;
 import apis.models.Token;
 
 import java.util.ArrayList;
@@ -28,13 +27,10 @@ import java.util.logging.Logger;
 
 public abstract class SocialMedia {
 
-    private static final Logger logger = Logger.getLogger(SocialMedia.class.getName());
-
-    private List<String> message;
-
     public static final Integer DEFAULT_INTERVALL = 5;
-
+    private static final Logger logger = Logger.getLogger(SocialMedia.class.getName());
     List<SocialMediaListener> socialMediaListeners = new ArrayList<SocialMediaListener>();
+    private List<String> message;
 
     public void addAsListener(SocialMediaListener socialMediaListener) {
         socialMediaListeners.add(socialMediaListener);

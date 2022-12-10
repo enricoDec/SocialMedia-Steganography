@@ -21,6 +21,7 @@ package persistence;
 import java.io.IOException;
 
 public interface JSONPersistentHelper {
-    public abstract void writeToJsonFile(String jsonString) throws IOException;
-    public abstract String readFromJsonFile() throws IOException;
+    void writeToJsonFile(String jsonString) throws IOException;
+
+    String readFromJsonFile() throws IOException;
 }

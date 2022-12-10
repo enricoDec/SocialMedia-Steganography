@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 /**
  * This class can read from and write to the least significant bits of a byte array.
+ *
  * @author Richard Rudek
  */
 public class LSBChanger {
@@ -40,6 +41,7 @@ public class LSBChanger {
      * Takes the byte array message and writes the message into the least significant bits of the byte array carrier
      * using the overlay given in the constructor.<br>
      * If the message is null, nothing will change.
+     *
      * @param message bytes to encode
      * @return the given byte array with the message encoded into the least significant bits
      * @throws AudioCapacityException if the message does not fit into the overlays bytes
@@ -75,10 +77,11 @@ public class LSBChanger {
 
     /**
      * Reads a message from this overlays byte array until length bytes have been read.
+     *
      * @param length amount of bytes in the message
      * @return the message as a byte array
      * @throws UnknownStegFormatException if there are not enough bytes to read the message from
-     * @throws IllegalArgumentException if the length is less than 1
+     * @throws IllegalArgumentException   if the length is less than 1
      */
     public byte[] decode(int length) throws UnknownStegFormatException {
         if (length < 1)

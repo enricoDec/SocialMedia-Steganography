@@ -35,7 +35,8 @@ public class Token {
      */
     private String accessTokenSecret;
 
-    public Token(){}
+    public Token() {
+    }
 
     public Token(String acessToken, String accessTokenSecret) {
         this.accessToken = acessToken;

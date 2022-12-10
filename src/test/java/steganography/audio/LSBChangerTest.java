@@ -27,21 +27,20 @@ import steganography.audio.overlays.AudioOverlay;
 import steganography.exceptions.UnknownStegFormatException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class LSBChangerTest {
 
-    private LSBChanger lsb;
-    private final byte[] bytes = new byte[] {
+    private final byte[] bytes = new byte[]{
             -128,  // 1000 0000
             -124,  // 1000 0100
-            -  1,  // 1111 1111
-               0,  // 0000 0000
-               0,  // 0000 0000
-               1,  // 0000 0001
-               4,  // 0000 0100
-             127   // 0111 1111
+            -1,  // 1111 1111
+            0,  // 0000 0000
+            0,  // 0000 0000
+            1,  // 0000 0001
+            4,  // 0000 0100
+            127   // 0111 1111
     };
+    private LSBChanger lsb;
 
     @BeforeEach
     public void getLSBChanger() {
@@ -57,7 +56,7 @@ public class LSBChangerTest {
     public void encodeNull_ExpectNoChanges() throws AudioCapacityException {
         byte[] encoded = this.lsb.encode(null);
 
-        Assertions.assertTrue(Arrays.equals(this.bytes, encoded));
+        Assertions.assertArrayEquals(this.bytes, encoded);
     }
 
     @Test
@@ -66,7 +65,7 @@ public class LSBChangerTest {
 
         byte[] encoded = this.lsb.encode(message);
 
-        Assertions.assertTrue(Arrays.equals(this.bytes, encoded));
+        Assertions.assertArrayEquals(this.bytes, encoded);
     }
 
     @Test
@@ -79,36 +78,36 @@ public class LSBChangerTest {
     @Test
     public void encodeMessageWithExactlyEnoughCapacity_ExpectChangedBytes() throws AudioCapacityException {
         // A = 65 = 0100 0001
-        byte[] expected = new byte[] {
+        byte[] expected = new byte[]{
                 -128,  // 1000 0000
                 -123,  // 1000 0101
-                -  2,  // 1111 1110
-                   0,  // 0000 0000
-                   0,  // 0000 0000
-                   0,  // 0000 0000
-                   4,  // 0000 0100
-                 127   // 0111 1111
+                -2,  // 1111 1110
+                0,  // 0000 0000
+                0,  // 0000 0000
+                0,  // 0000 0000
+                4,  // 0000 0100
+                127   // 0111 1111
         };
 
         byte[] message = "A".getBytes(StandardCharsets.UTF_8);
         byte[] encoded = this.lsb.encode(message);
 
-        Assertions.assertTrue(Arrays.equals(expected, encoded));
+        Assertions.assertArrayEquals(expected, encoded);
     }
 
     @Test
     public void encodeMessageWithEnoughCapacity_ExpectCorrectChanges() throws AudioCapacityException {
-        byte[] bytes = new byte[] {
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0
+        byte[] bytes = new byte[]{
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0
         };
         LSBChanger customLsbEncode = new LSBChanger(new MockMP3Overlay(bytes));
 
@@ -126,20 +125,20 @@ public class LSBChangerTest {
 
         byte[] encoded = customLsbEncode.encode(message);
 
-        byte[] expected = new byte[] {
-                0, 1, 0, 1,   0, 0, 0, 0,   // P
-                0, 1, 1, 0,   0, 1, 0, 1,   // e
-                0, 1, 1, 0,   0, 0, 1, 0,   // b
-                0, 1, 1, 0,   0, 0, 1, 0,   // b
-                0, 1, 1, 0,   1, 1, 0, 0,   // l
-                0, 1, 1, 0,   0, 1, 0, 1,   // e
-                0, 1, 1, 1,   0, 0, 1, 1,   // s
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0,
-                0, 0, 0, 0,   0, 0, 0, 0
+        byte[] expected = new byte[]{
+                0, 1, 0, 1, 0, 0, 0, 0,   // P
+                0, 1, 1, 0, 0, 1, 0, 1,   // e
+                0, 1, 1, 0, 0, 0, 1, 0,   // b
+                0, 1, 1, 0, 0, 0, 1, 0,   // b
+                0, 1, 1, 0, 1, 1, 0, 0,   // l
+                0, 1, 1, 0, 0, 1, 0, 1,   // e
+                0, 1, 1, 1, 0, 0, 1, 1,   // s
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0
         };
 
-        Assertions.assertTrue(Arrays.equals(expected, encoded));
+        Assertions.assertArrayEquals(expected, encoded);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,18 +176,18 @@ public class LSBChangerTest {
 
     @Test
     public void decodeMessage() throws UnknownStegFormatException {
-        byte[] bytes = new byte[] {
-                0, 1, 0, 1,   0, 0, 0, 0,
-                0, 1, 1, 0,   0, 1, 0, 1,
-                0, 1, 1, 0,   0, 0, 1, 0,
-                0, 1, 1, 0,   0, 0, 1, 0,
-                0, 1, 1, 0,   1, 1, 0, 0,
-                0, 1, 1, 0,   0, 1, 0, 1,
-                0, 1, 1, 1,   0, 0, 1, 1,
+        byte[] bytes = new byte[]{
+                0, 1, 0, 1, 0, 0, 0, 0,
+                0, 1, 1, 0, 0, 1, 0, 1,
+                0, 1, 1, 0, 0, 0, 1, 0,
+                0, 1, 1, 0, 0, 0, 1, 0,
+                0, 1, 1, 0, 1, 1, 0, 0,
+                0, 1, 1, 0, 0, 1, 0, 1,
+                0, 1, 1, 1, 0, 0, 1, 1,
 
-                101, 41,  55, 99,   -74, -42,  0,   17,
-                61,   0, -12, 0,    122,   0,  0, -128,
-                92,   0, -83, 83,     0, 127, -1,    1
+                101, 41, 55, 99, -74, -42, 0, 17,
+                61, 0, -12, 0, 122, 0, 0, -128,
+                92, 0, -83, 83, 0, 127, -1, 1
         };
         LSBChanger customLsbDecode = new LSBChanger(new MockMP3Overlay(bytes));
 
@@ -203,7 +202,8 @@ public class LSBChangerTest {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void encodeCharacterAndDecode_ExpectSameCharacter() throws UnknownStegFormatException, AudioCapacityException {
+    public void encodeCharacterAndDecode_ExpectSameCharacter() throws UnknownStegFormatException,
+            AudioCapacityException {
         String messageString = "A";
         byte[] encoded = this.lsb.encode(messageString.getBytes(StandardCharsets.UTF_8));
 

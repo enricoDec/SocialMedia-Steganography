@@ -41,6 +41,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
     /**
      * Creates a SequenceOverlay that returns Pixels of the underlying BufferedImage in order from top left (x=0, y=0)
      * to bottom right (x=bufferedImage.getWidth(), y=bufferedImage.getHeight()).
+     *
      * @param bufferedImage the BufferedImage to represent the pixels of.
      * @throws UnsupportedImageTypeException if the type of bufferedImage is bnot supported by this overlay
      */
@@ -55,6 +56,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
     /**
      * <p>Checks whether the type of the given image is accepted by this overlay.</p>
      * <p>Overwritten by subclasses to apply their own rules for acceptance.</p>
+     *
      * @param type representation of an image type as an int of BufferedImage.imageType
      *             <p>(type doesn't matter, for this overlay, but it may for subclasses)</p>
      * @return true if the images type is accepted by this overlay
@@ -105,7 +107,7 @@ public class SequenceOverlay implements PixelCoordinateOverlay {
         if (this.pixelOrder == null)
             createOverlay();
 
-        return this.pixelOrder.size() - this.currentPosition -1;
+        return this.pixelOrder.size() - this.currentPosition - 1;
     }
 }
 

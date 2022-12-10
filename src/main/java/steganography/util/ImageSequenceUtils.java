@@ -36,11 +36,12 @@ public class ImageSequenceUtils {
      * @param payload   payload to be split
      * @return list of payload splits (index is equal to order of image list).
      * Entry is Null if no payload for image
-     * @throws IOException if IO Exception is thrown during read operations
-     * @throws NoImageException read failed
+     * @throws IOException                   if IO Exception is thrown during read operations
+     * @throws NoImageException              read failed
      * @throws UnsupportedImageTypeException UnsupportedImageTypeException
      */
-    public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException, NoImageException, UnsupportedImageTypeException {
+    public static List<byte[]> sequenceDistribution(List<byte[]> imageList, byte[] payload) throws IOException,
+            NoImageException, UnsupportedImageTypeException {
         int chunkCursor = 0;
         List<byte[]> payloadSplitted = new ArrayList<>();
         ImageSteg steganography = new ImageSteg();
@@ -56,7 +57,8 @@ public class ImageSequenceUtils {
                 if (maxImagePayload <= 0) {
                     payloadSplitted.add(null);
                 } else {
-                    //If payload left to be encoded is bigger than what the current image can hold, encode as much as possible
+                    //If payload left to be encoded is bigger than what the current image can hold, encode as much as
+                    // possible
                     if (payload.length - chunkCursor > maxImagePayload) {
                         payloadChunk = new byte[maxImagePayload];
                     } else {
@@ -73,7 +75,7 @@ public class ImageSequenceUtils {
         return payloadSplitted;
     }
 
-    public static List<byte[]> shuffleDistribution(){
+    public static List<byte[]> shuffleDistribution() {
         return null;
     }
 }

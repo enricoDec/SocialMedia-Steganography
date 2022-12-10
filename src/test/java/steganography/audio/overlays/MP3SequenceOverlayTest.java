@@ -38,14 +38,14 @@ public class MP3SequenceOverlayTest {
     @Test
     public void sequenceConstructorTest_byteArrayIsEmpty_expectAudioNotFoundException() {
         Assertions.assertThrows(AudioNotFoundException.class, () ->
-                new MP3SequenceOverlay(new byte[] {}, 0)
+                new MP3SequenceOverlay(new byte[]{}, 0)
         );
     }
 
     @Test
     public void sequenceConstructorTest_byteArrayHasNoAudio_expectAudioNotFoundException() {
         // create byte array with nonsensical data
-        byte[] bytes = new byte[] {0, 10, 25, -13, -111, 127};
+        byte[] bytes = new byte[]{0, 10, 25, -13, -111, 127};
 
         Assertions.assertThrows(AudioNotFoundException.class, () ->
                 new MP3SequenceOverlay(bytes, 0)

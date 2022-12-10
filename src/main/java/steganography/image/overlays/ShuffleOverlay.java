@@ -35,8 +35,9 @@ public class ShuffleOverlay extends SequenceOverlay {
     /**
      * Creates a ShuffleOverlay that returns Pixels of the underlying BufferedImage in a random order
      * determined by the seed that is given to its constructor.
+     *
      * @param bufferedImage BufferedImage to represent the pixels of
-     * @param seed Long to be used to affect the randomization of pixelorder.
+     * @param seed          Long to be used to affect the randomization of pixelorder.
      * @throws UnsupportedImageTypeException if the images type is not supported by this overlay
      */
     public ShuffleOverlay(BufferedImage bufferedImage, long seed) throws UnsupportedImageTypeException {

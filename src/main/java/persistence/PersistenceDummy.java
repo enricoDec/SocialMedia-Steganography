@@ -24,15 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class PersistenceDummy implements JSONPersistentHelper{
+public class PersistenceDummy implements JSONPersistentHelper {
     private static final Logger logger = Logger.getLogger(PersistenceDummy.class.getName());
-    private String pathname = "jsonTest3.json";
+    private final String pathname = "jsonTest3.json";
 
     @Override
     public void writeToJsonFile(String jsonString) throws IOException {
         File file = new File(pathname);
-        if(!file.exists()){
-            if(file.createNewFile()){
+        if (!file.exists()) {
+            if (file.createNewFile()) {
                 logger.info("Persistence file created.");
             }
         }

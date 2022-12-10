@@ -22,6 +22,7 @@ import steganography.exceptions.MediaNotFoundException;
 
 /**
  * Thrown if an audio file could be read from the given media.
+ *
  * @author Richard Rudek
  */
 public class AudioNotFoundException extends MediaNotFoundException {

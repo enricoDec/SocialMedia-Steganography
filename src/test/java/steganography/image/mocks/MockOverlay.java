@@ -20,7 +20,6 @@ package steganography.image.mocks;
 
 import steganography.image.overlays.PixelCoordinateOverlay;
 
-import java.awt.image.BufferedImage;
 import java.util.NoSuchElementException;
 
 public class MockOverlay implements PixelCoordinateOverlay {
@@ -44,7 +43,7 @@ public class MockOverlay implements PixelCoordinateOverlay {
 
     @Override
     public int available() {
-        return this.mockPixels.length - this.position -1;
+        return this.mockPixels.length - this.position - 1;
     }
 
     public int[] getMockPixels() {

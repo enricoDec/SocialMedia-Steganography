@@ -28,18 +28,39 @@ import java.util.Random;
 
 /**
  * Implementation of RandomLSB, an algorithm to encode hidden messages into images
+ *
  * @author Henk-Joas Lubig
  */
 public class PixelBit extends BuffImgEncoder {
     private int numOfChannels = 3;
 
-    public PixelBit(PixelCoordinateOverlay overlay) throws IllegalArgumentException{
+    public PixelBit(PixelCoordinateOverlay overlay) throws IllegalArgumentException {
         super(overlay);
+    }
+
+    /**
+     * <p>In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
+     * If it is false, the pixel represents a bit-value of 0.</p>
+     * <p>Returns true, if the sum of the individual bytes of pixelARGB is an uneven number ((A+R+G+B) mod 2 == 1).</p>
+     * <p>Differently put: It determines whether the amount of 1's in the least significant bits
+     * of each individual byte of pixelARGB is uneven.</p>
+     *
+     * @param pixelARGB pixel that represents a bit.
+     * @return true if the given pixel represents a 1 bit.
+     */
+    public static boolean pixelIsOne(int pixelARGB) {
+        return (
+                (pixelARGB & 1) ^
+                        (pixelARGB >> 8 & 1) ^
+                        (pixelARGB >> 16 & 1) ^
+                        (pixelARGB >> 24 & 1)
+        ) > 0;
     }
 
     /**
      * Returns the number of color channels this algorithm is currently choosing from
      * to encode data. Cannot be greater than 4 or smaller than 1.
+     *
      * @return the number of color channels currently used
      */
     public int getNumberOfChannels() {
@@ -56,6 +77,7 @@ public class PixelBit extends BuffImgEncoder {
      *     <li>3: Red, Green and Blue channel</li>
      *     <li>4: Alpha, Red, Green and Blue channel</li>
      * </ul>
+     *
      * @param numberOfChannels number of channels to use
      */
     public void setNumberOfChannels(int numberOfChannels) {
@@ -68,11 +90,11 @@ public class PixelBit extends BuffImgEncoder {
     @Override
     public void encode(byte[] payload) throws ImageCapacityException {
         if ((payload.length * 8) > overlay.available()) {
-            StringBuilder sb = new StringBuilder("More Bits of payload (")
-                .append(payload.length * 8)
-                .append(") than pixels available (")
-                .append(this.overlay.available()).append(")");
-            throw new ImageCapacityException(sb.toString());
+            String sb = "More Bits of payload (" +
+                    payload.length * 8 +
+                    ") than pixels available (" +
+                    this.overlay.available() + ")";
+            throw new ImageCapacityException(sb);
         }
 
         for (byte bite : payload) {
@@ -116,6 +138,7 @@ public class PixelBit extends BuffImgEncoder {
 
     /**
      * Turns an array of 8 booleans into a byte
+     *
      * @param pixelByte
      * @return
      */
@@ -129,26 +152,8 @@ public class PixelBit extends BuffImgEncoder {
             if (pixelBit)
                 result = (result | 1);
         }
-        
-        return (byte) (result & 0xff);
-    }
 
-    /**
-     * <p>In this algorithm, if the return of this function is true, the given pixel represents a bit-value of 1.
-     * If it is false, the pixel represents a bit-value of 0.</p>
-     * <p>Returns true, if the sum of the individual bytes of pixelARGB is an uneven number ((A+R+G+B) mod 2 == 1).</p>
-     * <p>Differently put: It determines whether the amount of 1's in the least significant bits
-     * of each individual byte of pixelARGB is uneven.</p>
-     * @param pixelARGB pixel that represents a bit.
-     * @return true if the given pixel represents a 1 bit.
-     */
-    public static boolean pixelIsOne(int pixelARGB) {
-        return (
-                (pixelARGB & 1) ^
-                (pixelARGB >> 8 & 1) ^
-                (pixelARGB >> 16 & 1) ^
-                (pixelARGB >> 24 & 1)
-        ) > 0;
+        return (byte) (result & 0xff);
     }
 
     /**
@@ -156,6 +161,7 @@ public class PixelBit extends BuffImgEncoder {
      * by +1 or -1 (randomly, but avoiding overflow).</p>
      * <p>Since a pixel represents a bit, this method "flips" it.
      * (By changing the outcome of (A+R+G+B) &amp; 1 == 0)</p>
+     *
      * @param pixelARGB the pixelValue to change
      * @return the changed pixelValue
      */

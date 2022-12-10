@@ -20,6 +20,7 @@ package steganography.audio.mp3;
 
 /**
  * This class holds information about a frame in an MP3 file.
+ *
  * @author Richard Rudek
  */
 class Frame {

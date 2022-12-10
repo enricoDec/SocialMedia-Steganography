@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * This class can encode and decode messages from a byte array containing an MP3 audio file using an overlay.
+ *
  * @author Richard Rudek
  */
 public class MP3Steganography implements Steganography {
@@ -53,6 +54,7 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Creates an instance using the {@link MP3Overlays MP3Overlay} provided.
+     *
      * @param overlay overlay to use
      */
     public MP3Steganography(MP3Overlays overlay) {
@@ -69,8 +71,9 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Returns the AudioOverlay instance depending on this.overlay .
+     *
      * @param bytes the bytes containing the mp3 file
-     * @param seed the seed to use for encoding or decoding
+     * @param seed  the seed to use for encoding or decoding
      * @return Instance of an {@link AudioOverlay}
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
      *                                the mp3 file is not supported by this algorithm .
@@ -91,13 +94,14 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Conceals the given payload in the carrier (which is an mp3 file) using a default seed.
+     *
      * @param carrier a byte array containing an mp3 file
      * @param payload a byte array containing the message
      * @return The given carrier with the hidden message
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
      *                                the mp3 file is not supported by this algorithm
      * @throws AudioCapacityException If the payload does not fit into the carrier
-     * @throws NullPointerException If the carrier and or payload are null or have length 0
+     * @throws NullPointerException   If the carrier and or payload are null or have length 0
      */
     @Override
     public byte[] encode(byte[] carrier, byte[] payload)
@@ -107,13 +111,14 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Conceals the given payload in the carrier (which is an mp3 file) using the given seed.
+     *
      * @param carrier a byte array containing an mp3 file
      * @param payload a byte array containing the message
      * @return the given carrier with the hidden message
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
      *                                the mp3 file is not supported by this algorithm
      * @throws AudioCapacityException If the payload does not fit into the carrier
-     * @throws NullPointerException If the carrier and or payload are null or have length 0
+     * @throws NullPointerException   If the carrier and or payload are null or have length 0
      */
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed)
@@ -148,14 +153,15 @@ public class MP3Steganography implements Steganography {
     /**
      * Attempts to retrieve a hidden message from the given byte array (which contains an mp3 file)
      * using the default seed.
+     *
      * @param steganographicData a byte array containing an mp3 file that has a message hidden within
      * @return a byte array containing the hidden message
      * @throws UnknownStegFormatException if the message could not be read from the given byte array.
      *                                    This can happen if the file got changed after encoding
      *                                    (e.g. file gets compressed when uploading it to a social media).
-     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
-     *                                the mp3 file is not supported by this algorithm
-     * @throws NullPointerException If the given byte array is null or has length 0
+     * @throws AudioNotFoundException     If the given bytes either don't contain an mp3 file or
+     *                                    the mp3 file is not supported by this algorithm
+     * @throws NullPointerException       If the given byte array is null or has length 0
      */
     @Override
     public byte[] decode(byte[] steganographicData)
@@ -166,12 +172,13 @@ public class MP3Steganography implements Steganography {
     /**
      * Attempts to retrieve a hidden message from the given byte array (which contains an mp3 file)
      * using the given seed.
+     *
      * @param steganographicData a byte array containing an mp3 file that has a message hidden within
      * @return a byte array containing the hidden message
      * @throws UnknownStegFormatException if the message could not be read from the given byte array.
-     * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
-     *                                the mp3 file is not supported by this algorithm
-     * @throws NullPointerException If the given byte array is null or has length 0
+     * @throws AudioNotFoundException     If the given bytes either don't contain an mp3 file or
+     *                                    the mp3 file is not supported by this algorithm
+     * @throws NullPointerException       If the given byte array is null or has length 0
      */
     @Override
     public byte[] decode(byte[] steganographicData, long seed)
@@ -206,10 +213,11 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Checks if the given byte array contains a message that was hidden using the default seed.
+     *
      * @return true, if a message was found
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
      *                                the mp3 file is not supported by this algorithm
-     * @throws NullPointerException If the given byte array is null or has length 0
+     * @throws NullPointerException   If the given byte array is null or has length 0
      */
     @Override
     public boolean isSteganographicData(byte[] data) throws AudioNotFoundException {
@@ -218,10 +226,11 @@ public class MP3Steganography implements Steganography {
 
     /**
      * Checks if the given byte array contains a message that was hidden using the given seed.
+     *
      * @return true, if a message was found
      * @throws AudioNotFoundException If the given bytes either don't contain an mp3 file or
-     *                                 the mp3 file is not supported by this algorithm
-     * @throws NullPointerException If the given byte array is null or has length 0
+     *                                the mp3 file is not supported by this algorithm
+     * @throws NullPointerException   If the given byte array is null or has length 0
      */
     @Override
     public boolean isSteganographicData(byte[] data, long seed) throws AudioNotFoundException {
@@ -251,6 +260,7 @@ public class MP3Steganography implements Steganography {
      *     <li>Bits 0 - 31: MP3 Identifier (MP3+)</li>
      *     <li>Bits 32 - 64: Length of Message in Bytes</li>
      * </ul>
+     *
      * @param payload the message that should be hidden in the mp3 file
      * @return byte[] - message with added steganographic header
      */
@@ -263,7 +273,7 @@ public class MP3Steganography implements Steganography {
 
         // add length
         int value = payload.length;
-        byte[] messageLength = new byte[] {
+        byte[] messageLength = new byte[]{
                 (byte) (value >>> 24),
                 (byte) (value >>> 16),
                 (byte) (value >>> 8),

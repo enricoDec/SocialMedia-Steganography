@@ -18,21 +18,20 @@
 
 package steganography.image;
 
-import com.google.gson.internal.bind.util.ISO8601Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import steganography.Steganography;
 import steganography.exceptions.*;
-import steganography.image.exceptions.ImageCapacityException;
-import steganography.image.exceptions.ImageWritingException;
 import steganography.image.exceptions.NoImageException;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Set;
 
 public class TestImageSteg {
 
@@ -61,12 +60,12 @@ public class TestImageSteg {
 
         /////// ENCODE
         long seed = 121212L;
-            Steganography steganography = new ImageSteg();
-            byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
+        Steganography steganography = new ImageSteg();
+        byte[] imageInput = Files.readAllBytes(new File(pathToImage).toPath());
 
-            long startTime = System.currentTimeMillis();
-            imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
-            System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
+        long startTime = System.currentTimeMillis();
+        imageIntermediate = steganography.encode(imageInput, loremIpsum.getBytes(), seed);
+        System.out.println("Encoding time (ms): " + (System.currentTimeMillis() - startTime));
 
         /////// CHECK FOR NO TRANSPARENCY USED
         BufferedImage imgBefore = ImageIO.read(new ByteArrayInputStream(imageInput));
@@ -161,7 +160,7 @@ public class TestImageSteg {
             for (int x = 0; x < imgBefore.getWidth(); x++) {
                 if (
                         ((imgBefore.getRGB(x, y) >> 24) & 0xff) == 0 &&
-                        imgBefore.getRGB(x, y) != imgAfter.getRGB(x, y)
+                                imgBefore.getRGB(x, y) != imgAfter.getRGB(x, y)
                 ) {
                     return true;
                 }
@@ -480,7 +479,8 @@ public class TestImageSteg {
     // ------------------------------------
 
     @Test
-    void given_80PixelPNGNoDefaultHeader_when_getCapacity_expect_10() throws IOException, UnsupportedImageTypeException, NoImageException {
+    void given_80PixelPNGNoDefaultHeader_when_getCapacity_expect_10() throws IOException,
+            UnsupportedImageTypeException, NoImageException {
 
         BufferedImage bufferedImage = new BufferedImage(8, 10, BufferedImage.TYPE_3BYTE_BGR);
 

@@ -27,18 +27,18 @@ import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth1AccessToken;
 import com.github.scribejava.core.model.OAuth1RequestToken;
 import com.github.scribejava.core.oauth.OAuth10aService;
-import com.tumblr.jumblr.JumblrClient;
-import com.tumblr.jumblr.exceptions.JumblrException;
-import com.tumblr.jumblr.types.*;
 import persistence.JSONPersistentManager;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 /**
@@ -47,63 +47,66 @@ import java.util.logging.Logger;
 public class Tumblr extends SocialMedia {
 
     private static final Logger logger = Logger.getLogger(Tumblr.class.getName());
-
-    /**
-     * service to handle Authorization
-     */
-    private OAuth10aService service;
-
-    private OAuth1RequestToken requestToken;
-
-    /**
-     * oAuth 1 Token containing AccessToken and AccessTokenSecret
-     */
-    private Token token;
-
     /**
      * OAuth Consumer Key for Application
      */
     static String apiKey = null;
-
     /**
      * Secret Key for Application
      */
     static String apiSecret = null;
-
     /**
      * callback URL for Oauth Authorization Flow
      */
     private final String callbackURL = "https://example.com";
-
-    /**
-     * handles requests to Tumblr API
-     */
-    private JumblrClient tumblrClient;
-
-    /**
-     * blogname to access or post content to
-     */
-    private String blogName;
-
-    private List<String> postURLsForKeyword;
-
     /**
      * List of tags/keywords/hashtag to add to an upload or look for in posts
      */
     List<String> tags = new ArrayList<>();
+    /**
+     * service to handle Authorization
+     */
+    private OAuth10aService service;
+    private OAuth1RequestToken requestToken;
+    /**
+     * oAuth 1 Token containing AccessToken and AccessTokenSecret
+     */
+    private Token token;
+    /**
+     * blogname to access or post content to
+     */
+    private String blogName;
+    private List<String> postURLsForKeyword;
 
-    public Tumblr(){
-        tumblrClient = new JumblrClient(apiKey, apiSecret);
+    public Tumblr() {
         this.token = new Token();
     }
 
+    /**
+     * sets Application Consumer key which is needed to access Tumblr API
+     *
+     * @param key key
+     */
+    public static void setApiKey(String key) {
+        apiKey = key;
+    }
+
+    /**
+     * sets Application Secret which is needed to access Tumblr API
+     *
+     * @param secret secret
+     */
+    public static void setApiSecret(String secret) {
+        apiSecret = secret;
+    }
 
     /**
      * OAuth 1 Authorization workflow to get Request Token, authorize the Application and receive Authorization URL,
      * after authorization verifier has to be set to obtain Token containing accessToken and accessTokenSecret
+     *
      * @throws InterruptedException InterruptedException
-     * @throws ExecutionException ExecutionException
-     * @throws IOException IOException
+     * @throws ExecutionException   ExecutionException
+     * @throws IOException          IOException
      */
     public void login() throws InterruptedException, ExecutionException, IOException {
 
@@ -147,12 +150,13 @@ public class Tumblr extends SocialMedia {
 
     /**
      * gets Authorization URL for USer to log in to Tumblr
+     *
      * @return Authorization URL
      * @throws InterruptedException InterruptedException
-     * @throws ExecutionException ExecutionException
-     * @throws IOException IOException
+     * @throws ExecutionException   ExecutionException
+     * @throws IOException          IOException
      */
-    public String  getAuthorizationURL() throws InterruptedException, ExecutionException, IOException {
+    public String getAuthorizationURL() throws InterruptedException, ExecutionException, IOException {
         String authURL;
         service = new ServiceBuilder(apiKey)
                 .apiSecret(apiSecret)
@@ -171,10 +175,11 @@ public class Tumblr extends SocialMedia {
 
     /**
      * traded verifier and requestToken for accessToken and AccessTokenSecret
+     *
      * @param verifier verifier
      * @throws InterruptedException InterruptedException
-     * @throws ExecutionException ExecutionException
-     * @throws IOException IOException
+     * @throws ExecutionException   ExecutionException
+     * @throws IOException          IOException
      */
     public void getAccessTokenAndSecret(String verifier) throws InterruptedException, ExecutionException, IOException {
         final String oauthVerifier = verifier;
@@ -189,7 +194,7 @@ public class Tumblr extends SocialMedia {
     /**
      * set accessToken and TokenSecret to null to log in new user afterwards
      */
-    public void loginNewUser(){
+    public void loginNewUser() {
         this.token.setAccessToken(null);
         this.token.setAccessTokenSecret(null);
         try {
@@ -203,9 +208,9 @@ public class Tumblr extends SocialMedia {
         }
     }
 
-
     /**
      * get the oAuth 1 Token
+     *
      * @return Token object containing accessToken and TokenSecret
      */
     @Override
@@ -215,44 +220,29 @@ public class Tumblr extends SocialMedia {
 
     /**
      * set O Auth 1 Token to access Tumblr API
+     *
      * @param token containing accessToken and TokenSecret
      */
     @Override
     public void setToken(Token token) {
         this.token = token;
-        this.tumblrClient.setToken(this.token.getAccessToken(), this.token.getAccessTokenSecret());
-    }
-
-    /**
-     * sets Application Consumer key which is needed to access Tumblr API
-     * @param key key
-     */
-    public static void setApiKey(String key){
-        apiKey = key;
-    }
-
-    /**
-     * sets Application Secret which is needed to access Tumblr API
-     * @param secret secret
-     */
-    public static void setApiSecret(String secret){
-        apiSecret = secret;
     }
 
     /**
      * posts a given byte[] containing some media to Tumblr with a keyword
      * starts login process if no token available
-     * @param media data to upload
+     *
+     * @param media     data to upload
      * @param mediaType i.e. PNG, MP3, gif
-     * @param keyword keyword to search this post by
+     * @param keyword   keyword to search this post by
      * @return boolean
      */
     @Override
     public boolean postToSocialNetwork(byte[] media, MediaType mediaType, String keyword) {
-        if(keyword == null){
+        if (keyword == null) {
             throw new NullPointerException();
         }
-        if(this.token.getAccessToken() == null || this.token.getAccessTokenSecret() == null){
+        if (this.token.getAccessToken() == null || this.token.getAccessTokenSecret() == null) {
             try {
                 login();
             } catch (InterruptedException e) {
@@ -264,7 +254,7 @@ public class Tumblr extends SocialMedia {
             }
         }
         Long postId = null;
-        switch(mediaType){
+        switch (mediaType) {
             case MP3:
                 postId = this.postAudio(media, keyword);
                 break;
@@ -273,7 +263,7 @@ public class Tumblr extends SocialMedia {
                 break;
 
         }
-        if (postId != null){
+        if (postId != null) {
             return true;
         }
         return false;
@@ -281,10 +271,11 @@ public class Tumblr extends SocialMedia {
 
     /**
      * posts media to Tumblr if a token already exists to skip Authorization workflow
-     * @param media data to upload
+     *
+     * @param media     data to upload
      * @param mediaType mediaType
-     * @param keyword keyword to search this post by
-     * @param token token
+     * @param keyword   keyword to search this post by
+     * @param token     token
      * @return bolean
      */
     @Override
@@ -296,41 +287,42 @@ public class Tumblr extends SocialMedia {
 
     /**
      * search for keyword in tumblrposts
+     *
      * @param keyword keyword to subscribe to
-     * @return list of short URL, only last 20 entries from which comments and medias which are not PNG and MP3 are filtered out
+     * @return list of short URL, only last 20 entries from which comments and medias which are not PNG and MP3 are
+     * filtered out
      */
     @Override
     public boolean subscribeToKeyword(String keyword) {
 
-            tags.add(keyword);
-            for (Post post : tumblrClient.tagged(keyword, null)) {
-                if (post.getType() == Post.PostType.PHOTO || post.getType() == Post.PostType.AUDIO)
-                    postURLsForKeyword.add(post.getShortUrl());
-            }
-            printPostURLs();
-            return true;
+        tags.add(keyword);
+        printPostURLs();
+        return true;
     }
 
     /**
      * prints all saved Post URLs
      */
-    public void printPostURLs(){
-        for(String url : postURLsForKeyword){
+    public void printPostURLs() {
+        for (String url : postURLsForKeyword) {
             System.out.println(url);
         }
     }
 
     @Override
-    public boolean unsubscribeKeyword(String keyword) {return false;}
-
-
-
-    @Override
-    public void changeSchedulerPeriod(Integer interval) { }
+    public boolean unsubscribeKeyword(String keyword) {
+        return false;
+    }
 
 
     @Override
-    public void startSearch() { }
+    public void changeSchedulerPeriod(Integer interval) {
+    }
+
+
+    @Override
+    public void startSearch() {
+    }
 
     @Override
     public List<byte[]> getRecentMediaForKeyword(String keyword) {
@@ -342,10 +334,12 @@ public class Tumblr extends SocialMedia {
 
 
     @Override
-    public void stopSearch() {}
+    public void stopSearch() {
+    }
 
     /**
      * returns API name
+     *
      * @return string
      */
     @Override
@@ -355,6 +349,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * returns all subscribed keywords
+     *
      * @return Collections.emptyList()
      */
     @Override
@@ -368,6 +363,7 @@ public class Tumblr extends SocialMedia {
 
     /**
      * set blogname
+     *
      * @param blogname blogname
      */
     @Override
@@ -384,14 +380,14 @@ public class Tumblr extends SocialMedia {
      */
     /**
      * Posts Audio File to Tumblr
-     * @param media to post
+     *
+     * @param media   to post
      * @param keyword keyword
      * @return Post id if upload was successfull
      */
-    public Long postAudio(byte[] media, String keyword){
+    public Long postAudio(byte[] media, String keyword) {
 
         File audioFile = null;
-        AudioPost audioPost = null;
 
         try {
             FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/audioAfterEncode.mp3");
@@ -409,25 +405,12 @@ public class Tumblr extends SocialMedia {
         tags.add(keyword);
 
         try {
-            audioPost = this.tumblrClient.newPost(this.blogName, AudioPost.class);
-            audioPost.setData(audioFile);
-            audioPost.setTags(tags);
-            audioPost.save();
             Files.deleteIfExists(audioFile.toPath());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        catch (JumblrException ex) {
-            System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage());
-        }
-        if(audioPost.getId() != null){
-            System.out.println(" uploaded MP3 successfull");
-        }
-        return audioPost.getId();
+
+        return null;
 
     }
 
@@ -438,11 +421,12 @@ public class Tumblr extends SocialMedia {
      */
     /**
      * creates Photo Post on Tumblr
-     * @param media to post
+     *
+     * @param media   to post
      * @param keyword keyword
      * @return post id if upload was successfull
      */
-    public Long postPhoto(byte[] media, String keyword){
+    public Long postPhoto(byte[] media, String keyword) {
 
         File photoFile = new File("src/main/resources/photoTest.png");
         try {
@@ -453,30 +437,14 @@ public class Tumblr extends SocialMedia {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Photo photo = new Photo(photoFile);
-        PhotoPost photoPost = null;
 
         List<String> tags = new ArrayList<>();
         tags.add(keyword);
         try {
-            photoPost = this.tumblrClient.newPost(this.blogName, PhotoPost.class);
-            photoPost.setPhoto(photo);
-            photoPost.setTags(tags);
-            photoPost.save();
             Files.deleteIfExists(photoFile.toPath());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        catch (JumblrException ex) {
-            System.out.println("(" + ex.getResponseCode() + ") " + ex.getMessage() + "to post photo");
-        }
-        if(photoPost.getId() != null){
-            System.out.println("uploaded PNG successfull");
-        }
-        return photoPost.getId();
+        return null;
     }
 }

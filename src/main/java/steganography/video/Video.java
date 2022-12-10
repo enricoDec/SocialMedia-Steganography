@@ -40,12 +40,12 @@ import java.util.List;
  **/
 public class Video {
     private final File ffmpegBin;
+    private final byte[] videoByteArray;
     private float frameRate;
     private long frameCount;
     private int frameWidth;
     private int frameHeight;
     private Long timebase;
-    private final byte[] videoByteArray;
     private File audioFile;
     private String pixelformat;
     private String codec;

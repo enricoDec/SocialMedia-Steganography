@@ -20,6 +20,7 @@ package steganography.audio;
 
 /**
  * This class provides methods that make working with bits and bytes easier.
+ *
  * @author Richard Rudek
  */
 public class BitByteConverter {
@@ -27,10 +28,11 @@ public class BitByteConverter {
     /**
      * Converts a byte array to a 2d-array containing the bit representation of each byte.
      * An empty array will be treated as a byte array containing only a zero.
+     *
      * @param bytes Byte array to convert into bits
      * @return Byte array:<br>
-     *         First dimension = the number of the current byte<br>
-     *         Second dimension = the bit representation for that byte
+     * First dimension = the number of the current byte<br>
+     * Second dimension = the bit representation for that byte
      * @throws NullPointerException if the given byte array is null
      */
     public static byte[][] byteToBits(byte[] bytes) {
@@ -38,8 +40,8 @@ public class BitByteConverter {
             throw new NullPointerException("Byte array can't be null");
 
         if (bytes.length == 0)
-            return new byte[][] {
-                    new byte[] {0, 0, 0, 0, 0, 0, 0, 0}
+            return new byte[][]{
+                    new byte[]{0, 0, 0, 0, 0, 0, 0, 0}
             };
 
         byte[][] bitArray = new byte[bytes.length][8];
@@ -53,6 +55,7 @@ public class BitByteConverter {
 
     /**
      * Converts a byte into an array with length 8 that contains the bit representation of that byte.
+     *
      * @param byteToConvert Byte to convert into bits
      * @return Byte array - the bit representation for that byte
      */
@@ -72,11 +75,12 @@ public class BitByteConverter {
 
     /**
      * Converts 8 bits into a the byte they are representing.
+     *
      * @param bits Array of 8 bits to convert into a byte
      * @return byte - Byte representation of the bits
      * @throws IllegalArgumentException If the length of the array is not 8 or
      *                                  an element of the array is neither 0 nor 1
-     * @throws NullPointerException if the given array is null
+     * @throws NullPointerException     if the given array is null
      */
     public static byte bitsToByte(byte[] bits) {
         if (bits == null)

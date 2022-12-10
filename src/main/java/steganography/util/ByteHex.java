@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+package steganography.util;
+
 /**
  * @author Selina Wernike
  * This Class transforms a byte into a hex string and vice versa
  */
-package steganography.util;
-
 public class ByteHex {
 
     public static byte hexToByte(String hex) {
@@ -32,16 +33,10 @@ public class ByteHex {
 
     private static int toDigit(char hexChar) {
         int digit = Character.digit(hexChar, 16);
-        if(digit == -1) {
-            throw new IllegalArgumentException("Invalid Hexadecimal Character: "+ hexChar);
+        if (digit == -1) {
+            throw new IllegalArgumentException("Invalid Hexadecimal Character: " + hexChar);
         }
         return digit;
     }
 
-    public static String byteToHex(byte b) {
-        char[] hexDigits = new char[2];
-        hexDigits[0] = Character.forDigit((b >> 4) & 0xF, 16);
-        hexDigits[1] = Character.forDigit((b & 0xF),16);
-        return new String(hexDigits);
-    }
 }

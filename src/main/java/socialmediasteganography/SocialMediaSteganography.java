@@ -31,152 +31,182 @@ public interface SocialMediaSteganography {
 
     /**
      * Encodes payload in carrier and posts the result to socialMedia
-     * @param apiNames API Name
-     * @param carrier data used to encode the payload in
-     * @param payload payload to encode
+     *
+     * @param apiNames  API Name
+     * @param carrier   data used to encode the payload in
+     * @param payload   payload to encode
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param keyword The name under which the carrier is posted to social Media
+     * @param keyword   The name under which the carrier is posted to social Media
      * @return boolean true, when carrier is successfully posted
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
      */
     boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException;
 
 
-    /** Loads carrier from file path and uses encodeAndPost
-     * @param path Path to a Media file
-     * @param apiNames API Name
-     * @param payload payload to encode
+    /**
+     * Loads carrier from file path and uses encodeAndPost
+     *
+     * @param path      Path to a Media file
+     * @param apiNames  API Name
+     * @param payload   payload to encode
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param keyword The name under which the carrier is posted to social Media
+     * @param keyword   The name under which the carrier is posted to social Media
      * @return boolean true, when carrier is successfully posted
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
      * @see socialmediasteganography.SocialMediaSteganography#encodeAndPost(APINames, String, byte[], byte[], MediaType)
      */
     boolean encodeAndPost(APINames apiNames, String keyword, String path, byte[] payload, MediaType mediaType) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
 
-    /** Loads carrier from file path and uses encodeAndPost
-     * @param apiNames API Name
-     * @param payload payload to encode
-     * @param carrier data used to encode the payload in
+    /**
+     * Loads carrier from file path and uses encodeAndPost
+     *
+     * @param apiNames  API Name
+     * @param payload   payload to encode
+     * @param carrier   data used to encode the payload in
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param keyword The name under which the carrier is posted to social Media
-     * @param token Token class with tokens for Social Media
-     * @param username username
+     * @param keyword   The name under which the carrier is posted to social Media
+     * @param token     Token class with tokens for Social Media
+     * @param username  username
      * @return boolean true, when carrier is successfully posted
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
      * @see socialmediasteganography.SocialMediaSteganography#encodeAndPost(APINames, String, byte[], byte[], MediaType)
      */
-    boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType,Token token, String username) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
+    boolean encodeAndPost(APINames apiNames, String keyword, byte[] carrier, byte[] payload, MediaType mediaType,
+                          Token token, String username) throws IOException, UnsupportedMediaTypeException,
+            MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
+
     /**
      * Save encoded Media to given path as a file
-     * @param carrier data used to encode the payload in
-     * @param payload payload to encode
+     *
+     * @param carrier   data used to encode the payload in
+     * @param payload   payload to encode
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param savepath The path to which the generated file is saved
+     * @param savepath  The path to which the generated file is saved
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
      */
     void saveEncodedPicture(byte[] carrier, byte[] payload, MediaType mediaType, String savepath) throws UnsupportedMediaTypeException, MediaNotFoundException, MediaCapacityException, MediaReassemblingException, IOException;
 
-    /** Load Media from a file and save encoded Media to given path as a file
-     * @see socialmediasteganography.SocialMediaSteganography#saveEncodedPicture(byte[], byte[], MediaType, String)
-     * @param payload payload to encode
-     * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param savepath The path to which the generated file is saved
-     * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+    /**
+     * Load Media from a file and save encoded Media to given path as a file
      *
-     * @param filepath the path to the file thath needs to be encoded
+     * @param payload   payload to encode
+     * @param mediaType The type of the carrier (e.g. PNG.GIF)
+     * @param savepath  The path to which the generated file is saved
+     * @param filepath  the path to the file thath needs to be encoded
+     * @throws UnsupportedMediaTypeException if the MediaType is not supported
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
+     * @see socialmediasteganography.SocialMediaSteganography#saveEncodedPicture(byte[], byte[], MediaType, String)
      */
-    void saveEncodePicture(String filepath, MediaType mediaType, byte[] payload, String savepath) throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
+    void saveEncodePicture(String filepath, MediaType mediaType, byte[] payload, String savepath) throws IOException,
+            UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException;
 
     /**
      * Post media to Social Media, if no Token is given set Parameter beforehand
      * e.g. Tumbler.setApiKey = "..." and Tumbler.setApiSecretKey
-     * @param carrier data that should be uploaded
-     * @param apiNames API Name
-     * @param keyword The name under which the carrier is posted to social Media
+     *
+     * @param carrier   data that should be uploaded
+     * @param apiNames  API Name
+     * @param keyword   The name under which the carrier is posted to social Media
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
      * @return boolean true when carrier was successfully posted
      */
     boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType);
+
     /**
      * Post media to Social Media
-     * @param carrier data that should be uploaded
-     * @param apiNames API Name
-     * @param keyword The name under which the carrier is posted to social Media
+     *
+     * @param carrier   data that should be uploaded
+     * @param apiNames  API Name
+     * @param keyword   The name under which the carrier is posted to social Media
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param token The token used to access Social Media
-     * @param username username
+     * @param token     The token used to access Social Media
+     * @param username  username
      * @return boolean true when carrier was successfully posted
      */
-    boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token, String username);
+    boolean postToSocialMedia(byte[] carrier, APINames apiNames, String keyword, MediaType mediaType, Token token,
+                              String username);
 
     /**
      * Encodes payload into carrier for a given mediatype
-     * @param carrier data used to encode the payload in
-     * @param payload payload to encode
+     *
+     * @param carrier   data used to encode the payload in
+     * @param payload   payload to encode
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
      * @return byte[] carrier with encoded payload
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws MediaNotFoundException if f the intended media (e.g. Image, Video, ...) could not be read from data
-     * @throws MediaCapacityException if the payload doesn't fit in the carrier
-     * @throws IOException if there is a problem with reading Data from carrier or payload
-     * @throws MediaReassemblingException if a problem occurred during writing of the result media
+     * @throws MediaNotFoundException        if f the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       data
+     * @throws MediaCapacityException        if the payload doesn't fit in the carrier
+     * @throws IOException                   if there is a problem with reading Data from carrier or payload
+     * @throws MediaReassemblingException    if a problem occurred during writing of the result media
      */
-    byte[] encodeCarrier(byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException, MediaCapacityException, MediaNotFoundException, MediaReassemblingException, IOException;
+    byte[] encodeCarrier(byte[] carrier, byte[] payload, MediaType mediaType) throws UnsupportedMediaTypeException,
+            MediaCapacityException, MediaNotFoundException, MediaReassemblingException, IOException;
 
     /**
      * Subscribes a keyword to a social media
-     * @param keyword The name under which the carrier is posted to social Media
+     *
+     * @param keyword  The name under which the carrier is posted to social Media
      * @param apiNames API Name
      * @return Social Media The Social Media Class that can be used for interacting with given API
      */
-    SocialMedia subscribeToSocialMedia(String keyword,APINames apiNames);
+    SocialMedia subscribeToSocialMedia(String keyword, APINames apiNames);
 
     /**
      * Gets Media for a certain Keyword and checks if it is a steganographic picture.
      * If it is, proceeds to decode the picture and return payload. Currently not
      * supported by any Social Media implementation
-     * @param keyword keyword under which the media was posted
-     * @param apiNames name of the api used
+     *
+     * @param keyword   keyword under which the media was posted
+     * @param apiNames  name of the api used
      * @param mediaType media type in which the payload is decoded
      * @return payloads all payloads that could be read
      * @throws UnsupportedMediaTypeException if media type is not supported
      */
-    List<byte[]> getMediaAndDecode(String keyword,APINames apiNames,MediaType mediaType) throws UnsupportedMediaTypeException;
+    List<byte[]> getMediaAndDecode(String keyword, APINames apiNames, MediaType mediaType) throws UnsupportedMediaTypeException;
+
     /**
      * Decodes hidden payload from carrier
+     *
      * @param mediaType The type of the carrier (e.g. PNG.GIF)
-     * @param carrier data with encoded payload
+     * @param carrier   data with encoded payload
      * @return payload decoded payload
      * @throws UnsupportedMediaTypeException if the MediaType is not supported
-     * @throws UnknownStegFormatException UnknownStegFormatException
-     * @throws IOException if a problem occurs during reading of steganographicData
-     * @throws MediaNotFoundException if the intended media (e.g. Image, Video, ...) could not be read from steganographicData
+     * @throws UnknownStegFormatException    UnknownStegFormatException
+     * @throws IOException                   if a problem occurs during reading of steganographicData
+     * @throws MediaNotFoundException        if the intended media (e.g. Image, Video, ...) could not be read from
+     *                                       steganographicData
      */
-    byte[] decodeCarrier(MediaType mediaType, byte[] carrier) throws UnsupportedMediaTypeException, UnknownStegFormatException, MediaNotFoundException, IOException;
+    byte[] decodeCarrier(MediaType mediaType, byte[] carrier) throws UnsupportedMediaTypeException,
+            UnknownStegFormatException, MediaNotFoundException, IOException;
 
     /**
      * Set the seed for decoding or encoding
+     *
      * @param seed The seed to initialize random function
      */
     void setSeed(Long seed);

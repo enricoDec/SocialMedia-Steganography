@@ -19,14 +19,14 @@
 package steganography.video.unit;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.util.ByteArrayUtils;
 import steganography.video.Video;
 import steganography.video.exceptions.UnsupportedVideoTypeException;
 import steganography.video.exceptions.VideoNotFoundException;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author : Enrico Gamil Toros de Chadarevian

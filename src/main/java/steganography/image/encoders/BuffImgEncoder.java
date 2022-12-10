@@ -32,6 +32,7 @@ public abstract class BuffImgEncoder {
     /**
      * This is a superclass to algorithms which encode and decode payloads into images using
      * PixelCoordinateOverlays as image representation.
+     *
      * @param overlay PixelCoordinateOverlay to get pixels from
      */
     public BuffImgEncoder(PixelCoordinateOverlay overlay) {
@@ -45,6 +46,7 @@ public abstract class BuffImgEncoder {
     /**
      * Encodes the payload in the sequence of pixels provided by the overlay
      * given to the constructor.
+     *
      * @param payload payload or "message" to encode
      * @throws ImageCapacityException if the payload is larger than the available pixels
      */
@@ -56,6 +58,7 @@ public abstract class BuffImgEncoder {
      * Returns the result as a byte array.</p>
      * <p>Decoding will continue until the byte arrays length is
      * equal to bLength.</p>
+     *
      * @param bLength number of bytes to decode
      * @return decoded bytes
      */

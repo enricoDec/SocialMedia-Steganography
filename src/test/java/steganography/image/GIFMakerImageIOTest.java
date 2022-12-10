@@ -10,8 +10,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class GIFMakerImageIOTest {
-    private GIFMakerImageIO splicer;
     byte[] animatedGif;
+    private GIFMakerImageIO splicer;
 
     @BeforeEach
     public void before() throws IOException {
@@ -19,6 +19,7 @@ public class GIFMakerImageIOTest {
         animatedGif = ByteArrayUtils.read(file);
         splicer = new GIFMakerImageIO();
     }
+
     @Test
     public void splitGifDecoder_correctInput_byte2Array() throws UnsupportedImageTypeException {
         byte[][] result = splicer.splitGIF(animatedGif);
@@ -28,19 +29,22 @@ public class GIFMakerImageIOTest {
 
     @Test
     public void splitGifDecoder_nullInput_NullPointerException() {
-        Assertions.assertThrows(NullPointerException.class, () -> {splicer.splitGIF(null);});
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            splicer.splitGIF(null);
+        });
     }
 
     @Test
     public void splitGifDecoder_notAGIF_Exception() {
-        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.splitGIF(new byte[] {1,2,3,4,5,6,7,8,9}));
+        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.splitGIF(new byte[]{1, 2, 3, 4, 5,
+                6, 7, 8, 9}));
     }
 
     @Test
     public void sequenceGifDecoder_frames_ByteArray() throws UnsupportedImageTypeException {
         byte[][] frames = splicer.splitGIF(animatedGif);
         int length = 0;
-        for(int i = 0; i < frames.length; i++) {
+        for (int i = 0; i < frames.length; i++) {
             length = frames[i].length;
         }
         Assertions.assertTrue(length <= splicer.sequenzGIF(frames).length);

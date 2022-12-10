@@ -40,12 +40,11 @@ public class ImageSteg implements Steganography {
 
     public static final long DEFAULT_SEED = 1732341558;
     private static final int HEADER_SIGNATURE = 1349075561;
-    private final boolean useTransparent;
-    private final boolean useDefaultHeader;
-
     private static final Set<String> supportedFormats = new HashSet<>(
             Arrays.asList("bmp", "BMP", "gif", "GIF", "png", "PNG")
     );
+    private final boolean useTransparent;
+    private final boolean useDefaultHeader;
 
     /**
      * <p>Creates a new ImageSteg with settings:</p>
@@ -58,6 +57,7 @@ public class ImageSteg implements Steganography {
      * fully transparent pixels will not be used for encoding or decoding.</p>
      *
      * <p>This is equivalent to ImageSteg(true, false).</p>
+     *
      * @see #ImageSteg(boolean, boolean)
      */
     public ImageSteg() {
@@ -88,8 +88,9 @@ public class ImageSteg implements Steganography {
      *      <li>If the image is a GIF, this value will be ignored.</li>
      *      <li>BMPs with transparent pixels are not supported by this class.</li>
      * </ul>
+     *
      * @param useDefaultHeader should the default header be used for encoding?
-     * @param useTransparent should fully transparent pixels be used for encoding and decoding?
+     * @param useTransparent   should fully transparent pixels be used for encoding and decoding?
      * @see #decode(byte[])
      * @see #decode(byte[], long)
      * @see #decodeRaw(int, byte[])
@@ -103,7 +104,7 @@ public class ImageSteg implements Steganography {
     @Override
     public byte[] encode(byte[] carrier, byte[] payload)
             throws IOException, UnsupportedImageTypeException, NoImageException,
-                    ImageWritingException, ImageCapacityException {
+            ImageWritingException, ImageCapacityException {
 
         return encode(carrier, payload, DEFAULT_SEED);
     }
@@ -111,7 +112,7 @@ public class ImageSteg implements Steganography {
     @Override
     public byte[] encode(byte[] carrier, byte[] payload, long seed)
             throws IOException, NoImageException, UnsupportedImageTypeException,
-                    ImageWritingException, ImageCapacityException {
+            ImageWritingException, ImageCapacityException {
 
         if (carrier == null)
             throw new NullPointerException("Parameter 'carrier' must not be null");
@@ -142,12 +143,13 @@ public class ImageSteg implements Steganography {
      *      <li>the value for 'useTransparent' was different when hiding the message</li>
      *      <li>the message was hidden using an unknown algorithm</li>
      * </ul>
+     *
      * @param steganographicData Image containing the hidden message to decode
      * @return the hidden message as a byte array
-     * @throws IOException if an error occurs during reading 'steganographicData'
-     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws IOException                   if an error occurs during reading 'steganographicData'
+     * @throws NoImageException              if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
-     * @throws UnknownStegFormatException if the default header could not be found
+     * @throws UnknownStegFormatException    if the default header could not be found
      * @see #decodeRaw(int, byte[])
      */
     @Override
@@ -168,13 +170,14 @@ public class ImageSteg implements Steganography {
      *      <li>the value for 'useTransparent' was different when hiding the message</li>
      *      <li>the message was hidden using an unknown algorithm</li>
      * </ul>
+     *
      * @param steganographicData Image containing the hidden message to decode
-     * @param seed seed that was used to encode the given stenographicData
+     * @param seed               seed that was used to encode the given stenographicData
      * @return the hidden message as a byte array
-     * @throws IOException if an error occurs during reading 'steganographicData'
-     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws IOException                   if an error occurs during reading 'steganographicData'
+     * @throws NoImageException              if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
-     * @throws UnknownStegFormatException if the default header could not be found
+     * @throws UnknownStegFormatException    if the default header could not be found
      * @see #decodeRaw(int, byte[], long)
      */
     @Override
@@ -210,11 +213,12 @@ public class ImageSteg implements Steganography {
      *     <li>No seed used during encoding (thereby using ImageSteg.DEFAULT_SEED)</li>
      *     <li>'useDefaultHeader' == false during encoding</li>
      * </ul>
-     * @param length Length (in bytes) of the hidden message
+     *
+     * @param length             Length (in bytes) of the hidden message
      * @param steganographicData Data containing data to extract
      * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
-     * @throws IOException if an error occurs during reading 'steganographicData'
-     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws IOException                   if an error occurs during reading 'steganographicData'
+     * @throws NoImageException              if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
      */
     public byte[] decodeRaw(int length, byte[] steganographicData)
@@ -234,12 +238,13 @@ public class ImageSteg implements Steganography {
      *     <li>'seed' during encoding == 'seed' during decoding</li>
      *     <li>'useDefaultHeader' == false during encoding</li>
      * </ul>
-     * @param length Length (in bytes) of the hidden message
+     *
+     * @param length             Length (in bytes) of the hidden message
      * @param steganographicData Data containing data to extract
-     * @param seed seed that was used to encode the given stenographicData
+     * @param seed               seed that was used to encode the given stenographicData
      * @return a byte array of length == "length" as a result of decoding (length * 8) pixels
-     * @throws IOException if an error occurs during reading 'steganographicData'
-     * @throws NoImageException if no image could be read from 'steganographicData'
+     * @throws IOException                   if an error occurs during reading 'steganographicData'
+     * @throws NoImageException              if no image could be read from 'steganographicData'
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
      */
     public byte[] decodeRaw(int length, byte[] steganographicData, long seed)
@@ -277,10 +282,11 @@ public class ImageSteg implements Steganography {
     /**
      * Returns the maximum number of bytes that can be encoded (as payload) in the given image.
      * This method accounts for the use of transparent pixels and default header as given to the constructor.
+     *
      * @param image image to potentially encode bytes in
      * @return the payload-capacity of image
-     * @throws IOException if an error occurs during reading the image
-     * @throws NoImageException if no image could be read from the image
+     * @throws IOException                   if an error occurs during reading the image
+     * @throws NoImageException              if no image could be read from the image
      * @throws UnsupportedImageTypeException if the type of the given image is not supported
      * @see #ImageSteg(boolean, boolean)
      */
@@ -299,7 +305,7 @@ public class ImageSteg implements Steganography {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     private byte[] int2bytes(int integer) {
-        return new byte[] {
+        return new byte[]{
                 (byte) ((integer >> 24) & 0xFF),
                 (byte) ((integer >> 16) & 0xFF),
                 (byte) ((integer >> 8) & 0xFF),
@@ -308,7 +314,7 @@ public class ImageSteg implements Steganography {
     }
 
     private int bytesToInt(byte[] b) {
-        return   b[3] & 0xFF |
+        return b[3] & 0xFF |
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;

@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 /**
  * This class represents an MP3 file.
+ *
  * @author Richard Rudek
  */
 public class MP3File {
@@ -47,6 +48,7 @@ public class MP3File {
 
     /**
      * This constructs an MP3File object with the given bytes.
+     *
      * @param mp3Bytes the byte array containing the bytes of an MP3 file
      */
     public MP3File(byte[] mp3Bytes) {
@@ -55,6 +57,7 @@ public class MP3File {
 
     /**
      * Returns the byte array this class was given.
+     *
      * @return the byte array this class was given
      */
     public byte[] getMP3Bytes() {
@@ -63,8 +66,9 @@ public class MP3File {
 
     /**
      * Returns the number of frames in this MP3 file.
+     *
      * @return int - Number of frames,<br>
-     *         -1 if there was no prior search for headers
+     * -1 if there was no prior search for headers
      */
     public int getFrameCount() {
         return frameCount;
@@ -72,8 +76,9 @@ public class MP3File {
 
     /**
      * Returns the information of each frame in this MP3 file. The header is included in each frame.
+     *
      * @return - null, if findAllFrames() has not been called or there are no frames<br>
-     *         - List containing Frames
+     * - List containing Frames
      */
     public List<Frame> getFrames() {
         return this.frames;
@@ -81,6 +86,7 @@ public class MP3File {
 
     /**
      * Returns the positions of bytes that are safe to modify.
+     *
      * @return List of Integers - all positions of modifiable bytes in this MP3 file
      * @throws IllegalArgumentException if there are no frames.<br>
      *                                  This can happen when findAllFrames has not been called prior to this method
@@ -115,7 +121,8 @@ public class MP3File {
                 frameCounter++;
 
             // stop if loop went through every frame
-            if (frameCounter == this.frameCount) // TODO this is buggy, skips final frame - index out of bound zu beginn der schleife im "letzten" durchlauf
+            if (frameCounter == this.frameCount) // TODO this is buggy, skips final frame - index out of bound zu
+                // beginn der schleife im "letzten" durchlauf
                 break;
         }
 
@@ -126,8 +133,9 @@ public class MP3File {
     /**
      * Attempts to find {@link Frame frames} by searching for MP3 frame headers and
      * saves their information in this MP3File.
+     *
      * @return true, if frames have been found<br>
-     *         false, if there are none
+     * false, if there are none
      */
     public boolean findAllFrames() {
         System.out.println("[INFO] Starting the search for the frames in the MP3 byte array.");
@@ -146,6 +154,7 @@ public class MP3File {
 
     /**
      * Searches the MP3 byte array for its headers and saves them.
+     *
      * @return int - Number of headers found
      */
     private int findFrames() {
@@ -175,6 +184,7 @@ public class MP3File {
 
     /**
      * Find the next frame starting at byte searchStart.
+     *
      * @param searchStart Position in the byte array from which the next frame is searched
      * @return {@link Frame} - Object containing information about the header and frame
      * @throws NoSuchElementException if there is no header after searchStart
@@ -190,7 +200,7 @@ public class MP3File {
             }
 
             // frame candidate found, check next bits
-            byte[] bitsOfNextByte = BitByteConverter.byteToBits(this.mp3Bytes[i+1]);
+            byte[] bitsOfNextByte = BitByteConverter.byteToBits(this.mp3Bytes[i + 1]);
             if (bitsOfNextByte[0] == 0 || bitsOfNextByte[1] == 0 || bitsOfNextByte[2] == 0) {
                 // this and next bytes are no frame, so skip loop
                 i++;
@@ -229,6 +239,7 @@ public class MP3File {
     /**
      * Checks if the given frame is valid.
      * If it is, this method corrects the frames fields
+     *
      * @param frame MP3 frame to validate
      * @return {@link Frame} - The given Frame with adjusted fields
      * @throws IllegalArgumentException if the frame is not supported or invalid
@@ -327,7 +338,7 @@ public class MP3File {
         // 1110 = 320 kbps
         // 1111 = bad/invalid
         int bitrateValue = BitByteConverter.bitsToByte(
-                new byte[] {
+                new byte[]{
                         0, 0, 0, 0,
                         bitsToValidate[2][0], bitsToValidate[2][1], bitsToValidate[2][2], bitsToValidate[2][3]
                 }
@@ -340,7 +351,7 @@ public class MP3File {
         // 10 = 32000 Hz
         // 11 = reserved/invalid
         int samplingRateValue = BitByteConverter.bitsToByte(
-                new byte[] {
+                new byte[]{
                         0, 0, 0, 0, 0, 0, bitsToValidate[2][4], bitsToValidate[2][5]
                 }
         );

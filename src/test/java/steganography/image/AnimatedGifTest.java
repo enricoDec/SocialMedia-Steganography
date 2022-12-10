@@ -22,13 +22,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import steganography.exceptions.*;
-import steganography.image.AnimatedGif;
 import steganography.image.exceptions.UnsupportedImageTypeException;
 import steganography.util.ByteArrayUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 public class AnimatedGifTest {
@@ -46,18 +43,21 @@ public class AnimatedGifTest {
 
 
     @Test
-    public void encode_gif_ByteArray() throws UnsupportedMediaTypeException, MediaCapacityException, MediaNotFoundException, MediaReassemblingException, IOException {
-        Assertions.assertTrue(splicer.encode(animatedGif, new byte[]{1,2,3,4,5,6,7}).length > animatedGif.length);
+    public void encode_gif_ByteArray() throws UnsupportedMediaTypeException, MediaCapacityException,
+            MediaNotFoundException, MediaReassemblingException, IOException {
+        Assertions.assertTrue(splicer.encode(animatedGif, new byte[]{1, 2, 3, 4, 5, 6, 7}).length > animatedGif.length);
     }
 
     @Test
     public void encode_notAGIF_UnsupportedImageException() {
-        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.encode(new byte[] {2,6,9,4,5,5},new byte[]{1,2,3,4,5,6,7}));
+        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.encode(new byte[]{2, 6, 9, 4, 5,
+                5}, new byte[]{1, 2, 3, 4, 5, 6, 7}));
     }
 
     @Test
     public void encode_carrierNull_NullPointerException() {
-        Assertions.assertThrows(NullPointerException.class, () -> splicer.encode(null,new byte[]{1,2,3,4,5,6,7}));
+        Assertions.assertThrows(NullPointerException.class, () -> splicer.encode(null, new byte[]{1, 2, 3, 4, 5, 6,
+                7}));
 
     }
 
@@ -73,8 +73,9 @@ public class AnimatedGifTest {
     }
 
     @Test
-    public void decode_correctInput_byteArray() throws IOException, UnsupportedMediaTypeException, MediaNotFoundException, MediaReassemblingException, MediaCapacityException, UnknownStegFormatException {
-        byte[] textIn =  ByteArrayUtils.read(new File("src/test/resources/payload/test.txt"));
+    public void decode_correctInput_byteArray() throws IOException, UnsupportedMediaTypeException,
+            MediaNotFoundException, MediaReassemblingException, MediaCapacityException, UnknownStegFormatException {
+        byte[] textIn = ByteArrayUtils.read(new File("src/test/resources/payload/test.txt"));
         byte[] message = splicer.decode(splicer.encode(animatedGif, textIn));
         Assertions.assertArrayEquals(textIn, message);
 
@@ -82,7 +83,8 @@ public class AnimatedGifTest {
 
     @Test
     public void decode_NotAGif_UnssupportedImageException() {
-        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.decode(new byte[] {2,3,4,5,6,7}));
+        Assertions.assertThrows(UnsupportedImageTypeException.class, () -> splicer.decode(new byte[]{2, 3, 4, 5, 6,
+                7}));
     }
 
     @Test

@@ -20,6 +20,7 @@ package steganography.audio.overlays;
 
 /**
  * This enum contains every overlay that can be used to encode or decode messages into or from MP3 files.
+ *
  * @author Richard Rudek
  */
 public enum MP3Overlays {

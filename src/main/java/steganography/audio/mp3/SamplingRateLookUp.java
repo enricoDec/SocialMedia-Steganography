@@ -22,20 +22,22 @@ import java.util.NoSuchElementException;
 
 /**
  * This is a look up class for sampling rates used in mp3 files.
+ *
  * @author Richard Rudek
  */
 class SamplingRateLookUp {
 
     /**
      * Tries to find the Sampling rate of an MP3 frame.
+     *
      * @param mpegVersion MPEG Version of the frame<br>
      *                    MPEG Version 1 = 1f<br>
      *                    MPEG Version 2 = 2f<br>
      *                    MPEG Version 2.5 = 2.5f
-     * @param index Sampling rate index of the frame (should be between 0 and 2 inclusive)
+     * @param index       Sampling rate index of the frame (should be between 0 and 2 inclusive)
      * @return int - Sampling rate according to MPEG Version and Sampling rate index of the frame
      * @throws IllegalArgumentException if any of the parameters are invalid
-     * @throws NoSuchElementException if there is no value for the given parameters
+     * @throws NoSuchElementException   if there is no value for the given parameters
      */
     static int getValueForSamplingRate(float mpegVersion, int index)
             throws IllegalArgumentException, NoSuchElementException {
@@ -69,9 +71,15 @@ class SamplingRateLookUp {
     private static int getValueForV1(int index) {
         int samplingRate = -1;
         switch (index) {
-            case 0: samplingRate = 44100; break;
-            case 1: samplingRate = 48000; break;
-            case 2: samplingRate = 32000; break;
+            case 0:
+                samplingRate = 44100;
+                break;
+            case 1:
+                samplingRate = 48000;
+                break;
+            case 2:
+                samplingRate = 32000;
+                break;
         }
         return samplingRate;
     }
@@ -79,9 +87,15 @@ class SamplingRateLookUp {
     private static int getValueForV2(int index) {
         int samplingRate = -1;
         switch (index) {
-            case 0: samplingRate = 22050; break;
-            case 1: samplingRate = 24000; break;
-            case 2: samplingRate = 16000; break;
+            case 0:
+                samplingRate = 22050;
+                break;
+            case 1:
+                samplingRate = 24000;
+                break;
+            case 2:
+                samplingRate = 16000;
+                break;
         }
         return samplingRate;
     }
@@ -89,9 +103,15 @@ class SamplingRateLookUp {
     private static int getValueForV2Point5(int index) {
         int samplingRate = -1;
         switch (index) {
-            case 0: samplingRate = 11025; break;
-            case 1: samplingRate = 12000; break;
-            case 2: samplingRate = 8000; break;
+            case 0:
+                samplingRate = 11025;
+                break;
+            case 1:
+                samplingRate = 12000;
+                break;
+            case 2:
+                samplingRate = 8000;
+                break;
         }
         return samplingRate;
     }

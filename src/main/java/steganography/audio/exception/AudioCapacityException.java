@@ -22,6 +22,7 @@ import steganography.exceptions.MediaCapacityException;
 
 /**
  * Thrown if the capacity of an audio file is not enough to encode the payload.
+ *
  * @author Richard Rudek
  */
 public class AudioCapacityException extends MediaCapacityException {

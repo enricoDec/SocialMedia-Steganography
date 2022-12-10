@@ -28,7 +28,9 @@ import steganography.video.exceptions.VideoNotFoundException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class VideoDecoderTest {

@@ -25,15 +25,17 @@ import java.util.*;
 /**
  * This Class is mainly used to decode and change a GIF color table.
  * It's based on the official GIF source
+ *
  * @author Selina Wernike
  */
 public class GIFTableDecoder {
-    byte[] header = {ByteHex.hexToByte("47"),ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),
-                        ByteHex.hexToByte("38"), ByteHex.hexToByte("39"), ByteHex.hexToByte("61")};
+    byte[] header = {ByteHex.hexToByte("47"), ByteHex.hexToByte("49"), ByteHex.hexToByte("46"),
+            ByteHex.hexToByte("38"), ByteHex.hexToByte("39"), ByteHex.hexToByte("61")};
 
     /**
      * This Method extracts the color table of a gif and transforms it into an int-array.
      * Each entry contains an Integer representing Alpha, red, green, blue channel with 8 bit each
+     *
      * @param gif Not decoded byte-Array of a gif
      * @return {int[]} colorTable The
      */
@@ -50,35 +52,36 @@ public class GIFTableDecoder {
         int[] colorTable = null;
         //check if globalcolorTable exists
         //System.out.println(ByteHex.byteToHex(gif[10]));
-        if((gif[10] & 0x80) == 0) {
+        if ((gif[10] & 0x80) == 0) {
             throw new NoSuchElementException("No Color Table exists");
-        }  else {
-            int length =  (gif[10] & 0x7);
-             colorTable = globalColorTable(gif,length);
+        } else {
+            int length = (gif[10] & 0x7);
+            colorTable = globalColorTable(gif, length);
         }
         return colorTable;
     }
 
     /**
      * Writes color Values from gif color Table into an array
-     * @param gif An gif that has a color table
+     *
+     * @param gif    An gif that has a color table
      * @param length Length of the color Table
      * @return int[] table with ARGB values
      */
     private int[] globalColorTable(byte[] gif, int length) {
         int i = 13;
-        int[] table = new int[(int) Math.pow(2,length + 1)];
+        int[] table = new int[(int) Math.pow(2, length + 1)];
 
-            for (int j = 0; j < table.length; j++) {
-                int color = 0xFF;
-                color = (color << 8) | gif[i];
-                i++;
-                color = (color << 8) | gif[i];
-                i++;
-                color = (color << 8) | gif[i];
-                i++;
-                table[j] = color;
-            }
+        for (int j = 0; j < table.length; j++) {
+            int color = 0xFF;
+            color = (color << 8) | gif[i];
+            i++;
+            color = (color << 8) | gif[i];
+            i++;
+            color = (color << 8) | gif[i];
+            i++;
+            table[j] = color;
+        }
 
         return table;
     }
@@ -86,42 +89,43 @@ public class GIFTableDecoder {
     /**
      * Splits the colorTable into Color Couples which have similar color Values. Alpha is
      * allways 00xF.
+     *
      * @param colorTable A color Table containing ARGB values
      * @return ColorCoupel[] Hash Map with a color as key and similar Colors as List values
      */
-    public Map<Integer,List<Integer>> getColorCouples(int[] colorTable) {
-        if(colorTable.length <= Math.pow(2,8)) {
-        Map<Integer, List<Integer>> colorCouples = new HashMap<>();
-        for (int i = 0; i < colorTable.length;i++) {
-            List<Integer> couples = new ArrayList<>();
-            boolean pixelIsOne = PixelBit.pixelIsOne(colorTable[i]);
-            for (int j = 0; j < colorTable.length; j++) {
-                if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
-                    if (i != j && colorTable[i] != colorTable[j]) {
-                        int redI = getRed(colorTable[i]);
-                        int redJ = getRed(colorTable[j]);
-                        if (Math.abs(redI - redJ) <= 8 ) {
-                            int greenI = getGreen(colorTable[i]);
-                            if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
-                                 if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
-                                    couples.add(colorTable[j]);
+    public Map<Integer, List<Integer>> getColorCouples(int[] colorTable) {
+        if (colorTable.length <= Math.pow(2, 8)) {
+            Map<Integer, List<Integer>> colorCouples = new HashMap<>();
+            for (int i = 0; i < colorTable.length; i++) {
+                List<Integer> couples = new ArrayList<>();
+                boolean pixelIsOne = PixelBit.pixelIsOne(colorTable[i]);
+                for (int j = 0; j < colorTable.length; j++) {
+                    if (pixelIsOne != PixelBit.pixelIsOne(colorTable[j])) {
+                        if (i != j && colorTable[i] != colorTable[j]) {
+                            int redI = getRed(colorTable[i]);
+                            int redJ = getRed(colorTable[j]);
+                            if (Math.abs(redI - redJ) <= 8) {
+                                int greenI = getGreen(colorTable[i]);
+                                if (Math.abs(greenI - getGreen(colorTable[j])) <= 8) {
+                                    if (Math.abs(getBlue(colorTable[i]) - getBlue(colorTable[j])) <= 8) {
+                                        couples.add(colorTable[j]);
+                                    }
                                 }
                             }
                         }
-                    }
 
+                    }
+                }
+                if (couples.size() > 0) {
+                    colorCouples.put(colorTable[i], couples);
                 }
             }
-            if (couples.size() > 0) {
-                colorCouples.put(colorTable[i],couples);
-            }
-        }
-        return colorCouples;
+            return colorCouples;
         }
         throw new IllegalArgumentException("Array is not a color Table");
     }
 
-        private int getRed(int color) {
+    private int getRed(int color) {
         return (color >> 16) & 0xFF;
     }
 
@@ -130,6 +134,6 @@ public class GIFTableDecoder {
     }
 
     private int getBlue(int color) {
-        return  color & 0xFF;
+        return color & 0xFF;
     }
 }
