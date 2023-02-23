@@ -19,4 +19,4 @@ Außerdem finden sich Dokumentationen zu geplanten, aber nicht erfolgreich imple
 - [Twitter](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Erweiterung#twitter)
 - [Instagram](https://github.com/enricoDec/ProjektStudiumSteganography/wiki/Instagram)
 
-Die JavaDocumentation befindet sich [hier](https://enricodec.github.io/ProjektStudiumSteganography/), einzelne Teile derselben sind in den unterschiedlichen Seiten des Wikis aber noch einmal verlinkt.
+Die JavaDocumentation befindet sich [hier](https://enricodec.github.io/SocialMedia-Steganography/), einzelne Teile derselben sind in den unterschiedlichen Seiten des Wikis aber noch einmal verlinkt.
